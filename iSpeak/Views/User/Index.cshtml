@@ -1,0 +1,74 @@
+﻿@model IEnumerable<iSpeak.Models.UserViewModels>
+
+@{
+    ViewBag.Root = "User Accounts";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Register", "Account")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Fullname)</th>
+                                <th>@Html.DisplayNameFor(model => model.UserName)</th>
+                                <th>@Html.DisplayNameFor(model => model.Email)</th>
+                                <th>@Html.DisplayNameFor(model => model.Role)</th>
+                                <th>@Html.DisplayNameFor(model => model.Birthday)</th>
+                                <th>@Html.DisplayNameFor(model => model.Active)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.UserName)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Role)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                    <td>
+                                        @if (item.Active == true)
+                                        {
+                                            <span class="badge badge-primary d-block">Enabled</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-dark d-block">Disabled</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+
+    </div>
+    <!-- /content area -->
+
+</div>
