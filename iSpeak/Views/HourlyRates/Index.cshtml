@@ -1,0 +1,60 @@
+﻿@model IEnumerable<iSpeak.Models.HourlyRatesViewModels>
+
+@{
+    ViewBag.Root = "Hourly Rates";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Create", "HourlyRates")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.LessonPackages)</th>
+                                <th>@Html.DisplayNameFor(model => model.UserAccounts)</th>
+                                <th>@Html.DisplayNameFor(model => model.Rate)</th>
+                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.LessonPackages)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.UserAccounts)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Rate)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                    <td>
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>

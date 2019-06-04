@@ -33,6 +33,7 @@
     <script src="~/assets/js/plugins/pickers/pickadate/picker.js"></script>
     <script src="~/assets/js/plugins/pickers/pickadate/picker.date.js"></script>
     <script src="~/assets/js/plugins/pickers/pickadate/picker.time.js"></script>
+    <script src="~/assets/js/plugins/forms/selects/select2.min.js"></script>
     <script src="~/assets/js/plugins/forms/styling/uniform.min.js"></script>
     <script src="~/assets/js/plugins/forms/styling/switchery.min.js"></script>
     <script src="~/assets/js/plugins/forms/styling/switch.min.js"></script>
@@ -103,11 +104,15 @@
                         <a href="@Url.Action("Index", "User")" class="dropdown-item"><i class="icon-users2"></i> User</a>
                         <div class="dropdown-header">Data Master</div>
                         <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item dropdown-toggle"><i class="icon-grid2"></i> Temporary</a>
+                            <a href="#" class="dropdown-item dropdown-toggle"><i class="icon-menu2"></i> General</a>
                             <div class="dropdown-menu">
-                                <a href="#" class="dropdown-item">Temp 1</a>
-                                <a href="#" class="dropdown-item">Temp 2</a>
-                                <a href="#" class="dropdown-item">Temp 3</a>
+                                <a href="@Url.Action("Index", "Languages")" class="dropdown-item">Languages</a>
+                                <a href="@Url.Action("Index", "LessonTypes")" class="dropdown-item">Lesson Types</a>
+                                <a href="@Url.Action("Index", "LessonPackages")" class="dropdown-item">Lesson Packages</a>
+                                <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Hourly Rates</a>
+                                <a href="@Url.Action("Index", "Suppliers")" class="dropdown-item">Suppliers</a>
+                                <a href="@Url.Action("Index", "Units")" class="dropdown-item">Units</a>
+                                <a href="@Url.Action("Index", "Vouchers")" class="dropdown-item">Vouchers</a>
                             </div>
                         </div>
                     </div>

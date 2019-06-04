@@ -1,0 +1,123 @@
+﻿@model iSpeak.Models.LessonPackagesModels
+
+@{
+    ViewBag.Root = "Lesson Packages";
+    ViewBag.Title = "Create";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <!-- Form inputs -->
+            <div class="card">
+                <div class="card-header header-elements-inline">
+                    <h5 class="card-title">@ViewBag.Root</h5>
+                    <div class="header-elements">
+                        <div class="list-icons">
+                            <a class="list-icons-item" data-action="collapse"></a>
+                            <a class="list-icons-item" data-action="reload"></a>
+                            <a class="list-icons-item" data-action="remove"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <fieldset class="mb-3">
+                        <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                        <div class="form-group row">
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.Languages_Id, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.DropDownListFor(model => model.Languages_Id, ViewBag.listLanguages as SelectList, "Select Language", new { @class = "form-control select2" })
+                                        @Html.ValidationMessageFor(model => model.Languages_Id, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.LessonTypes_Id, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.DropDownListFor(model => model.LessonTypes_Id, ViewBag.listTypes as SelectList, "Select Lesson Type", new { @class = "form-control select2" })
+                                        @Html.ValidationMessageFor(model => model.LessonTypes_Id, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.SessionHours, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.EditorFor(model => model.SessionHours, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.SessionHours, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.ExpirationDay, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.EditorFor(model => model.ExpirationDay, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.ExpirationDay, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Price, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-lg-6">
+                                <div class="form-group row">
+                                    @Html.LabelFor(model => model.Notes, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <div class="col-lg-9">
+                                        @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+
+                            </div>
+                        </div>
+
+                    </fieldset>
+                    <div>
+                        <a href="@Url.Action("Index", "LessonPackages")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
+                    </div>
+                </div>
+            </div>
+			<!-- /form inputs -->
+        }
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+</script>
