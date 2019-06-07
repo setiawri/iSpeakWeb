@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iSpeak", "iSpeak\iSpeak.csproj", "{3F500CF4-BA67-427F-897A-CB48DB5ECC3F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iSpeakWeb", "iSpeakWeb\iSpeakWeb.csproj", "{3F500CF4-BA67-427F-897A-CB48DB5ECC3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E30508A5-1756-4C4D-ADDD-1E58CA024C0F}
 	EndGlobalSection
 EndGlobal
