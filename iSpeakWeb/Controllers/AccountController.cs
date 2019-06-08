@@ -95,29 +95,38 @@ namespace iSpeak.Controllers
                 return View(model);
             }
 
-            bool cekActive = db.User.Where(x => x.UserName == model.UserName).FirstOrDefault().Active;
-            if (!cekActive)
+            var cekUser = db.User.Where(x => x.UserName == model.UserName).FirstOrDefault();
+            if (cekUser == null)
             {
-                ModelState.AddModelError("", "User " + model.UserName + " is not active.");
+                ModelState.AddModelError("", "Invalid login attempt.");
                 return View(model);
             }
             else
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, change to shouldLockout: true
-                var result = await SignInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, shouldLockout: false);
-                switch (result)
+                bool cekActive = db.User.Where(x => x.UserName == model.UserName).FirstOrDefault().Active;
+                if (!cekActive)
                 {
-                    case SignInStatus.Success:
-                        return RedirectToLocal(returnUrl);
-                    case SignInStatus.LockedOut:
-                        return View("Lockout");
-                    case SignInStatus.RequiresVerification:
-                        return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                    case SignInStatus.Failure:
-                    default:
-                        ModelState.AddModelError("", "Invalid login attempt.");
-                        return View(model);
+                    ModelState.AddModelError("", "User " + model.UserName + " is not active.");
+                    return View(model);
+                }
+                else
+                {
+                    // This doesn't count login failures towards account lockout
+                    // To enable password failures to trigger account lockout, change to shouldLockout: true
+                    var result = await SignInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, shouldLockout: false);
+                    switch (result)
+                    {
+                        case SignInStatus.Success:
+                            return RedirectToLocal(returnUrl);
+                        case SignInStatus.LockedOut:
+                            return View("Lockout");
+                        case SignInStatus.RequiresVerification:
+                            return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
+                        case SignInStatus.Failure:
+                        default:
+                            ModelState.AddModelError("", "Invalid login attempt.");
+                            return View(model);
+                    }
                 }
             }
         }

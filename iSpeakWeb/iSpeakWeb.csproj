@@ -170,6 +170,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Common\IdentityExtension.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\BranchesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HourlyRatesController.cs" />
     <Compile Include="Controllers\LanguagesController.cs" />
@@ -177,6 +178,7 @@
     <Compile Include="Controllers\LessonTypesController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
+    <Compile Include="Controllers\SaleController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
     <Compile Include="Controllers\UnitsController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -198,6 +200,7 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\HourlyRatesModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\iSpeakContext.cs" />
@@ -206,6 +209,8 @@
     <Compile Include="Models\LessonTypesModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
+    <Compile Include="Models\SaleInvoicesModels.cs" />
+    <Compile Include="Models\SaleInvoicesViewModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
     <Compile Include="Models\UnitsModels.cs" />
     <Compile Include="Models\UserModels.cs" />
@@ -338,6 +343,12 @@
     <Content Include="Views\Vouchers\Create.cshtml" />
     <Content Include="Views\Vouchers\Edit.cshtml" />
     <Content Include="Views\Vouchers\Delete.cshtml" />
+    <Content Include="Views\Branches\Index.cshtml" />
+    <Content Include="Views\Branches\Create.cshtml" />
+    <Content Include="Views\Branches\Edit.cshtml" />
+    <Content Include="Views\Branches\Delete.cshtml" />
+    <Content Include="Views\Sale\Index.cshtml" />
+    <Content Include="Views\Sale\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
