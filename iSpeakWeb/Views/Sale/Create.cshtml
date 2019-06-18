@@ -9,9 +9,11 @@
 
     <!-- Content area -->
     <div class="content">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("Create", "Sale", FormMethod.Post, new { id = "target" }))
         {
             @Html.AntiForgeryToken()
+            <input type="hidden" id="Amount" name="Amount" />
+            <input type="hidden" id="Items" name="Items" />
             <!-- Form inputs -->
             <div class="card">
                 <div class="card-header header-elements-inline">
@@ -25,26 +27,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="form-group row">
-                        <div class="col-lg-6">
-                            <div class="form-group row">
-                                @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-3" })
-                                <div class="col-lg-9">
-                                    @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2" })
-                                    @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group row">
-                                @Html.LabelFor(model => model.Customers_Id, htmlAttributes: new { @class = "col-form-label col-lg-3" })
-                                <div class="col-lg-9">
-                                    @Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })
-                                    @Html.ValidationMessageFor(model => model.Customers_Id, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <ul class="nav nav-tabs nav-tabs-solid bg-teal-400 border-0 nav-justified">
                         <li class="nav-item"><a href="#tab-lesson" class="nav-link active" data-toggle="tab">Lesson</a></li>
                         <li class="nav-item"><a href="#tab-inventory" class="nav-link" data-toggle="tab">Inventory</a></li>
@@ -52,32 +34,13 @@
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="tab-lesson">
-                            <label class="error-lesson text-danger" style="display: none"></label>
                             <div class="form-group row">
                                 @Html.LabelFor(model => model.LessonPackages_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
                                 <div class="col-lg-6">
                                     @Html.DropDownListFor(model => model.LessonPackages_Id, ViewBag.listLesson as SelectList, "Select Lesson Package", new { @class = "form-control select2" })
                                 </div>
                                 <div class="col-lg-4">
-                                    @Html.ValidationMessageFor(model => model.LessonPackages_Id, "", new { @class = "text-danger" })
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-form-label col-lg-2">Qty / Discount / Voucher</label>
-                                <div class="col-lg-6">
-                                    <div class="form-group row">
-                                        <div class="col-lg-2">
-                                            @Html.Editor("Qty_Lesson", new { htmlAttributes = new { @class = "form-control", @Value = 1, @placeholder = "Qty" } })
-                                        </div>
-                                        <div class="col-lg-4">
-                                            @Html.Editor("Disc_Lesson", new { htmlAttributes = new { @class = "form-control", @Value = 0, @placeholder = "Discount" } })
-                                        </div>
-                                        <div class="col-lg-6">
-                                            @Html.DropDownListFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, "Select Voucher", new { @class = "form-control select2" })
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
+                                    <label class="error-lesson text-danger" style="display: none"></label>
                                     @Html.ValidationMessageFor(model => model.LessonPackages_Id, "", new { @class = "text-danger" })
                                 </div>
                             </div>
@@ -86,9 +49,6 @@
                                 <div class="col-lg-6">
                                     @Html.Editor("Notes_Lesson", new { htmlAttributes = new { @class = "form-control" } })
                                 </div>
-                                <div class="col-lg-4">
-                                    <button type="button" class="btn btn-success" id="btnAddLesson">Add <i class="icon-plus22 ml-2"></i></button>
-                                </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="tab-inventory">
@@ -96,6 +56,30 @@
                         </div>
                         <div class="tab-pane fade" id="tab-service">
                             Service content.
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group row">
+                        <label class="col-form-label col-lg-2">Qty / Discount / Voucher</label>
+                        <div class="col-lg-6">
+                            <div class="form-group row">
+                                <div class="col-lg-2">
+                                    @Html.Editor("Qty", new { htmlAttributes = new { @class = "form-control", @Value = 1, @placeholder = "Qty" } })
+                                </div>
+                                <div class="col-lg-3">
+                                    @Html.Editor("Disc", new { htmlAttributes = new { @class = "form-control", @Value = 0, @placeholder = "Discount" } })
+                                </div>
+                                <div class="col-lg-5">
+                                    @Html.DropDownListFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, "Select Voucher", new { @class = "form-control select2" })
+                                </div>
+                                <div class="col-lg-2">
+                                    <button type="button" class="btn btn-success" id="btnAdd">Add <i class="icon-plus22 ml-2"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            @Html.ValidationMessageFor(model => model.Vouchers_Id, "", new { @class = "text-danger" })
+                            <label class="error-sale text-danger" style="display: none"></label>
                         </div>
                     </div>
                     <hr />
@@ -126,6 +110,31 @@
                         </table>
                     </div>
                     <hr />
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                        <div class="col-lg-6">
+                            @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2" })
+                        </div>
+                        <div class="col-lg-4">
+                            @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        @Html.LabelFor(model => model.Customers_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                        <div class="col-lg-6">
+                            @Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })
+                        </div>
+                        <div class="col-lg-4">
+                            @Html.ValidationMessageFor(model => model.Customers_Id, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-lg-2">Notes</label>
+                        <div class="col-lg-6">
+                            @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control" } })
+                        </div>
+                    </div>
+                    <hr />
                     <div>
                         <a href="@Url.Action("Index", "Sale")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
                         <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
@@ -141,7 +150,47 @@
 
 <script type="text/javascript">
     var item_no = 100;
-    function AddItemLesson(desc, qty, price, travel, disc, voucher, subtotal) {
+
+    function ItemLesson() {
+        if ($('#LessonPackages_Id').val() == '') {
+            $('.error-lesson').html('The Lesson Package field is required.').show();
+        }
+        else {
+            $('.error-lesson').html('').hide();
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetItemTotal", "Sale")',
+                data: {
+                    qty: $('#Qty').val(),
+                    lesson_package_id: $('#LessonPackages_Id').val(),
+                    disc: $('#Disc').val(),
+                    voucher_id: $('#Vouchers_Id').val()
+                },
+                success: function (data) {
+                    AddItemLesson(
+                        data.description,
+                        $('#Qty').val(),
+                        data.price,
+                        0,
+                        $('#Disc').val(),
+                        data.voucher,
+                        data.subtotal,
+                        $('#Vouchers_Id').val(),
+                        $('#Notes_Lesson').val(),
+                        $('#LessonPackages_Id').val(),
+                        '',
+                        ''
+                    );
+                }, //end success
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                } //end error
+            }); //end ajax
+        }
+    }
+
+    function AddItemLesson(desc, qty, price, travel, disc, voucher, subtotal, voucher_id, note, lesson_id, inventory_id, service_id) {
         item_no += 1;
 
         var rowItem = '<tr id="item_' + item_no + '">'
@@ -153,6 +202,11 @@
             + '<td><input type="text" readonly class="form-control disc text-right" value="' + disc + '" /></td>'
             + '<td><input type="text" readonly class="form-control voucher text-right" value="' + voucher + '" /></td>'
             + '<td><input type="text" readonly class="form-control subtotal text-right" value="' + subtotal + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control voucher_id" value="' + voucher_id + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control note" value="' + note + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control lesson_id" value="' + lesson_id + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control inventory_id" value="' + inventory_id + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control service_id" value="' + service_id + '" /></td>'
             + '</tr>';
         $('#data-body').append(rowItem);
         math_total_disc();
@@ -247,6 +301,58 @@
                     } //end error
                 }); //end ajax
             }
+        });
+
+        $('#btnAdd').click(function () {
+            if ($('#Qty').val() == '') {
+                $('.error-sale').html('The Qty field is required.').show();
+            }
+            else if ($('#Disc').val() == '') {
+                $('.error-sale').html('The Discount field is required.').show();
+            }
+            else {
+                $('.error-sale').html('').hide();
+
+                var ref_this = $("div.tab-content div.active");
+                if (ref_this[0]['id'] == 'tab-lesson') {
+                    ItemLesson();
+                }
+                else if (ref_this[0]['id'] == 'tab-inventory') {
+
+                }
+                else { //tab-service
+
+                }
+            }
+        });
+
+        var arrItem = [];
+        $('#target').submit(function (e) {
+            //e.preventDefault();
+            var total = 0;
+            $('#data-body tr').each(function () {
+                var desc = $(this).find('input.desc').val();
+                var qty = parseFloat($(this).find('input.qty').val());
+                var price = parseFloat($(this).find('input.price').val());
+                var travel = parseFloat($(this).find('input.travel').val());
+                var disc = parseFloat($(this).find('input.disc').val());
+                var voucher = parseFloat($(this).find('input.voucher').val());
+                var subtotal = parseFloat($(this).find('input.subtotal').val());
+                var voucher_id = $(this).find('input.voucher_id').val();
+                var note = $(this).find('input.note').val();
+                var lesson_id = $(this).find('input.lesson_id').val();
+                var inventory_id = $(this).find('input.inventory_id').val();
+                var service_id = $(this).find('input.service_id').val();
+
+                total += subtotal;
+                var obj = {
+                    desc: desc, qty: qty, price: price, travel: travel, disc: disc, voucher: voucher, subtotal: subtotal,
+                    voucher_id: voucher_id, note: note, lesson_id: lesson_id, inventory_id: inventory_id, service_id: service_id
+                };
+                arrItem.push(obj);
+            });
+            $('#Amount').val(total);
+            $('#Items').val(JSON.stringify(arrItem));
         });
     })
 </script>

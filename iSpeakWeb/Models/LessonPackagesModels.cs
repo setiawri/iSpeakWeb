@@ -34,6 +34,8 @@ namespace iSpeak.Models
         public string Languages { get; set; }
         [Display(Name = "Lesson Type")]
         public string LessonTypes { get; set; }
+        [Display(Name = "Hours")]
+        public decimal SessionHours { get; set; }
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int Price { get; set; }
         public bool Active { get; set; }

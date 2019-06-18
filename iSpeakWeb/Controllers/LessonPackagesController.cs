@@ -26,6 +26,7 @@ namespace iSpeak.Controllers
                             Name = lp.Name,
                             Languages = l.Name,
                             LessonTypes = lt.Name,
+                            SessionHours = lp.SessionHours,
                             Price = lp.Price,
                             Active = lp.Active
                         }).ToListAsync();
@@ -43,6 +44,16 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create([Bind(Include = "Id,Name,Languages_Id,LessonTypes_Id,SessionHours,ExpirationDay,Price,Notes,Active")] LessonPackagesModels lessonPackagesModels)
         {
+            var check = db.LessonPackages.AsNoTracking()
+                .Where(x => x.Name == lessonPackagesModels.Name
+                            && x.Languages_Id == lessonPackagesModels.Languages_Id
+                            && x.LessonTypes_Id == lessonPackagesModels.LessonTypes_Id
+                            && x.SessionHours == lessonPackagesModels.SessionHours).ToList();
+            if (check.Count > 0)
+            {
+                ModelState.AddModelError("Duplicate", "This Lesson Package already existed.");
+            }
+
             if (ModelState.IsValid)
             {
                 lessonPackagesModels.Id = Guid.NewGuid();
@@ -78,6 +89,17 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Languages_Id,LessonTypes_Id,SessionHours,ExpirationDay,Price,Notes,Active")] LessonPackagesModels lessonPackagesModels)
         {
+            var check = db.LessonPackages.AsNoTracking()
+                .Where(x => x.Id != lessonPackagesModels.Id 
+                            && x.Name == lessonPackagesModels.Name 
+                            && x.Languages_Id == lessonPackagesModels.Languages_Id 
+                            && x.LessonTypes_Id == lessonPackagesModels.LessonTypes_Id 
+                            && x.SessionHours == lessonPackagesModels.SessionHours).ToList();
+            if (check.Count > 0)
+            {
+                ModelState.AddModelError("Duplicate", "This Lesson Package already existed.");
+            }
+
             if (ModelState.IsValid)
             {
                 db.Entry(lessonPackagesModels).State = EntityState.Modified;

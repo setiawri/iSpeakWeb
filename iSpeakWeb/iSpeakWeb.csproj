@@ -209,6 +209,7 @@
     <Compile Include="Models\LessonTypesModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
+    <Compile Include="Models\SaleInvoiceItemsModels.cs" />
     <Compile Include="Models\SaleInvoicesModels.cs" />
     <Compile Include="Models\SaleInvoicesViewModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
@@ -240,10 +241,12 @@
     <Content Include="assets\js\plugins\forms\styling\switchery.min.js" />
     <Content Include="assets\js\plugins\forms\styling\uniform.min.js" />
     <Content Include="assets\js\plugins\loaders\blockui.min.js" />
+    <Content Include="assets\js\plugins\notifications\bootbox.min.js" />
     <Content Include="assets\js\plugins\pickers\daterangepicker.js" />
     <Content Include="assets\js\plugins\pickers\pickadate\picker.date.js" />
     <Content Include="assets\js\plugins\pickers\pickadate\picker.js" />
     <Content Include="assets\js\plugins\pickers\pickadate\picker.time.js" />
+    <Content Include="assets\js\plugins\tables\datatables\datatables.min.js" />
     <Content Include="assets\js\plugins\ui\moment\moment.min.js" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />

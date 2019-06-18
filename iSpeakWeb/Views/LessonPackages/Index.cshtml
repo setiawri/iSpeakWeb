@@ -30,6 +30,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Name)</th>
                                 <th>@Html.DisplayNameFor(model => model.Languages)</th>
                                 <th>@Html.DisplayNameFor(model => model.LessonTypes)</th>
+                                <th>@Html.DisplayNameFor(model => model.SessionHours)</th>
                                 <th>@Html.DisplayNameFor(model => model.Price)</th>
                                 <th>@Html.DisplayNameFor(model => model.Active)</th>
                                 <th>Action</th>
@@ -42,6 +43,7 @@
                                     <td>@Html.DisplayFor(modelItem => item.Name)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Languages)</td>
                                     <td>@Html.DisplayFor(modelItem => item.LessonTypes)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.SessionHours)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Price)</td>
                                     <td>
                                         @if (item.Active == true)
@@ -54,8 +56,7 @@
                                         }
                                     </td>
                                     <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
                                     </td>
                                 </tr>
                             }

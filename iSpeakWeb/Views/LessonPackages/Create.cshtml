@@ -101,7 +101,7 @@
 
                             </div>
                         </div>
-
+                        @Html.ValidationMessage("Duplicate", "", new { @class = "text-danger" })
                     </fieldset>
                     <div>
                         <a href="@Url.Action("Index", "LessonPackages")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>

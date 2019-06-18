@@ -13,8 +13,9 @@ namespace iSpeak.Models
         [Display(Name = "Lesson Package")]
         public Guid LessonPackages_Id { get; set; }
         [Display(Name = "Voucher")]
-        public Guid Vouchers_Id { get; set; }
+        public Guid? Vouchers_Id { get; set; }
         [Display(Name = "Customer")]
         public Guid Customers_Id { get; set; }
+        public string Notes { get; set; }
     }
 }

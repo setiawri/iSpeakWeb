@@ -20,5 +20,6 @@ namespace iSpeak.Models
         public DbSet<SuppliersModels> Suppliers { get; set; }
         public DbSet<VouchersModels> Vouchers { get; set; }
         public DbSet<SaleInvoicesModels> SaleInvoices { get; set; }
+        public DbSet<SaleInvoiceItemsModels> SaleInvoiceItems { get; set; }
     }
 }

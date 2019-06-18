@@ -28,9 +28,28 @@ namespace iSpeak.Models
         public Guid Id { get; set; }
         public string Branches { get; set; }
         public string No { get; set; }
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime Timestamp { get; set; }
         public string Customer { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N0}")]
         public int Amount { get; set; }
         public bool Cancelled { get; set; }
+    }
+
+    public class SaleInvoiceItemDetails
+    {
+        public string desc { get; set; }
+        public int qty { get; set; }
+        public int price { get; set; }
+        public int travel { get; set; }
+        public decimal disc { get; set; }
+        public decimal voucher { get; set; }
+        public int subtotal { get; set; }
+        public Guid? voucher_id { get; set; }
+        public string note { get; set; }
+        public Guid? lesson_id { get; set; }
+        public Guid? inventory_id { get; set; }
+        public Guid? service_id { get; set; }
+
     }
 }
