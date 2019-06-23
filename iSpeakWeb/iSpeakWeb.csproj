@@ -177,6 +177,7 @@
     <Compile Include="Controllers\LessonPackagesController.cs" />
     <Compile Include="Controllers\LessonTypesController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\PaymentsController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
@@ -208,6 +209,9 @@
     <Compile Include="Models\LessonPackagesModels.cs" />
     <Compile Include="Models\LessonTypesModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\PaymentItemsModels.cs" />
+    <Compile Include="Models\PaymentsModels.cs" />
+    <Compile Include="Models\ReceiptViewModels.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
     <Compile Include="Models\SaleInvoiceItemsModels.cs" />
     <Compile Include="Models\SaleInvoicesModels.cs" />
@@ -231,6 +235,7 @@
     <Content Include="assets\css\icons\icomoon\fonts\icomoon.svg" />
     <Content Include="assets\css\icons\icomoon\styles.css" />
     <Content Include="assets\css\layout.min.css" />
+    <Content Include="assets\css\print\invoice-print.css" />
     <Content Include="assets\js\app.js" />
     <Content Include="assets\js\bootstrap-datetimepicker.min.js" />
     <Content Include="assets\js\main\bootstrap.bundle.min.js" />
@@ -352,6 +357,10 @@
     <Content Include="Views\Branches\Delete.cshtml" />
     <Content Include="Views\Sale\Index.cshtml" />
     <Content Include="Views\Sale\Create.cshtml" />
+    <Content Include="Views\Payments\Index.cshtml" />
+    <Content Include="Views\Payments\Create.cshtml" />
+    <Content Include="Views\Payments\Print.cshtml" />
+    <Content Include="Views\Payments\Printed.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

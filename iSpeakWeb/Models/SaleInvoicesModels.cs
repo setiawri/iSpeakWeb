@@ -20,6 +20,7 @@ namespace iSpeak.Models
         public string Customer_UserAccounts_Id { get; set; }
         public string Notes { get; set; }
         public int Amount { get; set; }
+        public int Due { get; set; }
         public bool Cancelled { get; set; }
     }
 
@@ -33,6 +34,8 @@ namespace iSpeak.Models
         public string Customer { get; set; }
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int Amount { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int Due { get; set; }
         public bool Cancelled { get; set; }
     }
 

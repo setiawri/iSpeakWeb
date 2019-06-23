@@ -1,0 +1,153 @@
+﻿@model IEnumerable<iSpeak.Models.SaleInvoicesIndexModels>
+
+@{
+    ViewBag.Root = "List Invoices";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Invoices -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <button type="button" class="btn btn-sm btn-success" id="btnCreate">Create New<i class="icon-plus22 ml-2"></i></button>
+                <a href="@Url.Action("Print", "Payments")" class="btn btn-sm btn-secondary">Print Invoice <i class="icon-printer ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.No)</th>
+                                <th>@Html.DisplayNameFor(model => model.Customer)</th>
+                                <th>@Html.DisplayNameFor(model => model.Amount)</th>
+                                <th>@Html.DisplayNameFor(model => model.Due)</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (item.Due > 0)
+                                        {
+                                            <input type="checkbox" id="@item.Id" class="check-styled" />
+                                        }
+                                        else
+                                        {
+                                            <span class="text-primary"><i class="icon-checkmark"></i></span>
+                                        }
+                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Customer)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Due)</td>
+                                    <td>
+                                        @if (item.Due > 0)
+                                        {
+                                            <span class="badge badge-warning d-block">Waiting Payment</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-primary d-block">Completed</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="#" onclick="View_Log('@item.Id')">Log</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /Invoices -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    function View_Log(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPayment", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Payment Log',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    $(document).ready(function () {
+        // Setting datatable defaults
+        $.extend($.fn.dataTable.defaults, {
+            autoWidth: false,
+            columnDefs: [
+                {
+                    orderable: false,
+                    width: 100,
+                    targets: [0, 7]
+                }
+            ],
+            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+            language: {
+                search: '<span>Filter:</span> _INPUT_',
+                searchPlaceholder: 'Type to filter...',
+                lengthMenu: '<span>Show:</span> _MENU_',
+                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+            }
+        });
+
+        $('.datatable').DataTable({
+            pagingType: 'full_numbers',
+            order: [[1, 'desc']]
+        });
+
+        $('.check-styled').uniform();
+
+        $('#btnCreate').click(function () {
+            var ids_selected = '';
+            $('#data-body tr').find('.check-styled').each(function () {
+                if ($(this).prop('checked') == true) {
+                    ids_selected = $('input:checkbox.check-styled:checked').map(function () {
+                        return this.id;
+                    }).get();
+                }
+            });
+
+            if (ids_selected == '') {
+                bootbox.alert("Please select Invoice!");
+            }
+            else {
+                var url = '@Url.Action("Create", "Payments", new { id = "_id" })';
+                window.location.href = url.replace('_id', ids_selected);
+            }
+        });
+    });
+</script>

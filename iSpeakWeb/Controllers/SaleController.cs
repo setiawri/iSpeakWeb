@@ -118,7 +118,7 @@ namespace iSpeak.Controllers
                 lesson_list.Add(new
                 {
                     Id = item.Id,
-                    Name = "[" + item.Languages + ":" + item.LessonTypes + ":" + item.SessionHours + " hr] " + item.Name + " (" + item.Price.ToString("#,##0") + ")"
+                    Name = "[" + item.Languages + ":" + item.LessonTypes + ":" + item.SessionHours + " hrs] " + item.Name + " (" + item.Price.ToString("#,##0") + ")"
                 });
             }
             ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
@@ -145,6 +145,7 @@ namespace iSpeak.Controllers
                 saleInvoicesModels.Customer_UserAccounts_Id = saleInvoicesViewModels.Customers_Id.ToString();
                 saleInvoicesModels.Notes = saleInvoicesViewModels.Notes;
                 saleInvoicesModels.Amount = Amount;
+                saleInvoicesModels.Due = Amount;
                 saleInvoicesModels.Cancelled = false;
                 db.SaleInvoices.Add(saleInvoicesModels);
 
@@ -215,7 +216,7 @@ namespace iSpeak.Controllers
                 lesson_list.Add(new
                 {
                     Id = item.Id,
-                    Name = "[" + item.Languages + ":" + item.LessonTypes + ":" + item.SessionHours + " hr] " + item.Name + " (" + item.Price.ToString("#,##0") + ")"
+                    Name = "[" + item.Languages + ":" + item.LessonTypes + ":" + item.SessionHours + " hrs] " + item.Name + " (" + item.Price.ToString("#,##0") + ")"
                 });
             }
             ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");

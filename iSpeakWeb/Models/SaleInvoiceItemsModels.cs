@@ -28,4 +28,24 @@ namespace iSpeak.Models
         public int TravelCost { get; set; }
         public int TutorTravelCost { get; set; }
     }
+
+    public class SaleInvoiceItemsDetails
+    {
+        public string Invoice { get; set; }
+        public string Description { get; set; }
+        public int Qty { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int Price { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int Travel { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int Tutor { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}")]
+        public decimal Voucher { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}")]
+        public decimal Discount { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}")]
+        public decimal Amount { get; set; }
+        public string Customer { get; set; }
+    }
 }

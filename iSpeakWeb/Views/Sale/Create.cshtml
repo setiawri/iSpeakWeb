@@ -169,7 +169,7 @@
                 },
                 success: function (data) {
                     AddItemLesson(
-                        data.description,
+                        $('#LessonPackages_Id option:selected').text(),
                         $('#Qty').val(),
                         data.price,
                         0,

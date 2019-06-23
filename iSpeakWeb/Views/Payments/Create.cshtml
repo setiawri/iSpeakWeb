@@ -1,0 +1,245 @@
+﻿@model IEnumerable<iSpeak.Models.SaleInvoiceItemsDetails>
+
+@{
+    ViewBag.Root = "Create";
+    ViewBag.Title = "Payments";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Invoices -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Index", "Payments")" class="btn btn-sm btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal_pay">Pay<i class="icon-checkmark3 ml-2"></i></button>
+                <span class="badge badge-flat border-primary text-primary-600"><strong>TOTAL: @ViewBag.Total</strong></span>
+                <span class="badge badge-flat border-danger text-danger-600"><strong>DUE: @ViewBag.Due</strong></span>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Invoice)</th>
+                                <th>@Html.DisplayNameFor(model => model.Description)</th>
+                                <th>@Html.DisplayNameFor(model => model.Qty)</th>
+                                <th>@Html.DisplayNameFor(model => model.Price)</th>
+                                <th>@Html.DisplayNameFor(model => model.Travel)</th>
+                                <th>@Html.DisplayNameFor(model => model.Tutor)</th>
+                                <th>@Html.DisplayNameFor(model => model.Voucher)</th>
+                                <th>@Html.DisplayNameFor(model => model.Discount)</th>
+                                <th>@Html.DisplayNameFor(model => model.Amount)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Invoice)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Qty)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Travel)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Voucher)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Discount)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /Invoices -->
+        <!-- Horizontal form modal -->
+        <div id="modal_pay" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success">
+                        <h6 class="modal-title">Payments</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Due / Total Payment</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control text-right mdl-due" value="@ViewBag.Due" readonly>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control text-right mdl-paid" value="0" readonly>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row modal-bank-input">
+                                <label class="col-form-label col-sm-4">Bank Amount</label>
+                                <div class="col-sm-4">
+                                    <input type="number" class="form-control text-right mdl-card" value="0" onkeyup="math_total()">
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-check form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="check-styled" id="Debit" name="radio-inline-left" checked data-fouc>
+                                            Debit
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-check form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" class="check-styled" id="Transfer" name="radio-inline-left" data-fouc>
+                                            Transfer
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">REF # / Last 4 #</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control mdl-reff" placeholder="REF #">
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control mdl-nocard" placeholder="Last 4 #">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Bank / Name</label>
+                                <div class="col-sm-4">
+                                    <select class="form-control mdl-bank">
+                                        <option value="BCA">BCA</option>
+                                        <option value="BNI">BNI</option>
+                                        <option value="BRI">BRI</option>
+                                        <option value="Danamon">Danamon</option>
+                                        <option value="Mandiri">Mandiri</option>
+                                        <option value="Permata">Permata</option>
+                                        <option value="Others">Others</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control mdl-name" placeholder="Name">
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Cash Amount</label>
+                                <div class="col-sm-4">
+                                    <input type="number" class="form-control text-right mdl-cash" value="0" onkeyup="math_total()">
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control mdl-notes" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /horizontal form modal -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    function math_total() {
+        var total = parseFloat($('.mdl-card').val()) + parseFloat($('.mdl-cash').val());
+        $('.mdl-paid').val(total.toLocaleString());
+    }
+
+    $(document).ready(function () {
+        // Setting datatable defaults
+        $.extend($.fn.dataTable.defaults, {
+            autoWidth: false,
+            columnDefs: [
+            ],
+            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+            language: {
+                search: '<span>Filter:</span> _INPUT_',
+                searchPlaceholder: 'Type to filter...',
+                lengthMenu: '<span>Show:</span> _MENU_',
+                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+            }
+        });
+
+        $('.datatable').DataTable({
+            pagingType: 'full_numbers',
+            order: [[0, 'asc']]
+        });
+
+        $('.select2').select2();
+        $('.check-styled').uniform();
+
+        $('.mdl-btn-submit').click(function () {
+            var bank_amount = parseFloat($('.mdl-card').val());
+            var cash_amount = parseFloat($('.mdl-cash').val());
+            var total_due = parseFloat($('.mdl-due').val().replace(/,/g, ''));
+            var total_paid = parseFloat($('.mdl-paid').val().replace(/,/g, ''));
+            console.log('due: ' + total_due + ', paid: ' + total_paid);
+            if (total_paid > total_due) {
+                $('.modal-validation').html('Max Payment is ' + total_due.toLocaleString()).show();
+            }
+            else if (bank_amount > 0 && $('.mdl-reff').val() == '') {
+                $('.modal-validation').html('The field REF # is required.').show();
+            }
+            else {
+                $('.modal-validation').html('').hide();
+
+                var ids_selected = '';
+                $('.modal-bank-input div div label').find('.check-styled').each(function () {
+                    if ($(this).prop('checked') == true) {
+                        ids_selected = $('input:radio.check-styled:checked').map(function () {
+                            return this.id;
+                        }).get();
+                    }
+                });
+                var bank_type = ids_selected[0]; //Debit or Transfer
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("SavePayments", "Payments")',
+                    data: {
+                        cash_amount: cash_amount,
+                        bank_amount: bank_amount,
+                        bank_name: $('.mdl-bank').val(),
+                        owner_name: $('.mdl-name').val(),
+                        bank_number: $('.mdl-nocard').val(),
+                        reff_no: $('.mdl-reff').val(),
+                        notes: $('.mdl-notes').val(),
+                        bank_type: bank_type,
+                        invoices_id: '@ViewBag.Invoices'
+                    },
+                    success: function (data) {
+                        var url = '@Url.Action("Print", "Payments", new { id = "_id" })';
+                        window.location.href = url.replace('_id', data.payment_id);
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+
+            }
+        });
+    });
+</script>
