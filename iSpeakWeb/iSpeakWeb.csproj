@@ -236,6 +236,7 @@
     <Content Include="assets\css\icons\icomoon\styles.css" />
     <Content Include="assets\css\layout.min.css" />
     <Content Include="assets\css\print\invoice-print.css" />
+    <Content Include="assets\images\logo.png" />
     <Content Include="assets\js\app.js" />
     <Content Include="assets\js\bootstrap-datetimepicker.min.js" />
     <Content Include="assets\js\main\bootstrap.bundle.min.js" />
@@ -364,7 +365,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="assets\images\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
