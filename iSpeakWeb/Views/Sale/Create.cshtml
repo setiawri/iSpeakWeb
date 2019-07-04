@@ -45,6 +45,19 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-form-label col-lg-2">Travel Cost / Tutor Cost</label>
+                                <div class="col-lg-6">
+                                    <div class="form-group row">
+                                        <div class="col-lg-3">
+                                            @Html.Editor("Travel", new { htmlAttributes = new { @class = "form-control", @placeholder = "Travel Cost", @Value = 0 } })
+                                        </div>
+                                        <div class="col-lg-3">
+                                            @Html.Editor("Tutor", new { htmlAttributes = new { @class = "form-control", @placeholder = "Tutor Cost", @Value = 0 } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-form-label col-lg-2">Notes</label>
                                 <div class="col-lg-6">
                                     @Html.Editor("Notes_Lesson", new { htmlAttributes = new { @class = "form-control" } })
@@ -84,24 +97,25 @@
                     </div>
                     <hr />
                     <div class="table-responsive">
-                        <table class="table table-condensed table-striped">
+                        <table class="table table-xs">
                             <thead>
                                 <tr>
-                                    <th style="width:5% !important"></th>
-                                    <th style="width:20% !important">Description</th>
-                                    <th style="width:10% !important">Qty</th>
-                                    <th style="width:13% !important">Price</th>
-                                    <th style="width:13% !important">Travel</th>
-                                    <th style="width:13% !important">Discount</th>
-                                    <th style="width:13% !important">Voucher</th>
-                                    <th style="width:13% !important">Subtotal</th>
+                                    <th style="width:3% !important"></th>
+                                    <th style="width:25% !important">Description</th>
+                                    <th style="width:6% !important">Qty</th>
+                                    <th style="width:11% !important">Price</th>
+                                    <th style="width:11% !important">Travel</th>
+                                    <th style="width:11% !important">Tutor</th>
+                                    <th style="width:11% !important">Discount</th>
+                                    <th style="width:11% !important">Voucher</th>
+                                    <th style="width:11% !important">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody id="data-body">
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="5" class="text-right">TOTAL</th>
+                                    <th colspan="6" class="text-right">TOTAL</th>
                                     <th class="text-right total-disc">0</th>
                                     <th class="text-right total-voucher">0</th>
                                     <th class="text-right total-inv">0</th>
@@ -158,24 +172,30 @@
         else {
             $('.error-lesson').html('').hide();
 
+            var travel_cost = parseFloat($('#Travel').val());
+            var tutor_cost = parseFloat($('#Tutor').val());
+            var discount = parseFloat($('#Disc').val());
+
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("GetItemTotal", "Sale")',
                 data: {
                     qty: $('#Qty').val(),
                     lesson_package_id: $('#LessonPackages_Id').val(),
-                    disc: $('#Disc').val(),
+                    travel: travel_cost,
+                    disc: discount,
                     voucher_id: $('#Vouchers_Id').val()
                 },
                 success: function (data) {
                     AddItemLesson(
                         $('#LessonPackages_Id option:selected').text(),
                         $('#Qty').val(),
-                        data.price,
-                        0,
-                        $('#Disc').val(),
-                        data.voucher,
-                        data.subtotal,
+                        data.price.toLocaleString(),
+                        travel_cost.toLocaleString(),
+                        tutor_cost.toLocaleString(),
+                        discount.toLocaleString(),
+                        data.voucher.toLocaleString(),
+                        data.subtotal.toLocaleString(),
                         $('#Vouchers_Id').val(),
                         $('#Notes_Lesson').val(),
                         $('#LessonPackages_Id').val(),
@@ -190,23 +210,24 @@
         }
     }
 
-    function AddItemLesson(desc, qty, price, travel, disc, voucher, subtotal, voucher_id, note, lesson_id, inventory_id, service_id) {
+    function AddItemLesson(desc, qty, price, travel, tutor, disc, voucher, subtotal, voucher_id, note, lesson_id, inventory_id, service_id) {
         item_no += 1;
 
         var rowItem = '<tr id="item_' + item_no + '">'
             + '<td align="center" style="vertical-align:middle"><a href="#" onclick="RemoveItem(' + item_no + ')" class="text-danger"><i class="icon-cross icon-2x"></i></a></td>'
-            + '<td><input type="text" readonly class="form-control desc" value="' + desc + '" /></td>'
-            + '<td><input type="text" readonly class="form-control qty text-right" value="' + qty + '" /></td>'
-            + '<td><input type="text" readonly class="form-control price text-right" value="' + price + '" /></td>'
-            + '<td><input type="text" readonly class="form-control travel text-right" value="' + travel + '" /></td>'
-            + '<td><input type="text" readonly class="form-control disc text-right" value="' + disc + '" /></td>'
-            + '<td><input type="text" readonly class="form-control voucher text-right" value="' + voucher + '" /></td>'
-            + '<td><input type="text" readonly class="form-control subtotal text-right" value="' + subtotal + '" /></td>'
-            + '<td style="display: none"><input type="text" readonly class="form-control voucher_id" value="' + voucher_id + '" /></td>'
-            + '<td style="display: none"><input type="text" readonly class="form-control note" value="' + note + '" /></td>'
-            + '<td style="display: none"><input type="text" readonly class="form-control lesson_id" value="' + lesson_id + '" /></td>'
-            + '<td style="display: none"><input type="text" readonly class="form-control inventory_id" value="' + inventory_id + '" /></td>'
-            + '<td style="display: none"><input type="text" readonly class="form-control service_id" value="' + service_id + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs desc" value="' + desc + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs qty text-right" value="' + qty + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs price text-right" value="' + price + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs travel text-right" value="' + travel + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs tutor text-right" value="' + tutor + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs disc text-right" value="' + disc + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs voucher text-right" value="' + voucher + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs subtotal text-right" value="' + subtotal + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control input-xs voucher_id" value="' + voucher_id + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control input-xs note" value="' + note + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control input-xs lesson_id" value="' + lesson_id + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control input-xs inventory_id" value="' + inventory_id + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control input-xs service_id" value="' + service_id + '" /></td>'
             + '</tr>';
         $('#data-body').append(rowItem);
         math_total_disc();
@@ -263,7 +284,7 @@
     $(document).ready(function () {
         $('.select2').select2();
 
-        $('#btnAddLesson').click(function () {
+        @*$('#btnAddLesson').click(function () {
             if ($('#LessonPackages_Id').val() == '') {
                 $('.error-lesson').html('The Lesson Package field is required.').show();
             }
@@ -301,11 +322,17 @@
                     } //end error
                 }); //end ajax
             }
-        });
+        });*@
 
         $('#btnAdd').click(function () {
-            if ($('#Qty').val() == '') {
-                $('.error-sale').html('The Qty field is required.').show();
+            if ($('#Travel').val() == '') {
+                $('.error-sale').html('The Travel Cost field is required.').show();
+            }
+            else if ($('#Tutor').val() == '') {
+                $('.error-sale').html('The Tutor Cost field is required.').show();
+            }
+            else if ($('#Disc').val() == '') {
+                $('.error-sale').html('The Discount field is required.').show();
             }
             else if ($('#Disc').val() == '') {
                 $('.error-sale').html('The Discount field is required.').show();
@@ -333,11 +360,12 @@
             $('#data-body tr').each(function () {
                 var desc = $(this).find('input.desc').val();
                 var qty = parseFloat($(this).find('input.qty').val());
-                var price = parseFloat($(this).find('input.price').val());
-                var travel = parseFloat($(this).find('input.travel').val());
-                var disc = parseFloat($(this).find('input.disc').val());
-                var voucher = parseFloat($(this).find('input.voucher').val());
-                var subtotal = parseFloat($(this).find('input.subtotal').val());
+                var price = parseFloat($(this).find('input.price').val().replace(/,/g, ''));
+                var travel = parseFloat($(this).find('input.travel').val().replace(/,/g, ''));
+                var tutor = parseFloat($(this).find('input.tutor').val().replace(/,/g, ''));
+                var disc = parseFloat($(this).find('input.disc').val().replace(/,/g, ''));
+                var voucher = parseFloat($(this).find('input.voucher').val().replace(/,/g, ''));
+                var subtotal = parseFloat($(this).find('input.subtotal').val().replace(/,/g, ''));
                 var voucher_id = $(this).find('input.voucher_id').val();
                 var note = $(this).find('input.note').val();
                 var lesson_id = $(this).find('input.lesson_id').val();
@@ -346,7 +374,7 @@
 
                 total += subtotal;
                 var obj = {
-                    desc: desc, qty: qty, price: price, travel: travel, disc: disc, voucher: voucher, subtotal: subtotal,
+                    desc: desc, qty: qty, price: price, travel: travel, tutor: tutor, disc: disc, voucher: voucher, subtotal: subtotal,
                     voucher_id: voucher_id, note: note, lesson_id: lesson_id, inventory_id: inventory_id, service_id: service_id
                 };
                 arrItem.push(obj);

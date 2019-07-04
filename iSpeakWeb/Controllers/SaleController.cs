@@ -67,13 +67,13 @@ namespace iSpeak.Controllers
             return View(await data);
         }
 
-        public JsonResult GetItemTotal(int qty, Guid lesson_package_id, decimal disc, string voucher_id)
+        public JsonResult GetItemTotal(int qty, Guid lesson_package_id, int travel, decimal disc, string voucher_id)
         {
             var lessonPackage = db.LessonPackages.Where(x => x.Id == lesson_package_id).FirstOrDefault();
             string description = lessonPackage.Name;
             int price = lessonPackage.Price;
             decimal voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
-            decimal subtotal = (qty * price) - disc - voucher;
+            decimal subtotal = (qty * price) + travel - disc - voucher;
 
             return Json(new { description = description, price = price, voucher = voucher, subtotal = subtotal }, JsonRequestBehavior.AllowGet);
         }
@@ -109,6 +109,7 @@ namespace iSpeak.Controllers
                                Languages = l.Name,
                                LessonTypes = lt.Name,
                                SessionHours = lp.SessionHours,
+                               ExpirationDay = lp.ExpirationDay,
                                Price = lp.Price,
                                Active = lp.Active
                            }).ToList();
@@ -118,7 +119,7 @@ namespace iSpeak.Controllers
                 lesson_list.Add(new
                 {
                     Id = item.Id,
-                    Name = "[" + item.Languages + ":" + item.LessonTypes + ":" + item.SessionHours + " hrs] " + item.Name + " (" + item.Price.ToString("#,##0") + ")"
+                    Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.ExpirationDay + " days, " + item.Price.ToString("#,##0") + ")"
                 });
             }
             ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
@@ -166,9 +167,9 @@ namespace iSpeak.Controllers
                     sii.Products_Id = item.inventory_id;
                     sii.Services_Id = item.service_id;
                     sii.LessonPackages_Id = item.lesson_id;
-                    sii.SessionHours = 0;
-                    sii.TravelCost = 0;
-                    sii.TutorTravelCost = 0;
+                    sii.SessionHours = db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours;
+                    sii.TravelCost = item.travel;
+                    sii.TutorTravelCost = item.tutor;
                     db.SaleInvoiceItems.Add(sii);
 
                     row++;
@@ -216,7 +217,7 @@ namespace iSpeak.Controllers
                 lesson_list.Add(new
                 {
                     Id = item.Id,
-                    Name = "[" + item.Languages + ":" + item.LessonTypes + ":" + item.SessionHours + " hrs] " + item.Name + " (" + item.Price.ToString("#,##0") + ")"
+                    Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.ExpirationDay + "days, " + item.Price.ToString("#,##0") + ")"
                 });
             }
             ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");

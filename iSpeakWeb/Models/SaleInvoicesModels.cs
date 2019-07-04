@@ -45,6 +45,7 @@ namespace iSpeak.Models
         public int qty { get; set; }
         public int price { get; set; }
         public int travel { get; set; }
+        public int tutor { get; set; }
         public decimal disc { get; set; }
         public decimal voucher { get; set; }
         public int subtotal { get; set; }
