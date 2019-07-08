@@ -15,6 +15,7 @@ namespace iSpeak
         {
             Database.SetInitializer<iSpeak.Models.iSpeakContext>(null);
             AreaRegistration.RegisterAllAreas();
+            GlobalFilters.Filters.Add(new Common.BranchesActionFilter(), 0);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);

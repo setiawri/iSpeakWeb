@@ -80,6 +80,7 @@ namespace iSpeak.Controllers
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View();
         }
 
@@ -90,6 +91,8 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
         {
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -117,6 +120,7 @@ namespace iSpeak.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
+                            Session["Login"] = model;
                             return RedirectToLocal(returnUrl);
                         case SignInStatus.LockedOut:
                             return View("Lockout");
@@ -448,6 +452,7 @@ namespace iSpeak.Controllers
         //[ValidateAntiForgeryToken]
         public ActionResult LogOff()
         {
+            Session["Login"] = null;
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             return RedirectToAction("Index", "Home");
         }

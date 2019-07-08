@@ -16,6 +16,7 @@ namespace iSpeak.Models
         public string Code { get; set; }
         [Required]
         public string Description { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}")]
         public decimal Amount { get; set; }
         public string Notes { get; set; }
         public bool Active { get; set; }

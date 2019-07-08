@@ -89,7 +89,7 @@ namespace iSpeak.Controllers
                     saleInvoiceItemsDetails.Tutor = item.TutorTravelCost;
                     saleInvoiceItemsDetails.Voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
                     saleInvoiceItemsDetails.Discount = item.DiscountAmount;
-                    saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
+                    saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
                     listDetails.Add(saleInvoiceItemsDetails);
                     total += saleInvoiceItemsDetails.Amount;
                 }
@@ -126,11 +126,12 @@ namespace iSpeak.Controllers
 
             int total_paid = cash_amount + bank_amount;
             string[] ids = invoices_id.Split(',');
-            foreach (string id in ids)
+            for (int i = ids.Length - 1; i >= 0; i--)  //foreach (string id in ids)
             {
                 if (total_paid > 0)
                 {
-                    SaleInvoicesModels saleInvoicesModels = db.SaleInvoices.Where(x => x.Id.ToString() == id).FirstOrDefault();
+                    string id_saleinvoice = ids[i];
+                    SaleInvoicesModels saleInvoicesModels = db.SaleInvoices.Where(x => x.Id.ToString() == id_saleinvoice).FirstOrDefault();
                     int due_inv = saleInvoicesModels.Due;
                     if (total_paid >= due_inv)
                     {
@@ -174,23 +175,28 @@ namespace iSpeak.Controllers
                 List<SaleInvoiceItemsDetails> listDetails = new List<SaleInvoiceItemsDetails>();
                 decimal total_paid = 0;
 
-                var list_PaymentItemsModels = db.PaymentItems.Where(x => x.Payments_Id == paymentsModels.Id).ToList();
+                //var list_PaymentItemsModels = db.PaymentItems.Where(x => x.Payments_Id == paymentsModels.Id).ToList();
+                var list_PaymentItemsModels = (from pi in db.PaymentItems
+                                               join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                               where pi.Payments_Id == paymentsModels.Id
+                                               orderby si.Timestamp ascending
+                                               select new { pi }).ToList();
                 foreach (var item in list_PaymentItemsModels)
                 {
-                    Guid branch_id = db.SaleInvoices.Where(x => x.Id == item.ReferenceId).FirstOrDefault().Branches_Id;
+                    Guid branch_id = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().Branches_Id;
                     branchesModels = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault();
 
                     PaymentItemsDetails paymentItemsDetails = new PaymentItemsDetails();
-                    paymentItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id == item.ReferenceId).FirstOrDefault().No;
-                    paymentItemsDetails.Amount = item.Amount;
-                    paymentItemsDetails.DueBefore = item.DueBefore;
-                    paymentItemsDetails.Payment = (item.DueBefore > item.DueAfter) ? item.DueBefore - item.DueAfter : item.DueAfter - item.DueBefore;
-                    paymentItemsDetails.DueAfter = item.DueAfter;
+                    paymentItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().No;
+                    paymentItemsDetails.Amount = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).Sum(x => x.Amount);
+                    paymentItemsDetails.DueBefore = item.pi.DueBefore;
+                    paymentItemsDetails.Payment = (item.pi.DueBefore > item.pi.DueAfter) ? item.pi.DueBefore - item.pi.DueAfter : item.pi.DueAfter - item.pi.DueBefore;
+                    paymentItemsDetails.DueAfter = item.pi.DueAfter;
                     listItems.Add(paymentItemsDetails);
                     total_paid += paymentItemsDetails.Payment;
 
                     //decimal total = 0;
-                    var list_SaleInvoiceItemsModels = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.ReferenceId).OrderBy(x => x.RowNo).ToList();
+                    var list_SaleInvoiceItemsModels = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.pi.ReferenceId).OrderBy(x => x.RowNo).ToList();
                     foreach (var subitem in list_SaleInvoiceItemsModels)
                     {
                         SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
@@ -198,7 +204,7 @@ namespace iSpeak.Controllers
                         saleInvoiceItemsDetails.Description = subitem.Description;
                         var data_customer = (from si in db.SaleInvoices
                                              join c in db.User on si.Customer_UserAccounts_Id equals c.Id
-                                             where si.Id == item.ReferenceId
+                                             where si.Id == item.pi.ReferenceId
                                              select new { c }).FirstOrDefault();
                         saleInvoiceItemsDetails.Customer = data_customer.c.Firstname + " " + data_customer.c.Middlename + " " + data_customer.c.Lastname;
                         saleInvoiceItemsDetails.Qty = subitem.Qty;
@@ -207,7 +213,7 @@ namespace iSpeak.Controllers
                         saleInvoiceItemsDetails.Tutor = subitem.TutorTravelCost;
                         saleInvoiceItemsDetails.Voucher = (subitem.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == subitem.Vouchers_Id).FirstOrDefault().Amount : 0;
                         saleInvoiceItemsDetails.Discount = subitem.DiscountAmount;
-                        saleInvoiceItemsDetails.Amount = (subitem.Qty * subitem.Price) - subitem.DiscountAmount - saleInvoiceItemsDetails.Voucher;
+                        saleInvoiceItemsDetails.Amount = (subitem.Qty * subitem.Price) + subitem.TravelCost - subitem.DiscountAmount - saleInvoiceItemsDetails.Voucher;
                         listDetails.Add(saleInvoiceItemsDetails);
                         //total += saleInvoiceItemsDetails.Amount;
                     }

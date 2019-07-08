@@ -90,6 +90,17 @@
         <div class="navbar-collapse collapse" id="navbar-navigation">
             <ul class="navbar-nav">
                 <li class="nav-item">
+                    @{
+                        var login_session = Session["Login"] as iSpeak.Models.LoginViewModel;
+                    }
+                    <select id="Branch" name="Branch" class = "navbar-nav-link">
+                        @foreach (SelectListItem option in ViewBag.LoginBranch)
+                        {
+                            <option value="@option.Value" @(option.Value == login_session.Branches_Id.ToString() ? "selected='selected'" : "")>@option.Text</option>
+                        }
+                    </select>
+                </li>
+                <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="navbar-nav-link">
                         <i class="icon-home4 mr-2"></i>
                         Dashboard
@@ -102,7 +113,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="@Url.Action("Index", "Payments")" class="navbar-nav-link">
+                    <a href="@Url.Action("Print", "Payments")" class="navbar-nav-link">
                         <i class="icon-cash3 mr-2"></i>
                         Payment
                     </a>
@@ -158,6 +169,25 @@
         </div>
     </div>
     <!-- /footer -->
+    <!-- Script -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#Branch').change(function () {
+                //change branch session using ajax
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ChangeBranch", "Branches")',
+                    data: { branch_id: $('#Branch').val() },
+                    success: function (data) {
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            });
+        });
+    </script>
+    <!-- /script -->
 
 </body>
 </html>

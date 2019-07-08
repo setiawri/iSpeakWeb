@@ -55,6 +55,13 @@
                             </div>
                             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                             <div class="form-group form-group-feedback form-group-feedback-left">
+                                @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2" })
+                                @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
+                                <div class="form-control-feedback">
+                                    <i class="icon-office text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="form-group form-group-feedback form-group-feedback-left">
                                 <input type="text" name="UserName" class="form-control" placeholder="Username">
                                 @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "text-danger" })
                                 <div class="form-control-feedback">

@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<iSpeak.Models.SaleInvoiceItemsDetails>
 
 @{
-    ViewBag.Root = "Create";
+    ViewBag.Root = "Payment Invoice";
     ViewBag.Title = "Payments";
 }
 
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Index", "Payments")" class="btn btn-sm btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                <a href="@Url.Action("Index", "Sale")" class="btn btn-sm btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
                 <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal_pay">Pay<i class="icon-checkmark3 ml-2"></i></button>
                 <span class="badge badge-flat border-primary text-primary-600"><strong>TOTAL: @ViewBag.Total</strong></span>
                 <span class="badge badge-flat border-danger text-danger-600"><strong>DUE: @ViewBag.Due</strong></span>

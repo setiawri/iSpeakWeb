@@ -49,10 +49,10 @@
                                 <div class="col-lg-6">
                                     <div class="form-group row">
                                         <div class="col-lg-3">
-                                            @Html.Editor("Travel", new { htmlAttributes = new { @class = "form-control", @placeholder = "Travel Cost", @Value = 0 } })
+                                            @Html.Editor("Travel", new { htmlAttributes = new { @class = "form-control", @placeholder = "Travel Cost" } })
                                         </div>
                                         <div class="col-lg-3">
-                                            @Html.Editor("Tutor", new { htmlAttributes = new { @class = "form-control", @placeholder = "Tutor Cost", @Value = 0 } })
+                                            @Html.Editor("Tutor", new { htmlAttributes = new { @class = "form-control", @placeholder = "Tutor Cost" } })
                                         </div>
                                     </div>
                                 </div>
@@ -79,10 +79,10 @@
                                 <div class="col-lg-2">
                                     @Html.Editor("Qty", new { htmlAttributes = new { @class = "form-control", @Value = 1, @placeholder = "Qty" } })
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-2">
                                     @Html.Editor("Disc", new { htmlAttributes = new { @class = "form-control", @Value = 0, @placeholder = "Discount" } })
                                 </div>
-                                <div class="col-lg-5">
+                                <div class="col-lg-6">
                                     @Html.DropDownListFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, "Select Voucher", new { @class = "form-control select2" })
                                 </div>
                                 <div class="col-lg-2">
@@ -323,6 +323,11 @@
                 }); //end ajax
             }
         });*@
+
+        @{ 
+            var session_login = Session["Login"] as iSpeak.Models.LoginViewModel;
+        }
+        $('#Branches_Id').val('@session_login.Branches_Id').trigger('change');
 
         $('#btnAdd').click(function () {
             if ($('#Travel').val() == '') {

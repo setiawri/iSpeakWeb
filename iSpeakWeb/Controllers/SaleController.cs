@@ -62,6 +62,7 @@ namespace iSpeak.Controllers
                             Timestamp = si.Timestamp,
                             Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
                             Amount = si.Amount,
+                            Due = si.Due,
                             Cancelled = si.Cancelled
                         }).ToListAsync();
             return View(await data);
@@ -82,7 +83,22 @@ namespace iSpeak.Controllers
         public ActionResult Create()
         {
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listVoucher = new SelectList(db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList(), "Id", "Code");
+            //ViewBag.listVoucher = new SelectList(db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList(), "Id", "Code");
+
+            var vouchers = db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList();
+            List<object> voucher_list = new List<object>();
+            foreach (var item in vouchers)
+            {
+                voucher_list.Add(new
+                {
+                    Id = item.Id,
+                    Name = (string.IsNullOrEmpty(item.Notes))
+                            ? "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description
+                            : "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description + " (" + item.Notes + ")"
+                });
+            }
+            ViewBag.listVoucher = new SelectList(voucher_list, "Id", "Name");
+
             var customers = (from u in db.User
                             join ur in db.UserRole on u.Id equals ur.UserId
                             join r in db.Role on ur.RoleId equals r.Id
@@ -99,6 +115,7 @@ namespace iSpeak.Controllers
                 });
             }
             ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
+
             var lessons = (from lp in db.LessonPackages
                            join l in db.Languages on lp.Languages_Id equals l.Id
                            join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
@@ -181,7 +198,21 @@ namespace iSpeak.Controllers
             }
 
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listVoucher = new SelectList(db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList(), "Id", "Code");
+
+            var vouchers = db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList();
+            List<object> voucher_list = new List<object>();
+            foreach (var item in vouchers)
+            {
+                voucher_list.Add(new
+                {
+                    Id = item.Id,
+                    Name = (string.IsNullOrEmpty(item.Notes))
+                            ? "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description
+                            : "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description + " (" + item.Notes + ")"
+                });
+            }
+            ViewBag.listVoucher = new SelectList(voucher_list, "Id", "Name");
+
             var customers = (from u in db.User
                              join ur in db.UserRole on u.Id equals ur.UserId
                              join r in db.Role on ur.RoleId equals r.Id
@@ -198,6 +229,7 @@ namespace iSpeak.Controllers
                 });
             }
             ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
+
             var lessons = (from lp in db.LessonPackages
                            join l in db.Languages on lp.Languages_Id equals l.Id
                            join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id

@@ -54,6 +54,9 @@ namespace iSpeak.Models
         [EmailAddress]
         public string Email { get; set; }
 
+        [Display(Name = "Branch")]
+        public Guid Branches_Id { get; set; }
+
         [Required]
         [Display(Name = "Username")]
         public string UserName { get; set; }
