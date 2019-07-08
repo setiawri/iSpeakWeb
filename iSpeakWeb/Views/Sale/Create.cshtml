@@ -127,7 +127,7 @@
                     <div class="form-group row">
                         @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
                         <div class="col-lg-6">
-                            @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2" })
+                            @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2", @disabled = "disabled" })
                         </div>
                         <div class="col-lg-4">
                             @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
@@ -324,7 +324,7 @@
             }
         });*@
 
-        @{ 
+        @{
             var session_login = Session["Login"] as iSpeak.Models.LoginViewModel;
         }
         $('#Branches_Id').val('@session_login.Branches_Id').trigger('change');

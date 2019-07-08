@@ -22,8 +22,32 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success">Create Invoice <i class="icon-plus22 ml-2"></i></a>
-                <button type="button" class="btn btn-sm btn-primary" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
+                <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success mb-1">Create Invoice <i class="icon-plus22 ml-2"></i></a>
+                <button type="button" class="btn btn-sm btn-primary mb-1" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
+                <div class="form-check mb-1" style="float: right">
+                    <label class="form-check-label">
+                        <input type="checkbox" id="chkHide" class="check-styled" data-fouc>
+                        Hide Completed Payment
+                    </label>
+                </div>
+
+                @*<div class="row col-lg-6">
+                    <div class="col-lg-3">
+                        <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success">Create Invoice <i class="icon-plus22 ml-2"></i></a>
+                    </div>
+                    <div class="col-lg-3">
+                        <button type="button" class="btn btn-sm btn-primary" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="checkbox" class="check-styled" data-fouc>
+                                Hide Completed Payment
+                            </label>
+                        </div>
+                    </div>
+                </div>*@
+                
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -70,7 +94,8 @@
                                         }
                                     </td>
                                     <td>
-                                        <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a>
+                                        <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> |
+                                        <a href="#" onclick="View_Log('@item.Id')">Log</a>
                                     </td>
                                 </tr>
                             }
@@ -107,6 +132,26 @@
         }); //end ajax
     }
 
+    function View_Log(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPayment", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Payment Log',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
@@ -131,6 +176,15 @@
         });
 
         $('.check-styled').uniform();
+
+        $('#chkHide').click(function () {
+            if ($(this).prop('checked') == true) {
+                $('input[type=search]').val('Waiting Payment').keyup();
+            }
+            else {
+                $('input[type=search]').val('').keyup();
+            }
+        });
 
         $('#btnCreate').click(function () {
             var ids_selected = '';

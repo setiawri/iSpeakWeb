@@ -1,4 +1,4 @@
-﻿@model IEnumerable<iSpeak.Models.PaymentsModels>
+﻿@model IEnumerable<iSpeak.Models.PaymentsIndexModels>
 
 @{
     ViewBag.Root = "Print Invoices";
@@ -27,6 +27,7 @@
                     <table class="table table-hover datatable">
                         <thead>
                             <tr>
+                                <th>@Html.DisplayNameFor(model => model.Branch)</th>
                                 <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
                                 <th>@Html.DisplayNameFor(model => model.No)</th>
                                 <th>@Html.DisplayNameFor(model => model.CashAmount)</th>
@@ -39,6 +40,7 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Branch)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
                                     <td>@Html.DisplayFor(modelItem => item.No)</td>
                                     <td>@Html.DisplayFor(modelItem => item.CashAmount)</td>
@@ -89,7 +91,7 @@
                 {
                     orderable: false,
                     width: 100,
-                    targets: [5]
+                    targets: [6]
                 }
             ],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
@@ -103,7 +105,7 @@
 
         $('.datatable').DataTable({
             pagingType: 'full_numbers',
-            order: [[0, 'desc']]
+            order: [[1, 'desc']]
         });
 
         $('.check-styled').uniform();

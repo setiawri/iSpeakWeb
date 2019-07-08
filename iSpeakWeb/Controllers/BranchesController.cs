@@ -36,7 +36,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Name,Address,PhoneNumber,Notes,Active")] BranchesModels branchesModels)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Name,Address,PhoneNumber,Notes,InvoiceHeaderText,Active")] BranchesModels branchesModels)
         {
             if (ModelState.IsValid)
             {
@@ -67,7 +67,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Address,PhoneNumber,Notes,Active")] BranchesModels branchesModels)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Address,PhoneNumber,Notes,InvoiceHeaderText,Active")] BranchesModels branchesModels)
         {
             if (ModelState.IsValid)
             {

@@ -25,6 +25,7 @@ namespace iSpeak.Controllers
                                                 <th>Description</th>
                                                 <th>Qty</th>
                                                 <th>Price</th>
+                                                <th>Travel</th>
                                                 <th>Discount</th>
                                                 <th>Voucher</th>
                                                 <th>Subtotal</th>
@@ -34,11 +35,12 @@ namespace iSpeak.Controllers
             foreach (var item in list)
             {
                 decimal voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
-                decimal subtotal = (item.Qty * item.Price) - item.DiscountAmount - voucher;
+                decimal subtotal = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - voucher;
                 message += @"<tr>
                                 <td>" + item.Description + @"</td>
                                 <td>" + item.Qty + @"</td>
                                 <td>" + item.Price.ToString("#,##0") + @"</td>
+                                <td>" + item.TravelCost.ToString("#,##0") + @"</td>
                                 <td>" + item.DiscountAmount.ToString("#,##0") + @"</td>
                                 <td>" + voucher.ToString("#,##0") + @"</td>
                                 <td>" + subtotal.ToString("#,##0") + @"</td>
@@ -51,9 +53,11 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
+            var login_session = Session["Login"] as LoginViewModel;
             var data = (from si in db.SaleInvoices
                         join b in db.Branches on si.Branches_Id equals b.Id
                         join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                        where si.Branches_Id == login_session.Branches_Id
                         select new SaleInvoicesIndexModels
                         {
                             Id = si.Id,

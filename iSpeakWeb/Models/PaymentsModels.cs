@@ -31,4 +31,20 @@ namespace iSpeak.Models
         public bool Confirmed { get; set; }
         public bool IsTransfer { get; set; }
     }
+
+    public class PaymentsIndexModels
+    {
+        public Guid Id { get; set; }
+        public string No { get; set; }
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
+        public DateTime Timestamp { get; set; }
+        [Display(Name = "Cash")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int CashAmount { get; set; }
+        [Display(Name = "Debit")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int DebitAmount { get; set; }
+        public string Notes { get; set; }
+        public string Branch { get; set; }
+    }
 }

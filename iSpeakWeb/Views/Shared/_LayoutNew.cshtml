@@ -179,6 +179,8 @@
                     url: '@Url.Action("ChangeBranch", "Branches")',
                     data: { branch_id: $('#Branch').val() },
                     success: function (data) {
+                        var url = '@Url.Action("Index", "Home")';
+                        window.location.href = url;
                     }, //end success
                     error: function (result) {
                         bootbox.alert("Error " + result);

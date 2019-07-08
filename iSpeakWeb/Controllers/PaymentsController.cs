@@ -165,7 +165,24 @@ namespace iSpeak.Controllers
         {
             if (id == null || id == Guid.Empty)
             {
-                return View(db.Payments.ToList());
+                var login_session = Session["Login"] as LoginViewModel;
+                List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
+                foreach (var item in db.Payments.ToList())
+                {
+                    PaymentsIndexModels pim = new PaymentsIndexModels();
+                    pim.Id = item.Id;
+                    pim.No = item.No;
+                    pim.Timestamp = item.Timestamp;
+                    pim.CashAmount = item.CashAmount;
+                    pim.DebitAmount = item.DebitAmount;
+                    pim.Notes = item.Notes;
+                    Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
+                    Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
+                    pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
+                    if (login_session.Branches_Id == branch_id)
+                        list_pim.Add(pim);
+                }
+                return View(list_pim);
             }
             else
             {

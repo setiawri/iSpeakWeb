@@ -19,6 +19,8 @@ namespace iSpeak.Models
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
         public string Notes { get; set; }
+        [Display(Name = "Invoice Header Text")]
+        public string InvoiceHeaderText { get; set; }
         public bool Active { get; set; }
     }
 }
