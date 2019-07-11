@@ -13,9 +13,9 @@ namespace iSpeak.Models
         [Key]
         public Guid Id { get; set; }
         [Display(Name = "Lesson Package")]
-        public Guid LessonPackages_Id { get; set; }
+        public Guid? LessonPackages_Id { get; set; }
         [Required]
-        [Display(Name = "User")]
+        [Display(Name = "Tutor")]
         public string UserAccounts_Id { get; set; }
         public decimal Rate { get; set; }
         public string Notes { get; set; }
@@ -26,7 +26,7 @@ namespace iSpeak.Models
         public Guid Id { get; set; }
         [Display(Name = "Lesson Package")]
         public string LessonPackages { get; set; }
-        [Display(Name = "User")]
+        [Display(Name = "Tutor")]
         public string UserAccounts { get; set; }
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public decimal Rate { get; set; }

@@ -35,4 +35,10 @@ namespace iSpeak.Models
         public string Notes { get; set; }
         public bool Active { get; set; }
     }
+
+    public class EditUserViewModels
+    {
+        public UserModels User { get; set; }
+        public List<string> RoleId { get; set; }
+    }
 }

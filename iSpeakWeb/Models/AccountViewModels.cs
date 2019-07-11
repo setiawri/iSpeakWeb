@@ -74,7 +74,7 @@ namespace iSpeak.Models
     {
         [Required]
         [Display(Name = "Role")]
-        public string RoleName { get; set; }
+        public string[] RoleName { get; set; }
 
         [Required]
         [Display(Name = "Username")]

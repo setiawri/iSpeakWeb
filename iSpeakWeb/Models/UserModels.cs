@@ -20,6 +20,7 @@ namespace iSpeak.Models
         public string Address { get; set; }
         public string Phone1 { get; set; }
         public string Phone2 { get; set; }
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}", ApplyFormatInEditMode = true)]
         public DateTime Birthday { get; set; }
         public string Notes { get; set; }
         public bool Active { get; set; }

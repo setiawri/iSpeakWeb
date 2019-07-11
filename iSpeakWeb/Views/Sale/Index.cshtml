@@ -26,7 +26,7 @@
                 <button type="button" class="btn btn-sm btn-primary mb-1" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
                 <div class="form-check mb-1" style="float: right">
                     <label class="form-check-label">
-                        <input type="checkbox" id="chkHide" class="check-styled" data-fouc>
+                        <input type="checkbox" id="chkHide" class="check-styled-primary" data-fouc>
                         Hide Completed Payment
                     </label>
                 </div>
@@ -176,6 +176,9 @@
         });
 
         $('.check-styled').uniform();
+        $('.check-styled-primary').uniform({
+            wrapperClass: 'border-primary-600 text-primary-800'
+        });
 
         $('#chkHide').click(function () {
             if ($(this).prop('checked') == true) {

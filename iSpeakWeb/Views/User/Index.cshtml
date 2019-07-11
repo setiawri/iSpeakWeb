@@ -1,4 +1,4 @@
-﻿@model IEnumerable<iSpeak.Models.UserViewModels>
+﻿@model IEnumerable<iSpeak.Models.UserModels>
 
 @{
     ViewBag.Root = "User Accounts";
@@ -28,10 +28,9 @@
                     <table class="table table-hover datatable">
                         <thead>
                             <tr>
-                                <th>@Html.DisplayNameFor(model => model.Fullname)</th>
+                                <th>Fullname</th>
                                 <th>@Html.DisplayNameFor(model => model.UserName)</th>
                                 <th>@Html.DisplayNameFor(model => model.Email)</th>
-                                <th>@Html.DisplayNameFor(model => model.Role)</th>
                                 <th>@Html.DisplayNameFor(model => model.Birthday)</th>
                                 <th>@Html.DisplayNameFor(model => model.Active)</th>
                                 <th>Action</th>
@@ -41,10 +40,9 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
+                                    <td>@item.Firstname @item.Middlename @item.Lastname</td>
                                     <td>@Html.DisplayFor(modelItem => item.UserName)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Role)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
                                     <td>
                                         @if (item.Active == true)
@@ -81,7 +79,7 @@
             columnDefs: [{
                 orderable: false,
                 width: 100,
-                targets: [6]
+                targets: [5]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {

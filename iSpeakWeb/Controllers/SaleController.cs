@@ -123,6 +123,7 @@ namespace iSpeak.Controllers
             var lessons = (from lp in db.LessonPackages
                            join l in db.Languages on lp.Languages_Id equals l.Id
                            join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
+                           where lp.Active == true
                            select new LessonPackagesViewModels
                            {
                                Id = lp.Id,
@@ -158,10 +159,11 @@ namespace iSpeak.Controllers
                 int lastHex_int = int.Parse(
                     string.IsNullOrEmpty(lastHex_string) ? 0.ToString("X5") : lastHex_string,
                     System.Globalization.NumberStyles.HexNumber);
+                var login_session = Session["Login"] as LoginViewModel;
 
                 SaleInvoicesModels saleInvoicesModels = new SaleInvoicesModels();
                 saleInvoicesModels.Id = Guid.NewGuid();
-                saleInvoicesModels.Branches_Id = saleInvoicesViewModels.Branches_Id; ;
+                saleInvoicesModels.Branches_Id = login_session.Branches_Id;
                 saleInvoicesModels.No = (lastHex_int + 1).ToString("X5");
                 saleInvoicesModels.Timestamp = DateTime.Now;
                 saleInvoicesModels.Customer_UserAccounts_Id = saleInvoicesViewModels.Customers_Id.ToString();
@@ -237,6 +239,7 @@ namespace iSpeak.Controllers
             var lessons = (from lp in db.LessonPackages
                            join l in db.Languages on lp.Languages_Id equals l.Id
                            join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
+                           where lp.Active == true
                            select new LessonPackagesViewModels
                            {
                                Id = lp.Id,

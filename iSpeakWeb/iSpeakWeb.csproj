@@ -176,6 +176,7 @@
     <Compile Include="Controllers\HourlyRatesController.cs" />
     <Compile Include="Controllers\LanguagesController.cs" />
     <Compile Include="Controllers\LessonPackagesController.cs" />
+    <Compile Include="Controllers\LessonSessionsController.cs" />
     <Compile Include="Controllers\LessonTypesController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PaymentsController.cs" />
@@ -208,6 +209,8 @@
     <Compile Include="Models\iSpeakContext.cs" />
     <Compile Include="Models\LanguagesModels.cs" />
     <Compile Include="Models\LessonPackagesModels.cs" />
+    <Compile Include="Models\LessonSessionsModels.cs" />
+    <Compile Include="Models\LessonSessionsViewModels.cs" />
     <Compile Include="Models\LessonTypesModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
@@ -363,6 +366,8 @@
     <Content Include="Views\Payments\Create.cshtml" />
     <Content Include="Views\Payments\Print.cshtml" />
     <Content Include="Views\Payments\Printed.cshtml" />
+    <Content Include="Views\LessonSessions\Index.cshtml" />
+    <Content Include="Views\LessonSessions\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
