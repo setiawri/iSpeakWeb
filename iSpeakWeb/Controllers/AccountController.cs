@@ -457,7 +457,7 @@ namespace iSpeak.Controllers
         {
             Session["Login"] = null;
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "LandingPage");
         }
 
         //
