@@ -323,6 +323,7 @@
     <Content Include="assets\css\landingpage\fonts\icomoon\fonts\icomoon.ttf" />
     <Content Include="assets\css\landingpage\fonts\icomoon\fonts\icomoon.woff" />
     <Content Include="assets\css\landingpage\fonts\icomoon\selection.json" />
+    <None Include="Properties\PublishProfiles\iSpeakWebPublished.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
