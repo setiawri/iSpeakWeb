@@ -264,6 +264,8 @@
     <Content Include="assets\css\print\invoice-print.css" />
     <Content Include="assets\images\landing_page.jpg" />
     <Content Include="assets\images\logo.png" />
+    <Content Include="assets\images\logo_light.png" />
+    <Content Include="assets\images\user.png" />
     <Content Include="assets\js\app.js" />
     <Content Include="assets\js\bootstrap-datetimepicker.min.js" />
     <Content Include="assets\js\landingpage\aos.js" />
