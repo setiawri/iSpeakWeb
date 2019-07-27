@@ -42,10 +42,10 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group row">
-                                    @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-3" })
                                     <div class="col-lg-9">
-                                        @Html.Editor("User", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
-                                        @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                                        @Html.DropDownListFor(m => m.Branches_Id, ViewBag.listBranch as SelectList, new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
                             </div>
@@ -70,16 +70,24 @@
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group row">
-                                    @Html.LabelFor(model => model.Birthday, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                                    <label class="col-form-label col-lg-3">Birthday / Username</label>
                                     <div class="col-lg-9">
-                                        @*@Html.EditorFor(model => model.Birthday, new { htmlAttributes = new { @class = "form-control" } })*@
-                                        <div class="input-group">
-                                            @Html.EditorFor(model => model.Birthday, new { htmlAttributes = new { @class = "form-control tanggal" } })
-                                            <span class="input-group-append">
-                                                <span class="input-group-text"><i class="icon-calendar"></i></span>
-                                            </span>
+                                        <div class="form-group row">
+                                            <div class="col-lg-6">
+                                                @*@Html.EditorFor(model => model.Birthday, new { htmlAttributes = new { @class = "form-control" } })*@
+                                                <div class="input-group">
+                                                    @Html.EditorFor(model => model.Birthday, new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                                    <span class="input-group-append">
+                                                        <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                                    </span>
+                                                </div>
+                                                @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "text-danger" })
+                                            </div>
+                                            <div class="col-lg-6">
+                                                @Html.Editor("User", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+                                            </div>
                                         </div>
-                                        @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
                             </div>

@@ -189,6 +189,7 @@ namespace iSpeak.Controllers
                 list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
             }
             ViewBag.Roles = list;
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View();
         }
 
@@ -203,8 +204,8 @@ namespace iSpeak.Controllers
             {
                 var user = new ApplicationUser
                 {
-                    UserName = model.UserName, Email = model.Email, Firstname = model.Firstname, Middlename = model.Middlename, Lastname = model.Lastname
-                    , Address = model.Address, Phone1 = model.Phone1, Phone2 = model.Phone2, Birthday = model.Birthday, Notes = model.Notes, Active = model.Active
+                    UserName = model.UserName, Email = model.Email, Firstname = model.Firstname, Middlename = model.Middlename, Lastname = model.Lastname, Address = model.Address,
+                    Phone1 = model.Phone1, Phone2 = model.Phone2, Birthday = model.Birthday, Notes = model.Notes, Active = model.Active, Branches_Id = model.Branches_Id
                 };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -233,6 +234,7 @@ namespace iSpeak.Controllers
                 list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
             }
             ViewBag.Roles = list;
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(model);
         }
 

@@ -35,6 +35,9 @@ namespace iSpeak.Models
 
         public bool Active { get; set; }
 
+        [Display(Name = "Branch")]
+        public Guid Branches_Id { get; set; }
+
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType

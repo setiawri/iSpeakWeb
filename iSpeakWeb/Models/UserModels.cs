@@ -24,6 +24,8 @@ namespace iSpeak.Models
         public DateTime Birthday { get; set; }
         public string Notes { get; set; }
         public bool Active { get; set; }
+        [Display(Name = "Branch")]
+        public Guid Branches_Id { get; set; }
     }
 
     [Table("AspNetRoles")]

@@ -104,6 +104,8 @@ namespace iSpeak.Models
 
         public bool Active { get; set; }
 
+        public Guid Branches_Id { get; set; }
+
         //[Required]
         [EmailAddress]
         [Display(Name = "Email")]
