@@ -63,6 +63,7 @@ namespace iSpeak.Controllers
             editUserViewModels.User = db.User.Where(x => x.Id == id).FirstOrDefault();
             editUserViewModels.RoleId = db.UserRole.Where(x => x.UserId == id).Select(x => x.RoleId).ToList();
             ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(editUserViewModels);
         }
 
@@ -80,7 +81,8 @@ namespace iSpeak.Controllers
                     Phone2 = editUserViewModels.User.Phone2,
                     Address = editUserViewModels.User.Address,
                     Notes = editUserViewModels.User.Notes,
-                    Active = editUserViewModels.User.Active
+                    Active = editUserViewModels.User.Active,
+                    Branches_Id = editUserViewModels.User.Branches_Id
                 };
                 //var userRole = new UserRoleModels() { UserId = userViewModels.Id, RoleId = userViewModels.RoleId };
 
@@ -93,6 +95,7 @@ namespace iSpeak.Controllers
                     database.Entry(user).Property(x => x.Address).IsModified = true;
                     database.Entry(user).Property(x => x.Notes).IsModified = true;
                     database.Entry(user).Property(x => x.Active).IsModified = true;
+                    database.Entry(user).Property(x => x.Branches_Id).IsModified = true;
 
                     int deleteUserRole = database.Database.ExecuteSqlCommand("DELETE FROM AspNetUserRoles WHERE UserId='" + editUserViewModels.User.Id + "'");
 
@@ -125,6 +128,7 @@ namespace iSpeak.Controllers
             }
 
             ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(editUserViewModels);
         }
     }
