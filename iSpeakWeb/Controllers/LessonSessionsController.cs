@@ -22,7 +22,7 @@ namespace iSpeak.Controllers
             List<object> newList = new List<object>();
             var data = (from si in db.SaleInvoices
                         join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                        where si.Customer_UserAccounts_Id == student_id && sii.SessionHours > 0
+                        where si.Due == 0 && si.Customer_UserAccounts_Id == student_id && sii.SessionHours > 0
                         orderby sii.Description ascending
                         select new { sii }).ToList();
             foreach (var item in data)

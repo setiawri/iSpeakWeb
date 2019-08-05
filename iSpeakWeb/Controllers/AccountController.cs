@@ -120,7 +120,7 @@ namespace iSpeak.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
-                            Session["Login"] = model;
+                            //Session["Login"] = model;
                             return RedirectToLocal(returnUrl);
                         case SignInStatus.LockedOut:
                             return View("Lockout");
@@ -457,7 +457,7 @@ namespace iSpeak.Controllers
         //[ValidateAntiForgeryToken]
         public ActionResult LogOff()
         {
-            Session["Login"] = null;
+            //Session["Login"] = null;
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             return RedirectToAction("Index", "LandingPage");
         }

@@ -27,7 +27,7 @@
                 <div class="form-check mb-1" style="float: right">
                     <label class="form-check-label">
                         <input type="checkbox" id="chkHide" class="check-styled-primary" data-fouc>
-                        Hide Completed Payment
+                        Show Completed Payment
                     </label>
                 </div>
 
@@ -172,7 +172,10 @@
 
         $('.datatable').DataTable({
             pagingType: 'full_numbers',
-            order: [[3, 'desc'], [2, 'desc']]
+            order: [[3, 'desc'], [2, 'desc']],
+            search: {
+                search: 'Waiting Payment'
+            }
         });
 
         $('.check-styled').uniform();
@@ -182,10 +185,10 @@
 
         $('#chkHide').click(function () {
             if ($(this).prop('checked') == true) {
-                $('input[type=search]').val('Waiting Payment').keyup();
+                $('input[type=search]').val('Completed').keyup();
             }
             else {
-                $('input[type=search]').val('').keyup();
+                $('input[type=search]').val('Waiting Payment').keyup();
             }
         });
 

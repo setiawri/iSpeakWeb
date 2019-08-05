@@ -15,14 +15,14 @@ namespace iSpeak.Controllers
     {
         private iSpeakContext db = new iSpeakContext();
 
-        public JsonResult ChangeBranch(Guid branch_id)
-        {
-            var session_login = Session["Login"] as LoginViewModel;
-            session_login.Branches_Id = branch_id;
-            string status = "200";
+        //public JsonResult ChangeBranch(Guid branch_id)
+        //{
+        //    var session_login = Session["Login"] as LoginViewModel;
+        //    session_login.Branches_Id = branch_id;
+        //    string status = "200";
 
-            return Json(new { status = status }, JsonRequestBehavior.AllowGet);
-        }
+        //    return Json(new { status }, JsonRequestBehavior.AllowGet);
+        //}
 
         public async Task<ActionResult> Index()
         {

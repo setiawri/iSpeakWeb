@@ -89,7 +89,7 @@
         </div>
         <div class="navbar-collapse collapse" id="navbar-navigation">
             <ul class="navbar-nav">
-                <li class="nav-item">
+                @*<li class="nav-item">
                     @{
                         var login_session = Session["Login"] as iSpeak.Models.LoginViewModel;
                     }
@@ -99,7 +99,7 @@
                             <option value="@option.Value" @(option.Value == login_session.Branches_Id.ToString() ? "selected='selected'" : "")>@option.Text</option>
                         }
                     </select>
-                </li>
+                </li>*@
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="navbar-nav-link">
                         <i class="icon-home4 mr-2"></i>
@@ -178,7 +178,7 @@
     <!-- Script -->
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#Branch').change(function () {
+            @*$('#Branch').change(function () {
                 //change branch session using ajax
                 $.ajax({
                     type: "POST",
@@ -192,7 +192,7 @@
                         bootbox.alert("Error " + result);
                     } //end error
                 }); //end ajax
-            });
+            });*@
         });
     </script>
     <!-- /script -->

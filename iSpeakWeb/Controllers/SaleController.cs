@@ -53,11 +53,11 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var login_session = Session["Login"] as LoginViewModel;
+            //var login_session = Session["Login"] as LoginViewModel;
             var data = (from si in db.SaleInvoices
                         join b in db.Branches on si.Branches_Id equals b.Id
                         join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                        where si.Branches_Id == login_session.Branches_Id
+                        where si.Branches_Id == u.Branches_Id //login_session.Branches_Id
                         select new SaleInvoicesIndexModels
                         {
                             Id = si.Id,
@@ -159,11 +159,11 @@ namespace iSpeak.Controllers
                 int lastHex_int = int.Parse(
                     string.IsNullOrEmpty(lastHex_string) ? 0.ToString("X5") : lastHex_string,
                     System.Globalization.NumberStyles.HexNumber);
-                var login_session = Session["Login"] as LoginViewModel;
+                //var login_session = Session["Login"] as LoginViewModel;
 
                 SaleInvoicesModels saleInvoicesModels = new SaleInvoicesModels();
                 saleInvoicesModels.Id = Guid.NewGuid();
-                saleInvoicesModels.Branches_Id = login_session.Branches_Id;
+                saleInvoicesModels.Branches_Id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id; //login_session.Branches_Id;
                 saleInvoicesModels.No = (lastHex_int + 1).ToString("X5");
                 saleInvoicesModels.Timestamp = DateTime.Now;
                 saleInvoicesModels.Customer_UserAccounts_Id = saleInvoicesViewModels.Customers_Id.ToString();
