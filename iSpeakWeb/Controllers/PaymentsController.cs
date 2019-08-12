@@ -57,7 +57,7 @@ namespace iSpeak.Controllers
             foreach (var item in list)
             {
                 message += @"<tr>
-                                <td>" + item.si.No + @"</td>
+                                <td>" + item.p.No + @"</td>
                                 <td>" + item.p.Timestamp.ToString("yyyy/MM/dd HH:mm") + @"</td>
                                 <td>" + item.pi.DueBefore.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.Amount.ToString("#,##0") + @"</td>

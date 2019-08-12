@@ -324,10 +324,12 @@
             }
         });*@
 
-        @{
+        @*@{
             var session_login = Session["Login"] as iSpeak.Models.LoginViewModel;
         }
-        $('#Branches_Id').val('@session_login.Branches_Id').trigger('change');
+        $('#Branches_Id').val('@session_login.Branches_Id').trigger('change');*@
+
+        $('#Branches_Id').val($('#Branch').val()).trigger('change');
 
         $('#btnAdd').click(function () {
             if ($('#Travel').val() == '') {

@@ -54,10 +54,11 @@ namespace iSpeak.Controllers
         public async Task<ActionResult> Index()
         {
             //var login_session = Session["Login"] as LoginViewModel;
+            var user = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
             var data = (from si in db.SaleInvoices
                         join b in db.Branches on si.Branches_Id equals b.Id
                         join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                        where si.Branches_Id == u.Branches_Id //login_session.Branches_Id
+                        where si.Branches_Id == user.Branches_Id //login_session.Branches_Id
                         select new SaleInvoicesIndexModels
                         {
                             Id = si.Id,

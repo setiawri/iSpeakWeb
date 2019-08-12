@@ -16,10 +16,24 @@ namespace iSpeak.Common
             {
                 throw new ArgumentNullException("identity");
             }
-            var ci = identity as ClaimsIdentity;
+            ClaimsIdentity ci = identity as ClaimsIdentity;
             if (ci != null)
             {
                 return ci.FindFirstValue("Fullname");
+            }
+            return null;
+        }
+
+        public static string GetBranches_Id(this IIdentity identity)
+        {
+            if (identity == null)
+            {
+                throw new ArgumentNullException("identity");
+            }
+            ClaimsIdentity ci = identity as ClaimsIdentity;
+            if (ci != null)
+            {
+                return ci.FindFirstValue("Branches_Id");
             }
             return null;
         }

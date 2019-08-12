@@ -89,17 +89,17 @@
         </div>
         <div class="navbar-collapse collapse" id="navbar-navigation">
             <ul class="navbar-nav">
-                @*<li class="nav-item">
-                    @{
+                <li class="nav-item">
+                    @*@{
                         var login_session = Session["Login"] as iSpeak.Models.LoginViewModel;
-                    }
+                    }*@
                     <select id="Branch" name="Branch" class = "navbar-nav-link">
                         @foreach (SelectListItem option in ViewBag.LoginBranch)
                         {
-                            <option value="@option.Value" @(option.Value == login_session.Branches_Id.ToString() ? "selected='selected'" : "")>@option.Text</option>
+                            <option value="@option.Value" @(option.Value == User.Identity.GetBranches_Id() ? "selected='selected'" : "")>@option.Text</option>
                         }
                     </select>
-                </li>*@
+                </li>
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="navbar-nav-link">
                         <i class="icon-home4 mr-2"></i>
@@ -178,21 +178,26 @@
     <!-- Script -->
     <script type="text/javascript">
         $(document).ready(function () {
-            @*$('#Branch').change(function () {
-                //change branch session using ajax
+            $('#Branch').change(function () {
+                
                 $.ajax({
                     type: "POST",
                     url: '@Url.Action("ChangeBranch", "Branches")',
                     data: { branch_id: $('#Branch').val() },
                     success: function (data) {
-                        var url = '@Url.Action("Index", "Home")';
-                        window.location.href = url;
+                        console.log(data);
+                        if (data.status == '200') {
+                            var url = '@Url.Action("Index", "Home")';
+                            window.location.href = url;
+                            $('#Branch').val($('#Branch').val()).trigger('change');
+                        }
                     }, //end success
                     error: function (result) {
                         bootbox.alert("Error " + result);
                     } //end error
                 }); //end ajax
-            });*@
+
+            });
         });
     </script>
     <!-- /script -->

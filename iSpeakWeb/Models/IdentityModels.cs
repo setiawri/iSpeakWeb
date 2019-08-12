@@ -44,6 +44,7 @@ namespace iSpeak.Models
             var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
             // Add custom user claims here
             userIdentity.AddClaim(new Claim("Fullname", Firstname + " " + Middlename + " " + Lastname));
+            userIdentity.AddClaim(new Claim("Branches_Id", Branches_Id.ToString()));
             return userIdentity;
         }
     }

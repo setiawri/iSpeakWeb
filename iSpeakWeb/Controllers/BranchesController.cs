@@ -1,4 +1,5 @@
 ﻿using iSpeak.Models;
+using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -14,15 +15,57 @@ namespace iSpeak.Controllers
     public class BranchesController : Controller
     {
         private iSpeakContext db = new iSpeakContext();
+        private ApplicationSignInManager _signInManager;
+        private ApplicationUserManager _userManager;
 
-        //public JsonResult ChangeBranch(Guid branch_id)
-        //{
-        //    var session_login = Session["Login"] as LoginViewModel;
-        //    session_login.Branches_Id = branch_id;
-        //    string status = "200";
+        public BranchesController()
+        {
+        }
 
-        //    return Json(new { status }, JsonRequestBehavior.AllowGet);
-        //}
+        public BranchesController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
+        }
+
+        public ApplicationSignInManager SignInManager
+        {
+            get
+            {
+                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            private set
+            {
+                _signInManager = value;
+            }
+        }
+
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
+        }
+
+        public async Task<JsonResult> ChangeBranch(Guid branch_id)
+        {
+            //var session_login = Session["Login"] as LoginViewModel;
+            //session_login.Branches_Id = branch_id;
+            
+            var user = await UserManager.FindByIdAsync(db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id);
+            user.Branches_Id = branch_id;
+            await UserManager.UpdateAsync(user); //update Branches_Id user
+            await SignInManager.SignInAsync(user, false, false); //re-sign in to refresh cookie/claims in identity
+
+            string status = "200";
+
+            return Json(new { status }, JsonRequestBehavior.AllowGet);
+        }
 
         public async Task<ActionResult> Index()
         {
