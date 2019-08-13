@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class RoleController : Controller
     {
+        private iSpeakContext db = new iSpeakContext();
         private ApplicationRoleManager _roleManager;
 
         public RoleController()
@@ -38,17 +40,29 @@ namespace iSpeak.Controllers
         // GET: Role
         public ActionResult Index()
         {
-            List<RoleViewModels> list = new List<RoleViewModels>();
-            foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                list.Add(new RoleViewModels(role));
+                List<RoleViewModels> list = new List<RoleViewModels>();
+                foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+                {
+                    list.Add(new RoleViewModels(role));
+                }
+                return View(list);
             }
-            return View(list);
         }
 
         public ActionResult Create()
         {
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View();
+            }
         }
 
         [HttpPost]
@@ -61,8 +75,14 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Edit(string id)
         {
-            var role = await RoleManager.FindByIdAsync(id);
-            return View(new RoleViewModels(role));
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var role = await RoleManager.FindByIdAsync(id);
+                return View(new RoleViewModels(role));
+            }
         }
 
         [HttpPost]
@@ -75,8 +95,14 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Delete(string id)
         {
-            var role = await RoleManager.FindByIdAsync(id);
-            return View(new RoleViewModels(role));
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var role = await RoleManager.FindByIdAsync(id);
+                return View(new RoleViewModels(role));
+            }
         }
 
         [HttpPost, ActionName("Delete")]
@@ -86,6 +112,115 @@ namespace iSpeak.Controllers
             var role = await RoleManager.FindByIdAsync(id);
             await RoleManager.DeleteAsync(role);
             return RedirectToAction("Index");
+        }
+
+        public ActionResult Manage(string id)
+        {
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                ViewBag.Id = id;
+                ViewBag.RoleName = db.Role.Where(x => x.Id == id).FirstOrDefault().Name;
+
+                return View();
+            }
+        }
+
+        public JsonResult GetAccessMenu(string id)
+        {
+            var menus = (from m in db.MasterMenu
+                         join a in db.Access
+                             .Join(db.Role, x => x.RoleId, y => y.Id, (x, y) => new { x.WebMenuAccess, RoleName = y.Name, RoleId = y.Id })
+                             .Where(x => x.RoleId == id)
+                         on m.WebMenuAccess equals a.WebMenuAccess into joined
+                         from access in joined.DefaultIfEmpty()
+                         orderby m.ParentOrder, m.MenuOrder
+                         select new AccessViewModels
+                         {
+                             MenuOrder = m.MenuOrder,
+                             ParentMenu = m.ParentMenu,
+                             MenuName = m.MenuName,
+                             WebMenuAccess = m.WebMenuAccess.ToUpper(),
+                             RoleName = access.RoleName ?? string.Empty
+                         }).ToList();
+
+            string content = ""; int row = 1;
+            foreach (var menu in menus)
+            {
+                string action = string.IsNullOrEmpty(menu.RoleName)
+                    ? "<a href='#'><span class='badge badge-dark d-block' onclick='ActionMenu(\"" + menu.WebMenuAccess + "\",\"" + id + "\",\"enable\")'>Disabled</span></a>"
+                    : "<a href='#'><span class='badge badge-success d-block' onclick='ActionMenu(\"" + menu.WebMenuAccess + "\",\"" + id + "\",\"disabled\")'>Enabled</span></a>";
+
+                content += @"<tr>
+                                <td>" + row + @"</td>
+                                <td>" + menu.ParentMenu + @"</td>
+                                <td>" + menu.MenuName + @"</td>
+                                <td>" + action + @"</td>
+                            </tr>";
+                row++;
+            }
+
+            return Json(new { status = "200", content }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SingleAccess(string WebMenuAccess, string IdRole, string Action)
+        {
+            if (Action.ToLower() == "enable")
+            {
+                AccessModels am = new AccessModels
+                {
+                    Id = Guid.NewGuid(),
+                    RoleId = IdRole,
+                    WebMenuAccess = WebMenuAccess.ToLower()
+                };
+                db.Access.Add(am);
+            }
+            else
+            {
+                AccessModels am = db.Access.Where(x => x.RoleId == IdRole && x.WebMenuAccess == WebMenuAccess).FirstOrDefault();
+                db.Access.Remove(am);
+            }
+            db.SaveChanges();
+
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult BulkAccess(string IdRole, string ParentMenu, string Action)
+        {
+            var menus = (ParentMenu.ToLower() == "all") ? db.MasterMenu.ToList()
+                : db.MasterMenu.Where(x => x.ParentMenu == ParentMenu).ToList();
+
+            if (Action.ToLower() == "enable")
+            {
+                foreach (var menu in menus)
+                {
+                    var access_role = db.Access.AsNoTracking().Where(x => x.RoleId == IdRole && x.WebMenuAccess == menu.WebMenuAccess).FirstOrDefault();
+                    if (access_role == null)
+                    {
+                        AccessModels am = new AccessModels
+                        {
+                            Id = Guid.NewGuid(),
+                            RoleId = IdRole,
+                            WebMenuAccess = menu.WebMenuAccess
+                        };
+                        db.Access.Add(am);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var menu in menus)
+                {
+                    AccessModels am = db.Access.Where(x => x.RoleId == IdRole && x.WebMenuAccess == menu.WebMenuAccess).FirstOrDefault();
+                    if (am != null)
+                        db.Access.Remove(am);
+                }
+            }
+            db.SaveChanges();
+
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace iSpeak.Models
 {
     public class iSpeakContext : DbContext
     {
+        public DbSet<MasterMenuModels> MasterMenu { get; set; }
+        public DbSet<AccessModels> Access { get; set; }
         public DbSet<UserModels> User { get; set; }
         public DbSet<RoleModels> Role { get; set; }
         public DbSet<UserRoleModels> UserRole { get; set; }

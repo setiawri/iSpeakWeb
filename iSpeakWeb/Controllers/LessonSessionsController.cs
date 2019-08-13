@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -106,58 +107,70 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var data = await (from ls in db.LessonSessions
-                              join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
-                              join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                              join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                              select new LessonSessionsViewModels
-                              {
-                                  Id = ls.Id,
-                                  Timestamp = ls.Timestamp,
-                                  Lesson = lp.Name,
-                                  Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                                  SessionHours = ls.SessionHours,
-                                  HourlyRates_Rate = ls.HourlyRates_Rate,
-                                  TravelCost = ls.TravelCost,
-                                  TutorTravelCost = ls.TutorTravelCost,
-                                  Deleted = ls.Deleted
-                              }).ToListAsync();
-            return View(data);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var data = await (from ls in db.LessonSessions
+                                  join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                                  join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                                  join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                                  select new LessonSessionsViewModels
+                                  {
+                                      Id = ls.Id,
+                                      Timestamp = ls.Timestamp,
+                                      Lesson = lp.Name,
+                                      Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                      SessionHours = ls.SessionHours,
+                                      HourlyRates_Rate = ls.HourlyRates_Rate,
+                                      TravelCost = ls.TravelCost,
+                                      TutorTravelCost = ls.TutorTravelCost,
+                                      Deleted = ls.Deleted
+                                  }).ToListAsync();
+                return View(data);
+            }
         }
 
         public ActionResult Create()
         {
-            var users = (from u in db.User
-                         join ur in db.UserRole on u.Id equals ur.UserId
-                         join r in db.Role on ur.RoleId equals r.Id
-                         where r.Name == "Tutor" || r.Name == "Student"
-                         orderby u.Firstname
-                         select new { u, r }).ToList();
-            List<object> tutor_list = new List<object>();
-            List<object> student_list = new List<object>();
-            foreach (var item in users)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                if (item.r.Name == "Tutor")
+                var users = (from u in db.User
+                             join ur in db.UserRole on u.Id equals ur.UserId
+                             join r in db.Role on ur.RoleId equals r.Id
+                             where r.Name == "Tutor" || r.Name == "Student"
+                             orderby u.Firstname
+                             select new { u, r }).ToList();
+                List<object> tutor_list = new List<object>();
+                List<object> student_list = new List<object>();
+                foreach (var item in users)
                 {
-                    tutor_list.Add(new
+                    if (item.r.Name == "Tutor")
                     {
-                        Id = item.u.Id,
-                        Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
-                    });
-                }
-                else
-                {
-                    student_list.Add(new
+                        tutor_list.Add(new
+                        {
+                            Id = item.u.Id,
+                            Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
+                        });
+                    }
+                    else
                     {
-                        Id = item.u.Id,
-                        Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
-                    });
+                        student_list.Add(new
+                        {
+                            Id = item.u.Id,
+                            Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
+                        });
+                    }
                 }
-            }
-            ViewBag.listTutor = new SelectList(tutor_list, "Id", "Name");
-            ViewBag.listStudent = new SelectList(student_list, "Id", "Name");
+                ViewBag.listTutor = new SelectList(tutor_list, "Id", "Name");
+                ViewBag.listStudent = new SelectList(student_list, "Id", "Name");
 
-            return View();
+                return View();
+            }
         }
 
         [HttpPost]

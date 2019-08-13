@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -53,24 +54,30 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            //var login_session = Session["Login"] as LoginViewModel;
-            var user = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            var data = (from si in db.SaleInvoices
-                        join b in db.Branches on si.Branches_Id equals b.Id
-                        join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                        where si.Branches_Id == user.Branches_Id //login_session.Branches_Id
-                        select new SaleInvoicesIndexModels
-                        {
-                            Id = si.Id,
-                            Branches = b.Name,
-                            No = si.No,
-                            Timestamp = si.Timestamp,
-                            Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                            Amount = si.Amount,
-                            Due = si.Due,
-                            Cancelled = si.Cancelled
-                        }).ToListAsync();
-            return View(await data);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                //var login_session = Session["Login"] as LoginViewModel;
+                var user = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+                var data = (from si in db.SaleInvoices
+                            join b in db.Branches on si.Branches_Id equals b.Id
+                            join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                            where si.Branches_Id == user.Branches_Id //login_session.Branches_Id
+                            select new SaleInvoicesIndexModels
+                            {
+                                Id = si.Id,
+                                Branches = b.Name,
+                                No = si.No,
+                                Timestamp = si.Timestamp,
+                                Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                Amount = si.Amount,
+                                Due = si.Due,
+                                Cancelled = si.Cancelled
+                            }).ToListAsync();
+                return View(await data);
+            }
         }
 
         public JsonResult GetItemTotal(int qty, Guid lesson_package_id, int travel, decimal disc, string voucher_id)
@@ -87,67 +94,73 @@ namespace iSpeak.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            //ViewBag.listVoucher = new SelectList(db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList(), "Id", "Code");
-
-            var vouchers = db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList();
-            List<object> voucher_list = new List<object>();
-            foreach (var item in vouchers)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                voucher_list.Add(new
-                {
-                    Id = item.Id,
-                    Name = (string.IsNullOrEmpty(item.Notes))
-                            ? "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description
-                            : "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description + " (" + item.Notes + ")"
-                });
-            }
-            ViewBag.listVoucher = new SelectList(voucher_list, "Id", "Name");
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                //ViewBag.listVoucher = new SelectList(db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList(), "Id", "Code");
 
-            var customers = (from u in db.User
-                            join ur in db.UserRole on u.Id equals ur.UserId
-                            join r in db.Role on ur.RoleId equals r.Id
-                            where r.Name == "Student"
-                            orderby u.Firstname
-                            select new { u }).ToList();
-            List<object> customer_list = new List<object>();
-            foreach (var item in customers)
-            {
-                customer_list.Add(new
+                var vouchers = db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList();
+                List<object> voucher_list = new List<object>();
+                foreach (var item in vouchers)
                 {
-                    Id = item.u.Id,
-                    Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
-                });
-            }
-            ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
+                    voucher_list.Add(new
+                    {
+                        Id = item.Id,
+                        Name = (string.IsNullOrEmpty(item.Notes))
+                                ? "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description
+                                : "[" + item.Code + ": " + string.Format("{0:N2}", item.Amount) + "] " + item.Description + " (" + item.Notes + ")"
+                    });
+                }
+                ViewBag.listVoucher = new SelectList(voucher_list, "Id", "Name");
 
-            var lessons = (from lp in db.LessonPackages
-                           join l in db.Languages on lp.Languages_Id equals l.Id
-                           join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
-                           where lp.Active == true
-                           select new LessonPackagesViewModels
-                           {
-                               Id = lp.Id,
-                               Name = lp.Name,
-                               Languages = l.Name,
-                               LessonTypes = lt.Name,
-                               SessionHours = lp.SessionHours,
-                               ExpirationDay = lp.ExpirationDay,
-                               Price = lp.Price,
-                               Active = lp.Active
-                           }).ToList();
-            List<object> lesson_list = new List<object>();
-            foreach (var item in lessons)
-            {
-                lesson_list.Add(new
+                var customers = (from u in db.User
+                                 join ur in db.UserRole on u.Id equals ur.UserId
+                                 join r in db.Role on ur.RoleId equals r.Id
+                                 where r.Name == "Student"
+                                 orderby u.Firstname
+                                 select new { u }).ToList();
+                List<object> customer_list = new List<object>();
+                foreach (var item in customers)
                 {
-                    Id = item.Id,
-                    Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.ExpirationDay + " days, " + item.Price.ToString("#,##0") + ")"
-                });
-            }
-            ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
+                    customer_list.Add(new
+                    {
+                        Id = item.u.Id,
+                        Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
+                    });
+                }
+                ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
 
-            return View();
+                var lessons = (from lp in db.LessonPackages
+                               join l in db.Languages on lp.Languages_Id equals l.Id
+                               join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
+                               where lp.Active == true
+                               select new LessonPackagesViewModels
+                               {
+                                   Id = lp.Id,
+                                   Name = lp.Name,
+                                   Languages = l.Name,
+                                   LessonTypes = lt.Name,
+                                   SessionHours = lp.SessionHours,
+                                   ExpirationDay = lp.ExpirationDay,
+                                   Price = lp.Price,
+                                   Active = lp.Active
+                               }).ToList();
+                List<object> lesson_list = new List<object>();
+                foreach (var item in lessons)
+                {
+                    lesson_list.Add(new
+                    {
+                        Id = item.Id,
+                        Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.ExpirationDay + " days, " + item.Price.ToString("#,##0") + ")"
+                    });
+                }
+                ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
+
+                return View();
+            }
         }
 
         [HttpPost]

@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,12 +18,24 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            return View(await db.Vouchers.OrderBy(x => x.Code).ToListAsync());
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View(await db.Vouchers.OrderBy(x => x.Code).ToListAsync());
+            }
         }
 
         public ActionResult Create()
         {
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View();
+            }
         }
 
         [HttpPost]
@@ -44,16 +57,22 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Edit(Guid? id)
         {
-            if (id == null)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                VouchersModels vouchersModels = await db.Vouchers.FindAsync(id);
+                if (vouchersModels == null)
+                {
+                    return HttpNotFound();
+                }
+                return View(vouchersModels);
             }
-            VouchersModels vouchersModels = await db.Vouchers.FindAsync(id);
-            if (vouchersModels == null)
-            {
-                return HttpNotFound();
-            }
-            return View(vouchersModels);
         }
 
         [HttpPost]
@@ -72,7 +91,13 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Delete(Guid? id)
         {
-            return View(await db.Vouchers.Where(x => x.Id == id).FirstOrDefaultAsync());
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View(await db.Vouchers.Where(x => x.Id == id).FirstOrDefaultAsync());
+            }
         }
 
         [HttpPost, ActionName("Delete")]

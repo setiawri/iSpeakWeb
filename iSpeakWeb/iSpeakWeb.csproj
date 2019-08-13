@@ -170,6 +170,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Common\BranchesActionFilter.cs" />
     <Compile Include="Common\IdentityExtension.cs" />
+    <Compile Include="Common\Permission.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BranchesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -207,6 +208,7 @@
       <DependentUpon>201907270231344_addBranchesId.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\AccessModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\HourlyRatesModels.cs" />
@@ -218,6 +220,7 @@
     <Compile Include="Models\LessonSessionsViewModels.cs" />
     <Compile Include="Models\LessonTypesModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\MasterMenuModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
     <Compile Include="Models\PaymentsModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
@@ -425,6 +428,8 @@
     <Content Include="Views\LessonSessions\Index.cshtml" />
     <Content Include="Views\LessonSessions\Create.cshtml" />
     <Content Include="Views\LandingPage\Index.cshtml" />
+    <Content Include="Views\Role\Manage.cshtml" />
+    <Content Include="Views\Shared\Unauthorized.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

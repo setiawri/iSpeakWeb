@@ -1,0 +1,225 @@
+﻿@model IEnumerable<iSpeak.Models.AccessViewModels>
+
+@{
+    ViewBag.Title = "Manage";
+}
+
+<style>
+    /* Start by setting display:none to make this hidden.
+    Then we position it in relation to the viewport window
+    with position:fixed. Width, height, top and left speak
+    for themselves. Background we set to 80% white with
+    our animation centered, and no-repeating */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba( 255, 255, 255, .8 ) url('http://i.stack.imgur.com/FhHRx.gif') 50% 50% no-repeat;
+    }
+
+    /* When the body has the loading class, we turn
+       the scrollbar off with overflow:hidden */
+    body.loading .modal {
+        overflow: hidden;
+    }
+
+    /* Anytime the body has the loading class, our
+       modal element will be visible */
+    body.loading .modal {
+        display: block;
+    }
+</style>
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.RoleName Role</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Submit Bulk Menu -->
+                <div class="form-group row">
+                    <div class="col-lg-6">
+                        <div class="form-group row">
+                            <div class="col-lg-5">
+                                @Html.DropDownList("ddlMenu", new List<SelectListItem>
+                                {
+                                    new SelectListItem { Text = "All Menu", Value = "All" },
+                                    new SelectListItem { Text = "Admin", Value = "Admin" },
+                                    new SelectListItem { Text = "Branches", Value = "Branches" },
+                                    new SelectListItem { Text = "Languages", Value = "Languages" },
+                                    new SelectListItem { Text = "Lesson Types", Value = "Lesson Types" },
+                                    new SelectListItem { Text = "Lesson Packages", Value = "Lesson Packages" },
+                                    new SelectListItem { Text = "Hourly Rates", Value = "Hourly Rates" },
+                                    new SelectListItem { Text = "Vouchers", Value = "Vouchers" },
+                                    new SelectListItem { Text = "Sale", Value = "Sale" },
+                                    new SelectListItem { Text = "Payments", Value = "Payments" },
+                                    new SelectListItem { Text = "Sessions", Value = "Sessions" }
+                                }, new { @class = "form-control" })
+                            </div>
+                            <div class="col-lg-3">
+                                @Html.DropDownList("ddlSelect", new List<SelectListItem>
+                                {
+                                    new SelectListItem { Text = "Enable", Value = "enable" },
+                                    new SelectListItem { Text = "Disable", Value = "disable" }
+                                }, new { @class = "form-control" })
+                            </div>
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-sm btn-primary" id="btnSubmit">Submit <i class="icon-paperplane ml-2"></i></button>
+                                <a href="@Url.Action("Index", "Role")" class="btn btn-sm btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Submit Bulk Menu -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5% !important">@Html.DisplayNameFor(model => model.MenuOrder)</th>
+                                <th style="width: 30% !important">@Html.DisplayNameFor(model => model.ParentMenu)</th>
+                                <th style="width: 50% !important">@Html.DisplayNameFor(model => model.MenuName)</th>
+                                @*<th>@Html.DisplayNameFor(model => model.WebMenuAccess)</th>
+                                <th>@Html.DisplayNameFor(model => model.RoleName)</th>*@
+                                <th style="width: 15% !important">Enable Access</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+                            @if (Model != null)
+                            {
+                                int row = 1;
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @(row++)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.ParentMenu)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.MenuName)
+                                        </td>
+                                        @*<td>
+                                            @Html.DisplayFor(modelItem => item.WebMenuAccess)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => item.RoleName)
+                                        </td>*@
+                                        <td class="actions">
+                                            @if (string.IsNullOrEmpty(item.RoleName))
+                                            {
+                                                <a href="#"><span class="badge badge-dark d-block" onclick="ActionMenu('@item.WebMenuAccess', '@ViewBag.Id', 'enable')">Disabled</span></a>
+                                            }
+                                            else
+                                            {
+                                                <a href="#"><span class="badge badge-success d-block" onclick="ActionMenu('@item.WebMenuAccess', '@ViewBag.Id', 'disable')">Enabled</span></a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<div class="modal"></div>
+
+<script type="text/javascript">
+
+    function GetData(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetAccessMenu", "Role")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                //window.location.reload();
+                $('#data-body').empty();
+                //console.log(data.content);
+                $('#data-body').append(data.content);
+            }, //end success
+            error: function (result) {
+                alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function ActionMenu(webMenu, idRole, action) {
+        
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SingleAccess", "Role")',
+            data: {
+                WebMenuAccess: webMenu,
+                IdRole: idRole,
+                Action: action
+            },
+            success: function (data) {
+                //window.location.reload();
+                GetData('@ViewBag.Id');
+            }, //end success
+            error: function (result) {
+                alert("Error " + result);
+            } //end error
+        }); //end ajax
+        
+    } //end function
+
+    $(document).ready(function () {
+        //$body = $('body');
+
+        //$(document).on({
+        //    ajaxStart: function () { $body.addClass('loading'); },
+        //    ajaxStop: function () { $body.removeClass('loading'); }
+        //});
+
+        $("#datatable").dataTable({
+            "paging": false
+        });
+
+        GetData('@ViewBag.Id');
+
+        $('#btnSubmit').click(function () {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("BulkAccess", "Role")',
+                data: {
+                    IdRole: '@ViewBag.Id',
+                    ParentMenu: $('#ddlMenu').val(),
+                    Action: $('#ddlSelect').val()
+                },
+                success: function (data) {
+                    window.location.reload();
+                }, //end success
+                error: function (error) {
+                    console.log(error);
+                    alert(error);
+                } //end error
+            }); //end ajax
+        });
+    });
+</script>

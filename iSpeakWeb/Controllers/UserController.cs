@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,56 +16,29 @@ namespace iSpeak.Controllers
         // GET: User
         public ActionResult Index()
         {
-            //var user = (from u in db.User
-            //            join ur in db.UserRole on u.Id equals ur.UserId
-            //            join r in db.Role on ur.RoleId equals r.Id
-            //            orderby u.Firstname ascending
-            //            select new UserViewModels
-            //            {
-            //                Id = u.Id,
-            //                Fullname = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-            //                UserName = u.UserName,
-            //                Email = u.Email,
-            //                Role = r.Name,
-            //                RoleId = r.Id,
-            //                Birthday = u.Birthday,
-            //                Active = u.Active
-            //            });
-
-            return View(db.User.ToList());
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View(db.User.ToList());
+            }
         }
 
         public ActionResult Edit(string id)
         {
-            //var user = (from u in db.User
-            //            join ur in db.UserRole on u.Id equals ur.UserId
-            //            join r in db.Role on ur.RoleId equals r.Id
-            //            where u.Id == id
-            //            select new UserViewModels
-            //            {
-            //                Id = u.Id,
-            //                Fullname = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-            //                Firstname = u.Firstname,
-            //                Middlename = u.Middlename,
-            //                Lastname = u.Lastname,
-            //                UserName = u.UserName,
-            //                Address = u.Address,
-            //                Email = u.Email,
-            //                Phone1 = u.Phone1,
-            //                Phone2 = u.Phone2,
-            //                Role = r.Name,
-            //                RoleId = r.Id,
-            //                Birthday = u.Birthday,
-            //                Notes = u.Notes,
-            //                Active = u.Active
-            //            }).FirstOrDefault();
-
-            EditUserViewModels editUserViewModels = new EditUserViewModels();
-            editUserViewModels.User = db.User.Where(x => x.Id == id).FirstOrDefault();
-            editUserViewModels.RoleId = db.UserRole.Where(x => x.UserId == id).Select(x => x.RoleId).ToList();
-            ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View(editUserViewModels);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                EditUserViewModels editUserViewModels = new EditUserViewModels();
+                editUserViewModels.User = db.User.Where(x => x.Id == id).FirstOrDefault();
+                editUserViewModels.RoleId = db.UserRole.Where(x => x.UserId == id).Select(x => x.RoleId).ToList();
+                ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View(editUserViewModels);
+            }
         }
 
         [HttpPost]

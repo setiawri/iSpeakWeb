@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,27 +18,39 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var data = (from lp in db.LessonPackages
-                        join l in db.Languages on lp.Languages_Id equals l.Id
-                        join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
-                        select new LessonPackagesViewModels
-                        {
-                            Id = lp.Id,
-                            Name = lp.Name,
-                            Languages = l.Name,
-                            LessonTypes = lt.Name,
-                            SessionHours = lp.SessionHours,
-                            Price = lp.Price,
-                            Active = lp.Active
-                        }).ToListAsync();
-            return View(await data);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var data = (from lp in db.LessonPackages
+                            join l in db.Languages on lp.Languages_Id equals l.Id
+                            join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
+                            select new LessonPackagesViewModels
+                            {
+                                Id = lp.Id,
+                                Name = lp.Name,
+                                Languages = l.Name,
+                                LessonTypes = lt.Name,
+                                SessionHours = lp.SessionHours,
+                                Price = lp.Price,
+                                Active = lp.Active
+                            }).ToListAsync();
+                return View(await data);
+            }
         }
 
         public ActionResult Create()
         {
-            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listTypes = new SelectList(db.LessonTypes.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listTypes = new SelectList(db.LessonTypes.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View();
+            }
         }
 
         [HttpPost]
@@ -71,18 +84,24 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Edit(Guid? id)
         {
-            if (id == null)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                LessonPackagesModels lessonPackagesModels = await db.LessonPackages.FindAsync(id);
+                if (lessonPackagesModels == null)
+                {
+                    return HttpNotFound();
+                }
+                ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listTypes = new SelectList(db.LessonTypes.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View(lessonPackagesModels);
             }
-            LessonPackagesModels lessonPackagesModels = await db.LessonPackages.FindAsync(id);
-            if (lessonPackagesModels == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listTypes = new SelectList(db.LessonTypes.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View(lessonPackagesModels);
         }
 
         [HttpPost]

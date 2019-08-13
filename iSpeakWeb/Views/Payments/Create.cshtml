@@ -164,7 +164,17 @@
 
 <script type="text/javascript">
     function math_total() {
-        var total = parseFloat($('.mdl-card').val()) + parseFloat($('.mdl-cash').val());
+        var total_card = 0;
+        if ($('.mdl-card').val() != '') {
+            total_card = parseFloat($('.mdl-card').val());
+        }
+
+        var total_cash = 0;
+        if ($('.mdl-cash').val() != '') {
+            total_cash = parseFloat($('.mdl-cash').val());
+        }
+
+        var total = total_card + total_cash;
         $('.mdl-paid').val(total.toLocaleString());
     }
 
@@ -192,13 +202,24 @@
         $('.check-styled').uniform();
 
         $('.mdl-btn-submit').click(function () {
-            var bank_amount = parseFloat($('.mdl-card').val());
-            var cash_amount = parseFloat($('.mdl-cash').val());
+            var bank_amount = 0;
+            if ($('.mdl-card').val() != '') {
+                bank_amount = parseFloat($('.mdl-card').val());
+            }
+
+            var cash_amount = 0;
+            if ($('.mdl-cash').val() != '') {
+                cash_amount = parseFloat($('.mdl-cash').val());
+            }
+
             var total_due = parseFloat($('.mdl-due').val().replace(/,/g, ''));
             var total_paid = parseFloat($('.mdl-paid').val().replace(/,/g, ''));
-            console.log('due: ' + total_due + ', paid: ' + total_paid);
+            //console.log('due: ' + total_due + ', paid: ' + total_paid);
             if (total_paid > total_due) {
                 $('.modal-validation').html('Max Payment is ' + total_due.toLocaleString()).show();
+            }
+            else if (total_paid == 0) {
+                $('.modal-validation').html('The field Total Payment is required.').show();
             }
             else if (bank_amount > 0 && $('.mdl-reff').val() == '') {
                 $('.modal-validation').html('The field REF # is required.').show();

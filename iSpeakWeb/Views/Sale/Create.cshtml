@@ -80,7 +80,7 @@
                                     @Html.Editor("Qty", new { htmlAttributes = new { @class = "form-control", @Value = 1, @placeholder = "Qty" } })
                                 </div>
                                 <div class="col-lg-2">
-                                    @Html.Editor("Disc", new { htmlAttributes = new { @class = "form-control", @Value = 0, @placeholder = "Discount" } })
+                                    @Html.Editor("Disc", new { htmlAttributes = new { @class = "form-control", @placeholder = "Discount" } })
                                 </div>
                                 <div class="col-lg-6">
                                     @Html.DropDownListFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, "Select Voucher", new { @class = "form-control select2" })
@@ -124,7 +124,7 @@
                         </table>
                     </div>
                     <hr />
-                    <div class="form-group row">
+                    <div class="form-group row" style="display: none">
                         @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
                         <div class="col-lg-6">
                             @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2", @disabled = "disabled" })
@@ -171,10 +171,21 @@
         }
         else {
             $('.error-lesson').html('').hide();
+            
+            var travel_cost = 0;
+            if ($('#Travel').val() != '') {
+                travel_cost = parseFloat($('#Travel').val());
+            }
 
-            var travel_cost = parseFloat($('#Travel').val());
-            var tutor_cost = parseFloat($('#Tutor').val());
-            var discount = parseFloat($('#Disc').val());
+            var tutor_cost = 0;
+            if ($('#Tutor').val() != '') {
+                tutor_cost = parseFloat($('#Tutor').val());
+            }
+
+            var discount = 0;
+            if ($('#Disc').val() != '') {
+                discount = parseFloat($('#Disc').val());
+            }
 
             $.ajax({
                 type: "POST",
@@ -332,17 +343,11 @@
         $('#Branches_Id').val($('#Branch').val()).trigger('change');
 
         $('#btnAdd').click(function () {
-            if ($('#Travel').val() == '') {
-                $('.error-sale').html('The Travel Cost field is required.').show();
+            if ($('#Qty').val() == '') {
+                $('.error-sale').html('The Qty field is required.').show();
             }
-            else if ($('#Tutor').val() == '') {
-                $('.error-sale').html('The Tutor Cost field is required.').show();
-            }
-            else if ($('#Disc').val() == '') {
-                $('.error-sale').html('The Discount field is required.').show();
-            }
-            else if ($('#Disc').val() == '') {
-                $('.error-sale').html('The Discount field is required.').show();
+            else if ($('#Qty').val() == '0') {
+                $('.error-sale').html('The Qty field is required.').show();
             }
             else {
                 $('.error-sale').html('').hide();

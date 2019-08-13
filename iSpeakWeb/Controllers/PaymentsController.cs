@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -16,22 +17,28 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var data = (from si in db.SaleInvoices
-                        join b in db.Branches on si.Branches_Id equals b.Id
-                        join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                        //where si.Due > 0
-                        select new SaleInvoicesIndexModels
-                        {
-                            Id = si.Id,
-                            Branches = b.Name,
-                            No = si.No,
-                            Timestamp = si.Timestamp,
-                            Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                            Amount = si.Amount,
-                            Due = si.Due,
-                            Cancelled = si.Cancelled
-                        }).ToListAsync();
-            return View(await data);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var data = (from si in db.SaleInvoices
+                            join b in db.Branches on si.Branches_Id equals b.Id
+                            join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                            //where si.Due > 0
+                            select new SaleInvoicesIndexModels
+                            {
+                                Id = si.Id,
+                                Branches = b.Name,
+                                No = si.No,
+                                Timestamp = si.Timestamp,
+                                Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                Amount = si.Amount,
+                                Due = si.Due,
+                                Cancelled = si.Cancelled
+                            }).ToListAsync();
+                return View(await data);
+            }
         }
 
         public JsonResult GetPayment(Guid id)
@@ -72,33 +79,39 @@ namespace iSpeak.Controllers
         [HttpGet]
         public ActionResult Create(string id)
         {
-            decimal total = 0; decimal due = 0;
-            List<SaleInvoiceItemsDetails> listDetails = new List<SaleInvoiceItemsDetails>();
-            string[] ids = id.Split(',');
-            foreach (string inv_id in ids)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                var list = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id.ToString() == inv_id).OrderBy(x => x.RowNo).ToList();
-                foreach (var item in list)
+                decimal total = 0; decimal due = 0;
+                List<SaleInvoiceItemsDetails> listDetails = new List<SaleInvoiceItemsDetails>();
+                string[] ids = id.Split(',');
+                foreach (string inv_id in ids)
                 {
-                    SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
-                    saleInvoiceItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id.ToString() == inv_id).FirstOrDefault().No;
-                    saleInvoiceItemsDetails.Description = item.Description;
-                    saleInvoiceItemsDetails.Qty = item.Qty;
-                    saleInvoiceItemsDetails.Price = item.Price;
-                    saleInvoiceItemsDetails.Travel = item.TravelCost;
-                    saleInvoiceItemsDetails.Tutor = item.TutorTravelCost;
-                    saleInvoiceItemsDetails.Voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
-                    saleInvoiceItemsDetails.Discount = item.DiscountAmount;
-                    saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
-                    listDetails.Add(saleInvoiceItemsDetails);
-                    total += saleInvoiceItemsDetails.Amount;
+                    var list = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id.ToString() == inv_id).OrderBy(x => x.RowNo).ToList();
+                    foreach (var item in list)
+                    {
+                        SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
+                        saleInvoiceItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id.ToString() == inv_id).FirstOrDefault().No;
+                        saleInvoiceItemsDetails.Description = item.Description;
+                        saleInvoiceItemsDetails.Qty = item.Qty;
+                        saleInvoiceItemsDetails.Price = item.Price;
+                        saleInvoiceItemsDetails.Travel = item.TravelCost;
+                        saleInvoiceItemsDetails.Tutor = item.TutorTravelCost;
+                        saleInvoiceItemsDetails.Voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
+                        saleInvoiceItemsDetails.Discount = item.DiscountAmount;
+                        saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
+                        listDetails.Add(saleInvoiceItemsDetails);
+                        total += saleInvoiceItemsDetails.Amount;
+                    }
+                    due += db.SaleInvoices.Where(x => x.Id.ToString() == inv_id).FirstOrDefault().Due;
                 }
-                due += db.SaleInvoices.Where(x => x.Id.ToString() == inv_id).FirstOrDefault().Due;
+                ViewBag.Total = total.ToString("#,##0");
+                ViewBag.Due = due.ToString("#,##0");
+                ViewBag.Invoices = id;
+                return View(listDetails);
             }
-            ViewBag.Total = total.ToString("#,##0");
-            ViewBag.Due = due.ToString("#,##0");
-            ViewBag.Invoices = id;
-            return View(listDetails);
         }
 
         public JsonResult SavePayments(int cash_amount, int bank_amount, string bank_name, string owner_name, string bank_number, string reff_no, string notes, string bank_type, string invoices_id)
@@ -163,89 +176,95 @@ namespace iSpeak.Controllers
 
         public ActionResult Print(Guid? id)
         {
-            if (id == null || id == Guid.Empty)
-            {
-                //var login_session = Session["Login"] as LoginViewModel;
-                Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
-                List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
-                foreach (var item in db.Payments.ToList())
-                {
-                    PaymentsIndexModels pim = new PaymentsIndexModels();
-                    pim.Id = item.Id;
-                    pim.No = item.No;
-                    pim.Timestamp = item.Timestamp;
-                    pim.CashAmount = item.CashAmount;
-                    pim.DebitAmount = item.DebitAmount;
-                    pim.Notes = item.Notes;
-                    Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
-                    Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
-                    pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
-                    if (branch_id == user_branch)
-                        list_pim.Add(pim);
-                }
-                return View(list_pim);
-            }
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                PaymentsModels paymentsModels = db.Payments.Where(x => x.Id == id).FirstOrDefault();
-                BranchesModels branchesModels = new BranchesModels();
-                List<PaymentItemsDetails> listItems = new List<PaymentItemsDetails>();
-                List<SaleInvoiceItemsDetails> listDetails = new List<SaleInvoiceItemsDetails>();
-                decimal total_paid = 0;
-
-                //var list_PaymentItemsModels = db.PaymentItems.Where(x => x.Payments_Id == paymentsModels.Id).ToList();
-                var list_PaymentItemsModels = (from pi in db.PaymentItems
-                                               join si in db.SaleInvoices on pi.ReferenceId equals si.Id
-                                               where pi.Payments_Id == paymentsModels.Id
-                                               orderby si.Timestamp ascending
-                                               select new { pi }).ToList();
-                foreach (var item in list_PaymentItemsModels)
+                if (id == null || id == Guid.Empty)
                 {
-                    Guid branch_id = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().Branches_Id;
-                    branchesModels = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault();
-
-                    PaymentItemsDetails paymentItemsDetails = new PaymentItemsDetails();
-                    paymentItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().No;
-                    paymentItemsDetails.Amount = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).Sum(x => x.Amount);
-                    paymentItemsDetails.DueBefore = item.pi.DueBefore;
-                    paymentItemsDetails.Payment = (item.pi.DueBefore > item.pi.DueAfter) ? item.pi.DueBefore - item.pi.DueAfter : item.pi.DueAfter - item.pi.DueBefore;
-                    paymentItemsDetails.DueAfter = item.pi.DueAfter;
-                    listItems.Add(paymentItemsDetails);
-                    total_paid += paymentItemsDetails.Payment;
-
-                    //decimal total = 0;
-                    var list_SaleInvoiceItemsModels = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.pi.ReferenceId).OrderBy(x => x.RowNo).ToList();
-                    foreach (var subitem in list_SaleInvoiceItemsModels)
+                    //var login_session = Session["Login"] as LoginViewModel;
+                    Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+                    List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
+                    foreach (var item in db.Payments.ToList())
                     {
-                        SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
-                        saleInvoiceItemsDetails.Invoice = paymentItemsDetails.Invoice;
-                        saleInvoiceItemsDetails.Description = subitem.Description;
-                        var data_customer = (from si in db.SaleInvoices
-                                             join c in db.User on si.Customer_UserAccounts_Id equals c.Id
-                                             where si.Id == item.pi.ReferenceId
-                                             select new { c }).FirstOrDefault();
-                        saleInvoiceItemsDetails.Customer = data_customer.c.Firstname + " " + data_customer.c.Middlename + " " + data_customer.c.Lastname;
-                        saleInvoiceItemsDetails.Qty = subitem.Qty;
-                        saleInvoiceItemsDetails.Price = subitem.Price;
-                        saleInvoiceItemsDetails.Travel = subitem.TravelCost;
-                        saleInvoiceItemsDetails.Tutor = subitem.TutorTravelCost;
-                        saleInvoiceItemsDetails.Voucher = (subitem.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == subitem.Vouchers_Id).FirstOrDefault().Amount : 0;
-                        saleInvoiceItemsDetails.Discount = subitem.DiscountAmount;
-                        saleInvoiceItemsDetails.Amount = (subitem.Qty * subitem.Price) + subitem.TravelCost - subitem.DiscountAmount - saleInvoiceItemsDetails.Voucher;
-                        listDetails.Add(saleInvoiceItemsDetails);
-                        //total += saleInvoiceItemsDetails.Amount;
+                        PaymentsIndexModels pim = new PaymentsIndexModels();
+                        pim.Id = item.Id;
+                        pim.No = item.No;
+                        pim.Timestamp = item.Timestamp;
+                        pim.CashAmount = item.CashAmount;
+                        pim.DebitAmount = item.DebitAmount;
+                        pim.Notes = item.Notes;
+                        Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
+                        Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
+                        pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
+                        if (branch_id == user_branch)
+                            list_pim.Add(pim);
                     }
+                    return View(list_pim);
                 }
+                else
+                {
+                    PaymentsModels paymentsModels = db.Payments.Where(x => x.Id == id).FirstOrDefault();
+                    BranchesModels branchesModels = new BranchesModels();
+                    List<PaymentItemsDetails> listItems = new List<PaymentItemsDetails>();
+                    List<SaleInvoiceItemsDetails> listDetails = new List<SaleInvoiceItemsDetails>();
+                    decimal total_paid = 0;
 
-                ReceiptViewModels receiptViewModels = new ReceiptViewModels();
-                receiptViewModels.Branch = branchesModels;
-                receiptViewModels.Payment = paymentsModels;
-                receiptViewModels.listSaleInvoiceItems = listDetails;
-                receiptViewModels.listPaymentItems = listItems;
-                receiptViewModels.TotalCash = paymentsModels.CashAmount;
-                receiptViewModels.TotalDebit = paymentsModels.DebitAmount;
-                receiptViewModels.TotalAmount = total_paid;
-                return View("Printed", receiptViewModels);
+                    //var list_PaymentItemsModels = db.PaymentItems.Where(x => x.Payments_Id == paymentsModels.Id).ToList();
+                    var list_PaymentItemsModels = (from pi in db.PaymentItems
+                                                   join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                                   where pi.Payments_Id == paymentsModels.Id
+                                                   orderby si.Timestamp ascending
+                                                   select new { pi }).ToList();
+                    foreach (var item in list_PaymentItemsModels)
+                    {
+                        Guid branch_id = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().Branches_Id;
+                        branchesModels = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault();
+
+                        PaymentItemsDetails paymentItemsDetails = new PaymentItemsDetails();
+                        paymentItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().No;
+                        paymentItemsDetails.Amount = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).Sum(x => x.Amount);
+                        paymentItemsDetails.DueBefore = item.pi.DueBefore;
+                        paymentItemsDetails.Payment = (item.pi.DueBefore > item.pi.DueAfter) ? item.pi.DueBefore - item.pi.DueAfter : item.pi.DueAfter - item.pi.DueBefore;
+                        paymentItemsDetails.DueAfter = item.pi.DueAfter;
+                        listItems.Add(paymentItemsDetails);
+                        total_paid += paymentItemsDetails.Payment;
+
+                        //decimal total = 0;
+                        var list_SaleInvoiceItemsModels = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.pi.ReferenceId).OrderBy(x => x.RowNo).ToList();
+                        foreach (var subitem in list_SaleInvoiceItemsModels)
+                        {
+                            SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
+                            saleInvoiceItemsDetails.Invoice = paymentItemsDetails.Invoice;
+                            saleInvoiceItemsDetails.Description = subitem.Description;
+                            var data_customer = (from si in db.SaleInvoices
+                                                 join c in db.User on si.Customer_UserAccounts_Id equals c.Id
+                                                 where si.Id == item.pi.ReferenceId
+                                                 select new { c }).FirstOrDefault();
+                            saleInvoiceItemsDetails.Customer = data_customer.c.Firstname + " " + data_customer.c.Middlename + " " + data_customer.c.Lastname;
+                            saleInvoiceItemsDetails.Qty = subitem.Qty;
+                            saleInvoiceItemsDetails.Price = subitem.Price;
+                            saleInvoiceItemsDetails.Travel = subitem.TravelCost;
+                            saleInvoiceItemsDetails.Tutor = subitem.TutorTravelCost;
+                            saleInvoiceItemsDetails.Voucher = (subitem.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == subitem.Vouchers_Id).FirstOrDefault().Amount : 0;
+                            saleInvoiceItemsDetails.Discount = subitem.DiscountAmount;
+                            saleInvoiceItemsDetails.Amount = (subitem.Qty * subitem.Price) + subitem.TravelCost - subitem.DiscountAmount - saleInvoiceItemsDetails.Voucher;
+                            listDetails.Add(saleInvoiceItemsDetails);
+                            //total += saleInvoiceItemsDetails.Amount;
+                        }
+                    }
+
+                    ReceiptViewModels receiptViewModels = new ReceiptViewModels();
+                    receiptViewModels.Branch = branchesModels;
+                    receiptViewModels.Payment = paymentsModels;
+                    receiptViewModels.listSaleInvoiceItems = listDetails;
+                    receiptViewModels.listPaymentItems = listItems;
+                    receiptViewModels.TotalCash = paymentsModels.CashAmount;
+                    receiptViewModels.TotalDebit = paymentsModels.DebitAmount;
+                    receiptViewModels.TotalAmount = total_paid;
+                    return View("Printed", receiptViewModels);
+                }
             }
         }
     }
