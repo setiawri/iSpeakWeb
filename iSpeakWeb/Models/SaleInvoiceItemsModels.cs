@@ -25,6 +25,7 @@ namespace iSpeak.Models
         public Guid? Services_Id { get; set; }
         public Guid? LessonPackages_Id { get; set; }
         public decimal? SessionHours { get; set; }
+        public decimal? SessionHours_Remaining { get; set; }
         public int TravelCost { get; set; }
         public int TutorTravelCost { get; set; }
     }

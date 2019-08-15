@@ -71,7 +71,7 @@
                         <span>@User.Identity.GetFullName()</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
-                        <a href="#" class="dropdown-item"><i class="icon-lock2"></i> Change Password</a>
+                        <a href="@Url.Action("ChangePassword", "Manage")" class="dropdown-item"><i class="icon-lock2"></i> Change Password</a>
                         <a href="@Url.Action("LogOff", "Account")" class="dropdown-item"><i class="icon-switch2"></i> Logout</a>
                     </div>
                 </li>
@@ -170,7 +170,7 @@
         </div>
         <div class="navbar-collapse collapse" id="navbar-footer">
             <span class="navbar-text">
-                &copy; @DateTime.Now.Year - iSpeak Language Center
+                &copy; @DateTime.UtcNow.Year - iSpeak Language Center
             </span>
         </div>
     </div>
@@ -190,6 +190,10 @@
                             var url = '@Url.Action("Index", "Home")';
                             window.location.href = url;
                             $('#Branch').val($('#Branch').val()).trigger('change');
+                        }
+                        else {
+                            bootbox.alert("You don't have access to change Branches.");
+                            $('#Branch').val(data.branch_id_before);
                         }
                     }, //end success
                     error: function (result) {

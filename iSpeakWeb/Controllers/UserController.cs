@@ -50,6 +50,11 @@ namespace iSpeak.Controllers
                 var user = new UserModels()
                 {
                     Id = editUserViewModels.User.Id,
+                    Firstname = editUserViewModels.User.Firstname,
+                    Middlename = editUserViewModels.User.Middlename,
+                    Lastname = editUserViewModels.User.Lastname,
+                    Birthday = editUserViewModels.User.Birthday,
+                    UserName = editUserViewModels.User.UserName,
                     Email = editUserViewModels.User.Email,
                     Phone1 = editUserViewModels.User.Phone1,
                     Phone2 = editUserViewModels.User.Phone2,
@@ -63,6 +68,11 @@ namespace iSpeak.Controllers
                 using (var database = new iSpeakContext())
                 {
                     database.User.Attach(user);
+                    database.Entry(user).Property(x => x.Firstname).IsModified = true;
+                    database.Entry(user).Property(x => x.Middlename).IsModified = true;
+                    database.Entry(user).Property(x => x.Lastname).IsModified = true;
+                    database.Entry(user).Property(x => x.Birthday).IsModified = true;
+                    database.Entry(user).Property(x => x.UserName).IsModified = true;
                     database.Entry(user).Property(x => x.Email).IsModified = true;
                     database.Entry(user).Property(x => x.Phone1).IsModified = true;
                     database.Entry(user).Property(x => x.Phone2).IsModified = true;

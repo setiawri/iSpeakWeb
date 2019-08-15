@@ -65,7 +65,7 @@ namespace iSpeak.Controllers
             {
                 message += @"<tr>
                                 <td>" + item.p.No + @"</td>
-                                <td>" + item.p.Timestamp.ToString("yyyy/MM/dd HH:mm") + @"</td>
+                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
                                 <td>" + item.pi.DueBefore.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.Amount.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.DueAfter.ToString("#,##0") + @"</td>
@@ -124,7 +124,7 @@ namespace iSpeak.Controllers
             PaymentsModels paymentsModels = new PaymentsModels();
             paymentsModels.Id = Guid.NewGuid();
             paymentsModels.No = (lastHex_int + 1).ToString("X5");
-            paymentsModels.Timestamp = DateTime.Now;
+            paymentsModels.Timestamp = DateTime.UtcNow;
             paymentsModels.CashAmount = cash_amount;
             paymentsModels.DebitAmount = bank_amount;
             paymentsModels.DebitBank = (bank_amount == 0) ? "" : bank_name;
@@ -188,13 +188,15 @@ namespace iSpeak.Controllers
                     List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
                     foreach (var item in db.Payments.ToList())
                     {
-                        PaymentsIndexModels pim = new PaymentsIndexModels();
-                        pim.Id = item.Id;
-                        pim.No = item.No;
-                        pim.Timestamp = item.Timestamp;
-                        pim.CashAmount = item.CashAmount;
-                        pim.DebitAmount = item.DebitAmount;
-                        pim.Notes = item.Notes;
+                        PaymentsIndexModels pim = new PaymentsIndexModels
+                        {
+                            Id = item.Id,
+                            No = item.No,
+                            Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                            CashAmount = item.CashAmount,
+                            DebitAmount = item.DebitAmount,
+                            Notes = item.Notes
+                        };
                         Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
                         pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;

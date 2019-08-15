@@ -23,7 +23,7 @@ namespace iSpeak.Controllers
             List<object> newList = new List<object>();
             var data = (from si in db.SaleInvoices
                         join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                        where si.Due == 0 && si.Customer_UserAccounts_Id == student_id && sii.SessionHours > 0
+                        where si.Due == 0 && si.Customer_UserAccounts_Id == student_id && sii.SessionHours_Remaining > 0
                         orderby sii.Description ascending
                         select new { sii }).ToList();
             foreach (var item in data)
@@ -31,7 +31,7 @@ namespace iSpeak.Controllers
                 newList.Add(new
                 {
                     Id = item.sii.Id,
-                    Name = item.sii.Description
+                    Name = item.sii.Description + " [Avail. Hours: " + item.sii.SessionHours_Remaining + " hrs]"
                 });
             }
             var ddl = new SelectList(newList, "Id", "Name");
@@ -91,8 +91,8 @@ namespace iSpeak.Controllers
                             join u in db.User on si.Customer_UserAccounts_Id equals u.Id
                             where sii.Id == item.sale_invoice_item_id
                             select new { si, sii, u }).FirstOrDefault();
-                decimal remaining = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault().SessionHours.Value;
-                if (data.sii.SessionHours.Value < hour)
+                decimal remaining = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault().SessionHours_Remaining.Value;
+                if (data.sii.SessionHours_Remaining.Value < hour)
                 {
                     isValid = false;
                     message = "INVALID! " + data.u.Firstname + " " + data.u.Middlename + " " + data.u.Lastname + " - " + data.sii.Description + " remaining hours is less than " + hour + " hr.";
@@ -112,7 +112,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                var data = await (from ls in db.LessonSessions
+                var sessions = await (from ls in db.LessonSessions
                                   join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
                                   join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                                   join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
@@ -128,7 +128,25 @@ namespace iSpeak.Controllers
                                       TutorTravelCost = ls.TutorTravelCost,
                                       Deleted = ls.Deleted
                                   }).ToListAsync();
-                return View(data);
+
+                List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
+                foreach (var session in sessions)
+                {
+                    list.Add(new LessonSessionsViewModels
+                    {
+                        Id = session.Id,
+                        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(session.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                        Lesson = session.Lesson,
+                        Tutor = session.Tutor,
+                        SessionHours = session.SessionHours,
+                        HourlyRates_Rate = session.HourlyRates_Rate,
+                        TravelCost = session.TravelCost,
+                        TutorTravelCost = session.TutorTravelCost,
+                        Deleted = session.Deleted
+                    });
+                }
+                
+                return View(list);
             }
         }
 
@@ -177,6 +195,29 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Timestamp,Tutor_UserAccounts_Id,SessionHours,Review,InternalNotes")] LessonSessionsModels lessonSessionsModels, string Items)
         {
+            //bool isValid = true; string message = "";
+            //List<LessonSessionsDetails> list = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
+            //foreach (var item in list)
+            //{
+            //    var data = (from si in db.SaleInvoices
+            //                join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+            //                join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+            //                where sii.Id == item.sale_invoice_item_id
+            //                select new { si, sii, u }).FirstOrDefault();
+            //    //decimal remaining = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault().SessionHours_Remaining.Value;
+            //    if (data.sii.SessionHours_Remaining.Value < lessonSessionsModels.SessionHours)
+            //    {
+            //        isValid = false;
+            //        message = data.u.Firstname + " " + data.u.Middlename + " " + data.u.Lastname + " - " + data.sii.Description + " remaining hours is less than " + lessonSessionsModels.SessionHours + " hr.";
+            //        break;
+            //    }
+            //}
+
+            //if (!isValid)
+            //{
+            //    ModelState.AddModelError("ErrorHours", message);
+            //}
+
             if (ModelState.IsValid)
             {
                 List<LessonSessionsDetails> details = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
@@ -186,7 +227,7 @@ namespace iSpeak.Controllers
 
                     LessonSessionsModels model = new LessonSessionsModels();
                     model.Id = Guid.NewGuid();
-                    model.Timestamp = new DateTime(lessonSessionsModels.Timestamp.Year, lessonSessionsModels.Timestamp.Month, lessonSessionsModels.Timestamp.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+                    model.Timestamp = new DateTime(lessonSessionsModels.Timestamp.Year, lessonSessionsModels.Timestamp.Month, lessonSessionsModels.Timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
                     model.SaleInvoiceItems_Id = item.sale_invoice_item_id;
                     model.SessionHours = lessonSessionsModels.SessionHours;
                     model.Review = lessonSessionsModels.Review;
@@ -211,7 +252,7 @@ namespace iSpeak.Controllers
                     model.Adjustment = 0;
                     db.LessonSessions.Add(model);
 
-                    sale_invoice_item.SessionHours = sale_invoice_item.SessionHours.Value - lessonSessionsModels.SessionHours;
+                    sale_invoice_item.SessionHours_Remaining = sale_invoice_item.SessionHours_Remaining.Value - lessonSessionsModels.SessionHours;
                     db.Entry(sale_invoice_item).State = EntityState.Modified;
                 }
                 db.SaveChanges();

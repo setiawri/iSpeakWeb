@@ -56,7 +56,7 @@
                                     @*<img src="../../../../global_assets/images/logo_demo.png" class="mb-3 mt-2" alt="" style="width: 120px;">*@
                                     <h4 class="text-primary mb-2 mt-md-2">RECEIPT #@Model.Payment.No</h4>
                                     <ul class="list list-unstyled mb-0">
-                                        <li>DATE: <span class="font-weight-semibold">@Model.Payment.Timestamp.ToString("yyyy/MM/dd")</span></li>
+                                        <li>DATE: <span class="font-weight-semibold">@string.Format("{0:yyyy/MM/dd}", TimeZoneInfo.ConvertTimeFromUtc(Model.Payment.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")))</span></li>
                                     </ul>
                                 </div>
                             </div>
@@ -64,17 +64,14 @@
                             <div class="col-sm-6">
                                 <div class="mb-4" style="float: right">
                                     <div class="row">
-                                        <div class="col-sm-6">
-                                            <div class="text-sm-right">
+                                        <div class="col-sm-7">
+                                            <div class="text-sm-right mt-2">
                                                 <ul class="list list-unstyled mb-0">
-                                                    <li><span class="font-weight-semibold">@Model.Branch.InvoiceHeaderText</span></li>
-                                                    @*<li><span class="font-weight-semibold">@Model.Branch.Name</span></li>*@
-                                                    @*<li><span class="font-weight-semibold">@Model.Branch.Address</span></li>*@
-                                                    @*<li><span class="font-weight-semibold">@Model.Branch.PhoneNumber</span></li>*@
+                                                    <li><span class="font-weight-semibold" style="white-space: pre-line">@Model.Branch.InvoiceHeaderText</span></li>
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div class="col-sm-6">
+                                        <div class="col-sm-5">
                                             <img src="~/assets/images/logo.png" class="img-responsive" style="width: 150px" />
                                         </div>
                                     </div>
@@ -175,7 +172,7 @@
                             </div>
                         </div>
                         <div>
-                            <span style="float: left" class="font-weight-semibold">NOTES : @Model.Payment.Notes</span>
+                            <span style="float: left; white-space: pre-line" class="font-weight-semibold">NOTES :<br /> @Model.Payment.Notes</span>
                             <span style="float: right" class="font-weight-semibold">*) Uang yang sudah kami terima tidak dapat dikembalikan.</span>
                         </div>
 

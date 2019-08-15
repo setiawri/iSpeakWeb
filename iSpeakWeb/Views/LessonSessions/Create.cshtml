@@ -29,6 +29,7 @@
                     <fieldset class="mb-3">
                         <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
                         <label class="session-validation text-danger" style="display: none"></label>
+                        @Html.ValidationMessage("ErrorHours", "", new { @class = "text-danger" })
                         <div class="row">
                             <div class="col-md-5">
                                 <div class="form-group">
@@ -94,8 +95,7 @@
                                             <th style="width: 60% !important">Package</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="data-body">
-                                    </tbody>
+                                    <tbody id="data-body"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -131,13 +131,13 @@
 <script type="text/javascript">
     var item_no = 100;
 
-    function AddItem(student, package, sale_inv_id) {
+    function AddItem(student, package_info, sale_inv_id) {
         item_no += 1;
 
         var rowItem = '<tr id="item_' + item_no + '">'
             + '<td align="center" style="vertical-align:middle"><a href="#" onclick="RemoveItem(' + item_no + ')" class="text-danger"><i class="icon-cross icon-2x"></i></a></td>'
             + '<td><input type="text" readonly class="form-control input-xs student" value="' + student + '" /></td>'
-            + '<td><input type="text" readonly class="form-control input-xs package" value="' + package + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs package" value="' + package_info + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs sii_id" value="' + sale_inv_id + '" /></td>'
             + '</tr>';
         $('#data-body').append(rowItem);
@@ -196,9 +196,10 @@
                 $('#Student_Id').val('').trigger('change');
             }
         });
+        
+        $('#target').submit (function (e) {
 
-        var arrItem = [];
-        $('#target').submit(function (e) {
+            var arrItem = [];
             $('#data-body tr').each(function () {
                 var student = $(this).find('input.student').val();
                 var package = $(this).find('input.package').val();
@@ -213,38 +214,41 @@
                 $('.session-validation').html('The Tutor field is required.').show();
                 return false;
             }
-            else {
-                if (arrItem.length > 0) {
 
-                    $.ajax({
-                        type: "POST",
-                        url: '@Url.Action("CheckRemainingHour", "LessonSessions")',
-                        data: {
-                            items: $('#Items').val(),
-                            hour: $('#SessionHours').val()
-                        },
-                        success: function (data) {
-                            if (data.isValid == false) {
-                                $('.session-validation').html(data.message).show();
-                                return false;
-                            }
-                            else {
-                                $('.session-validation').html('').hide();
-                                return true;
-                            }
-                        }, //end success
-                        error: function (result) {
-                            bootbox.alert("Error " + result);
-                        } //end error
-                    }); //end ajax
-
-                }
-                else {
-                    $('.session-validation').html('List Student-Package is required.').show();
-                    return false;
-                }
+            if (arrItem.length == 0) {
+                $('.session-validation').html('List Student-Package is required.').show();
+                return false;
             }
-            //e.preventDefault();
+            else {
+                
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CheckRemainingHour", "LessonSessions")',
+                    data: {
+                        items: $('#Items').val(),
+                        hour: $('#SessionHours').val()
+                    },
+                    async: false,
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                        return false;
+                    }, //end error
+                    success: function (data) {
+                        //console.log(data);
+                        if (data.isValid == false) {
+                            e.preventDefault();
+                            $('.session-validation').html(data.message).show();
+                            return false;
+                        }
+                        else {
+                            $('.session-validation').html('').hide();
+                            return true;
+                        }
+                    } //end success
+                }); //end ajax
+
+            }
+            
         });
 
     })

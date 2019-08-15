@@ -10,6 +10,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using iSpeak.Models;
 using System.Collections.Generic;
+using iSpeak.Common;
 
 namespace iSpeak.Controllers
 {
@@ -183,20 +184,27 @@ namespace iSpeak.Controllers
         //[AllowAnonymous]
         public ActionResult Register()
         {
-            List<SelectListItem> list = new List<SelectListItem>();
-            foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                List<SelectListItem> list = new List<SelectListItem>();
+                foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+                {
+                    list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                }
+                ViewBag.Roles = list;
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.DOB = DateTime.UtcNow.Date;
+                return View();
             }
-            ViewBag.Roles = list;
-            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View();
         }
 
         //
         // POST: /Account/Register
         [HttpPost]
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
@@ -204,8 +212,18 @@ namespace iSpeak.Controllers
             {
                 var user = new ApplicationUser
                 {
-                    UserName = model.UserName, Email = model.Email, Firstname = model.Firstname, Middlename = model.Middlename, Lastname = model.Lastname, Address = model.Address,
-                    Phone1 = model.Phone1, Phone2 = model.Phone2, Birthday = model.Birthday, Notes = model.Notes, Active = model.Active, Branches_Id = model.Branches_Id
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    Firstname = model.Firstname,
+                    Middlename = model.Middlename,
+                    Lastname = model.Lastname,
+                    Address = model.Address,
+                    Phone1 = model.Phone1,
+                    Phone2 = model.Phone2,
+                    Birthday = model.Birthday,
+                    Notes = model.Notes,
+                    Active = model.Active,
+                    Branches_Id = model.Branches_Id
                 };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -215,7 +233,7 @@ namespace iSpeak.Controllers
                         result = await UserManager.AddToRoleAsync(user.Id, role);
                     }
                     //await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+
                     // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
@@ -235,6 +253,7 @@ namespace iSpeak.Controllers
             }
             ViewBag.Roles = list;
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.DOB = model.Birthday;
             return View(model);
         }
 

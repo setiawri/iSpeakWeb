@@ -1,5 +1,4 @@
-﻿using iSpeak.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,13 +11,7 @@ namespace iSpeak.Controllers
     {
         public ActionResult Index()
         {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                return View();
-            }
+            return View();
         }
 
         //public ActionResult About()

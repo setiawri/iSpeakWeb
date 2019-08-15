@@ -30,6 +30,7 @@ namespace iSpeak.Controllers
                                                 <th>Discount</th>
                                                 <th>Voucher</th>
                                                 <th>Subtotal</th>
+                                                <th>Avail. Hours</th>
                                             </tr>
                                         </thead>
                                         <tbody>";
@@ -45,6 +46,7 @@ namespace iSpeak.Controllers
                                 <td>" + item.DiscountAmount.ToString("#,##0") + @"</td>
                                 <td>" + voucher.ToString("#,##0") + @"</td>
                                 <td>" + subtotal.ToString("#,##0") + @"</td>
+                                <td>" + item.SessionHours_Remaining + @"</td>
                             </tr>";
             }
             message += "</tbody></table></div>";
@@ -179,7 +181,7 @@ namespace iSpeak.Controllers
                 saleInvoicesModels.Id = Guid.NewGuid();
                 saleInvoicesModels.Branches_Id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id; //login_session.Branches_Id;
                 saleInvoicesModels.No = (lastHex_int + 1).ToString("X5");
-                saleInvoicesModels.Timestamp = DateTime.Now;
+                saleInvoicesModels.Timestamp = DateTime.UtcNow;
                 saleInvoicesModels.Customer_UserAccounts_Id = saleInvoicesViewModels.Customers_Id.ToString();
                 saleInvoicesModels.Notes = saleInvoicesViewModels.Notes;
                 saleInvoicesModels.Amount = Amount;
@@ -205,6 +207,7 @@ namespace iSpeak.Controllers
                     sii.Services_Id = item.service_id;
                     sii.LessonPackages_Id = item.lesson_id;
                     sii.SessionHours = db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours;
+                    sii.SessionHours_Remaining = db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours;
                     sii.TravelCost = item.travel;
                     sii.TutorTravelCost = item.tutor;
                     db.SaleInvoiceItems.Add(sii);

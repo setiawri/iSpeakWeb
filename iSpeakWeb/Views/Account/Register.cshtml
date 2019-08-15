@@ -1,4 +1,5 @@
 ﻿@model iSpeak.Models.RegisterViewModel
+
 @{
     ViewBag.Root = "User Accounts";
     ViewBag.Title = "Register";
@@ -11,7 +12,6 @@
         @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "target" }))
         {
             @Html.AntiForgeryToken()
-            @Html.HiddenFor(model => model.UserName)
             @Html.HiddenFor(model => model.Active)
             <!-- Form inputs -->
             <div class="card">
@@ -84,7 +84,7 @@
                                                 @Html.ValidationMessageFor(model => model.Birthday, "", new { @class = "text-danger" })
                                             </div>
                                             <div class="col-lg-6">
-                                                @Html.Editor("User", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Username" } })
                                                 @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
@@ -178,7 +178,7 @@
         var str1 = $('#Firstname').val().substring(0, 3);
         var str2 = $('#Lastname').val().substring(0, 3);
         var dob = new Date($('#Birthday').val());
-        $('#User').val(str1 + str2 + ('0' + dob.getDate()).slice(-2) + ('0' + (dob.getMonth() + 1)).slice(-2));
+        $('#UserName').val(str1 + str2 + ('0' + dob.getDate()).slice(-2) + ('0' + (dob.getMonth() + 1)).slice(-2));
     }
 
     $(document).ready(function () {
@@ -191,15 +191,18 @@
                 format: 'YYYY/MM/DD'
             }
         });
+        
+        $('#Birthday').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
+        $('#Birthday').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
 
         $('.tanggal').change(function () {
-            user_generate();
-        })
+                user_generate();
+            })
 
         $('#target').submit(function (e) {
-            $('#UserName').val($('#User').val());
+            //$('#UserName').val($('#User').val());
             $('#Active').val(true);
-        });
+            });
 
-    });
+        });
 </script>

@@ -57,15 +57,25 @@ namespace iSpeak.Controllers
         {
             //var session_login = Session["Login"] as LoginViewModel;
             //session_login.Branches_Id = branch_id;
-            
-            var user = await UserManager.FindByIdAsync(db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id);
-            user.Branches_Id = branch_id;
-            await UserManager.UpdateAsync(user); //update Branches_Id user
-            await SignInManager.SignInAsync(user, false, false); //re-sign in to refresh cookie/claims in identity
 
-            string status = "200";
+            Guid branch_id_before = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+            string status;
+            var isValid = (from u in db.User
+                           join ur in db.UserRole on u.Id equals ur.UserId
+                           join a in db.Access on ur.RoleId equals a.RoleId
+                           where u.UserName == User.Identity.Name && a.WebMenuAccess == "branches_change"
+                           select u);
+            if (isValid.Count() > 0)
+            {
+                status = "200";
+                var user = await UserManager.FindByIdAsync(db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id);
+                user.Branches_Id = branch_id;
+                await UserManager.UpdateAsync(user); //update Branches_Id user
+                await SignInManager.SignInAsync(user, false, false); //re-sign in to refresh cookie/claims in identity
+            }
+            else { status = "401"; }
 
-            return Json(new { status }, JsonRequestBehavior.AllowGet);
+            return Json(new { status, branch_id_before }, JsonRequestBehavior.AllowGet);
         }
 
         public async Task<ActionResult> Index()

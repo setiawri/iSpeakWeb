@@ -55,15 +55,15 @@
                                 <div class="form-group row">
                                     <label class="col-form-label col-lg-3">Full Name</label>
                                     <div class="col-lg-3">
-                                        @Html.EditorFor(model => model.User.Firstname, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                        @Html.EditorFor(model => model.User.Firstname, new { htmlAttributes = new { @class = "form-control", @placeholder = "First Name", @onkeyup = "user_generate()" } })
                                         @Html.ValidationMessageFor(model => model.User.Firstname, "", new { @class = "text-danger" })
                                     </div>
                                     <div class="col-lg-3">
-                                        @Html.EditorFor(model => model.User.Middlename, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                        @Html.EditorFor(model => model.User.Middlename, new { htmlAttributes = new { @class = "form-control", @placeholder = "Middle Name" } })
                                         @Html.ValidationMessageFor(model => model.User.Middlename, "", new { @class = "text-danger" })
                                     </div>
                                     <div class="col-lg-3">
-                                        @Html.EditorFor(model => model.User.Lastname, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                        @Html.EditorFor(model => model.User.Lastname, new { htmlAttributes = new { @class = "form-control", @placeholder = "Last Name", @onkeyup = "user_generate()" } })
                                         @Html.ValidationMessageFor(model => model.User.Lastname, "", new { @class = "text-danger" })
                                     </div>
                                 </div>
@@ -74,12 +74,18 @@
                                     <div class="col-lg-9">
                                         <div class="form-group row">
                                             <div class="col-lg-6">
-                                                @Html.EditorFor(model => model.User.Birthday, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                                                @*@Html.EditorFor(model => model.User.Birthday, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })*@
+                                                <div class="input-group">
+                                                    @Html.EditorFor(model => model.User.Birthday, new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                                    <span class="input-group-append">
+                                                        <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                                    </span>
+                                                </div>
                                                 @Html.ValidationMessageFor(model => model.User.Birthday, "", new { @class = "text-danger" })
                                             </div>
                                             <div class="col-lg-6">
                                                 @*@Html.Editor("User", new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", @Value = Model.User.UserName } })*@
-                                                <input type="text" class="form-control" value="@Model.User.UserName" readonly />
+                                                @Html.EditorFor(model => model.User.UserName, new { htmlAttributes = new { @class = "form-control", @placeholder = "Username" } })
                                                 @Html.ValidationMessageFor(model => model.User.UserName, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
@@ -165,8 +171,29 @@
 </div>
 
 <script type="text/javascript">
+    function user_generate() {
+        var str1 = $('#User_Firstname').val().substring(0, 3);
+        var str2 = $('#User_Lastname').val().substring(0, 3);
+        var dob = new Date($('#User_Birthday').val());
+        $('#User_UserName').val(str1 + str2 + ('0' + dob.getDate()).slice(-2) + ('0' + (dob.getMonth() + 1)).slice(-2));
+    }
+
     $(document).ready(function () {
         $('.select2').select2();
         var switchery = new Switchery(document.querySelector('.form-check-input-switchery'));
+
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
+        });
+
+        $('#User_Birthday').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", Model.User.Birthday)');
+        $('#User_Birthday').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", Model.User.Birthday)');
+
+        $('.tanggal').change(function () {
+            user_generate();
+        });
     })
 </script>
