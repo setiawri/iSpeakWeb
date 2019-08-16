@@ -190,9 +190,20 @@ namespace iSpeak.Controllers
             else
             {
                 List<SelectListItem> list = new List<SelectListItem>();
-                foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+                bool setRole = p.IsGranted(User.Identity.Name, "user_setroles");
+                if (setRole)
                 {
-                    list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                    foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+                    {
+                        list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                    }
+                }
+                else
+                {
+                    foreach (var role in RoleManager.Roles.Where(x => x.Name == "Student").OrderBy(x => x.Name))
+                    {
+                        list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                    }
                 }
                 ViewBag.Roles = list;
                 ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
@@ -247,9 +258,21 @@ namespace iSpeak.Controllers
 
             // If we got this far, something failed, redisplay form
             List<SelectListItem> list = new List<SelectListItem>();
-            foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+            Permission p = new Permission();
+            bool setRole = p.IsGranted(User.Identity.Name, "user_setroles");
+            if (setRole)
             {
-                list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
+                {
+                    list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                }
+            }
+            else
+            {
+                foreach (var role in RoleManager.Roles.Where(x => x.Name == "Student").OrderBy(x => x.Name))
+                {
+                    list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                }
             }
             ViewBag.Roles = list;
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");

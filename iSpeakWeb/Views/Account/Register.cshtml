@@ -35,7 +35,7 @@
                                     @Html.LabelFor(model => model.RoleName, htmlAttributes: new { @class = "col-form-label col-lg-3" })
                                     <div class="col-lg-9">
                                         @*@Html.DropDownListFor(m => m.RoleName, new SelectList(ViewBag.Roles, "Value", "Text"), new { @class = "form-control select2", @multiple = "multiple" })*@
-                                        @Html.ListBoxFor(model => model.RoleName, new SelectList(ViewBag.Roles, "Value", "Text"), new { @class = "form-control select2", @multiple = "multiple" })
+                                        @Html.ListBoxFor(model => model.RoleName, new SelectList(ViewBag.Roles, "Value", "Text", "Student"), new { @class = "form-control select2", @multiple = "multiple" })
                                         @Html.ValidationMessageFor(model => model.RoleName, "", new { @class = "text-danger" })
                                     </div>
                                 </div>

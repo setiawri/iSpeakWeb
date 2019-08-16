@@ -30,9 +30,13 @@
                             <tr>
                                 <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
                                 <th>@Html.DisplayNameFor(model => model.Lesson)</th>
+                                <th>@Html.DisplayNameFor(model => model.Student)</th>
                                 <th>@Html.DisplayNameFor(model => model.Tutor)</th>
                                 <th>@Html.DisplayNameFor(model => model.SessionHours)</th>
-                                <th>@Html.DisplayNameFor(model => model.HourlyRates_Rate)</th>
+                                @if (ViewBag.IsShowHourlyRate == true)
+                                {
+                                    <th>@Html.DisplayNameFor(model => model.HourlyRates_Rate)</th>
+                                }
                                 <th>@Html.DisplayNameFor(model => model.TravelCost)</th>
                                 <th>@Html.DisplayNameFor(model => model.TutorTravelCost)</th>
                                 @*<th>@Html.DisplayNameFor(model => model.Deleted)</th>*@
@@ -45,9 +49,13 @@
                                 <tr>
                                     <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Lesson)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Student)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
                                     <td>@Html.DisplayFor(modelItem => item.SessionHours)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.HourlyRates_Rate)</td>
+                                    @if (ViewBag.IsShowHourlyRate)
+                                    {
+                                        <td>@Html.DisplayFor(modelItem => item.HourlyRates_Rate)</td>
+                                    }
                                     <td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
                                     <td>@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
                                     @*<td>
@@ -61,7 +69,8 @@
                                         }
                                     </td>*@
                                     <td>
-                                        <a href="#" onclick="View('@item.Id')">View</a>
+                                        <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
                                     </td>
                                 </tr>
                             }
@@ -78,14 +87,47 @@
 </div>
 
 <script type="text/javascript">
+
+    function View(id, lesson, student, tutor) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetSession", "LessonSessions")',
+            data: {
+                id: id,
+                lesson: lesson,
+                student: student,
+                tutor: tutor
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Session Details',
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
+        var lastColumn = 0;
+        if ('@ViewBag.IsShowHourlyRate' == 'True') {
+            lastColumn = 8;
+        }
+        else {
+            lastColumn = 7;
+        }
+
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
                 width: 100,
-                targets: [7]
+                targets: [lastColumn]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {

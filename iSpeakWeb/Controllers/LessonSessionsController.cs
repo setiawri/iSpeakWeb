@@ -103,6 +103,52 @@ namespace iSpeak.Controllers
             return Json(new { isValid, message }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region Get Session Data Index
+        public JsonResult GetSession(Guid id, string lesson, string student, string tutor)
+        {
+            var data = db.LessonSessions.Where(x => x.Id == id).FirstOrDefault();
+            string message = @"<div class='table-responsive'>
+                                    <table class='table table-striped table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Lesson</th>
+                                                <th>Student</th>
+                                                <th>Tutor</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>";
+            message += @"<tr>
+                            <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", data.Timestamp) + @"</td>
+                            <td>" + lesson + @"</td>
+                            <td>" + student + @"</td>
+                            <td>" + tutor + @"</td>
+                        </tr>";
+            message += "</tbody></table></div><br />";
+            message += @"<div class='row'>
+                            <div class='col-md-6'>
+                                <div class='form-group'>
+                                    <label>Review</label>
+                                    <textarea class='form-control' rows='3'>" + data.Review + @"</textarea>
+                                </div>
+                            </div>";
+            
+            Permission p = new Permission();
+            bool isShowInternalNotes = p.IsGranted(User.Identity.Name, "lessonsessions_showinternalnotes");
+            if (isShowInternalNotes)
+            {
+                message += @"<div class='col-md-6'>
+                                <div class='form-group'>
+                                    <label>Internal Notes</label>
+                                    <textarea class='form-control' rows='3'>" + data.InternalNotes + @"</textarea>
+                                </div>
+                            </div>";
+            }
+            message += "</div>";
+
+            return Json(new { content = message }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #endregion
 
         public async Task<ActionResult> Index()
@@ -113,21 +159,24 @@ namespace iSpeak.Controllers
             else
             {
                 var sessions = await (from ls in db.LessonSessions
-                                  join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
-                                  join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                                  join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                                  select new LessonSessionsViewModels
-                                  {
-                                      Id = ls.Id,
-                                      Timestamp = ls.Timestamp,
-                                      Lesson = lp.Name,
-                                      Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                                      SessionHours = ls.SessionHours,
-                                      HourlyRates_Rate = ls.HourlyRates_Rate,
-                                      TravelCost = ls.TravelCost,
-                                      TutorTravelCost = ls.TutorTravelCost,
-                                      Deleted = ls.Deleted
-                                  }).ToListAsync();
+                                      join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                                      join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                                      join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                                      join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                                      join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                                      select new LessonSessionsViewModels
+                                      {
+                                          Id = ls.Id,
+                                          Timestamp = ls.Timestamp,
+                                          Lesson = lp.Name,
+                                          Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                                          Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                          SessionHours = ls.SessionHours,
+                                          HourlyRates_Rate = ls.HourlyRates_Rate,
+                                          TravelCost = ls.TravelCost,
+                                          TutorTravelCost = ls.TutorTravelCost,
+                                          Deleted = ls.Deleted
+                                      }).ToListAsync();
 
                 List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
                 foreach (var session in sessions)
@@ -137,6 +186,7 @@ namespace iSpeak.Controllers
                         Id = session.Id,
                         Timestamp = TimeZoneInfo.ConvertTimeFromUtc(session.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
                         Lesson = session.Lesson,
+                        Student = session.Student,
                         Tutor = session.Tutor,
                         SessionHours = session.SessionHours,
                         HourlyRates_Rate = session.HourlyRates_Rate,
@@ -145,7 +195,8 @@ namespace iSpeak.Controllers
                         Deleted = session.Deleted
                     });
                 }
-                
+
+                ViewBag.IsShowHourlyRate = p.IsGranted(User.Identity.Name, "lessonsessions_showhourlyrate");
                 return View(list);
             }
         }
@@ -195,29 +246,6 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Timestamp,Tutor_UserAccounts_Id,SessionHours,Review,InternalNotes")] LessonSessionsModels lessonSessionsModels, string Items)
         {
-            //bool isValid = true; string message = "";
-            //List<LessonSessionsDetails> list = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
-            //foreach (var item in list)
-            //{
-            //    var data = (from si in db.SaleInvoices
-            //                join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-            //                join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-            //                where sii.Id == item.sale_invoice_item_id
-            //                select new { si, sii, u }).FirstOrDefault();
-            //    //decimal remaining = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault().SessionHours_Remaining.Value;
-            //    if (data.sii.SessionHours_Remaining.Value < lessonSessionsModels.SessionHours)
-            //    {
-            //        isValid = false;
-            //        message = data.u.Firstname + " " + data.u.Middlename + " " + data.u.Lastname + " - " + data.sii.Description + " remaining hours is less than " + lessonSessionsModels.SessionHours + " hr.";
-            //        break;
-            //    }
-            //}
-
-            //if (!isValid)
-            //{
-            //    ModelState.AddModelError("ErrorHours", message);
-            //}
-
             if (ModelState.IsValid)
             {
                 List<LessonSessionsDetails> details = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
@@ -289,6 +317,32 @@ namespace iSpeak.Controllers
             }
             ViewBag.listTutor = new SelectList(tutor_list, "Id", "Name");
             ViewBag.listStudent = new SelectList(student_list, "Id", "Name");
+
+            return View(lessonSessionsModels);
+        }
+
+        public async Task<ActionResult> Edit(Guid? id)
+        {
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                LessonSessionsModels lessonSessionsModels = await db.LessonSessions.Where(x => x.Id == id).FirstOrDefaultAsync();
+                return View(lessonSessionsModels);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Timestamp,SaleInvoiceItems_Id,SessionHours,Review,InternalNotes,Deleted,Tutor_UserAccounts_Id,HourlyRates_Rate,TravelCost,TutorTravelCost,Adjustment")] LessonSessionsModels lessonSessionsModels)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Entry(lessonSessionsModels).State = EntityState.Modified;
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
 
             return View(lessonSessionsModels);
         }

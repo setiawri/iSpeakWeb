@@ -430,6 +430,7 @@
     <Content Include="Views\LandingPage\Index.cshtml" />
     <Content Include="Views\Role\Manage.cshtml" />
     <Content Include="Views\Shared\Unauthorized.cshtml" />
+    <Content Include="Views\LessonSessions\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

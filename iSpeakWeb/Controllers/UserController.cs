@@ -21,7 +21,25 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                return View(db.User.ToList());
+                bool isSetRole = p.IsGranted(User.Identity.Name, "user_setroles");
+                if (isSetRole)
+                {
+                    return View(db.User.ToList());
+                }
+                else
+                {
+                    var list_user = (from u in db.User
+                                     join ur in db.UserRole on u.Id equals ur.UserId
+                                     join r in db.Role on ur.RoleId equals r.Id
+                                     where r.Name == "Student"
+                                     select new { u, ur, r }).ToList();
+                    List<UserModels> users = new List<UserModels>();
+                    foreach (var usr in list_user)
+                    {
+                        users.Add(usr.u);
+                    }
+                    return View(users);
+                }
             }
         }
 

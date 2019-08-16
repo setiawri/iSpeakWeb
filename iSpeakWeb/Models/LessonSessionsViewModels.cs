@@ -13,6 +13,7 @@ namespace iSpeak.Models
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime Timestamp { get; set; }
         public string Lesson { get; set; }
+        public string Student { get; set; }
         public string Tutor { get; set; }
         [Display(Name = "Hour")]
         [DisplayFormat(DataFormatString = "{0:N2}")]
