@@ -41,7 +41,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-6">
-                                <div class="form-group row">
+                                <div class="form-group row" style="display: none">
                                     @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-3" })
                                     <div class="col-lg-9">
                                         @Html.DropDownListFor(m => m.Branches_Id, ViewBag.listBranch as SelectList, new { @class = "form-control" })
@@ -185,6 +185,8 @@
 
         $('.select2').select2();
 
+        $('#Branches_Id').val($('#Branch').val()).trigger('change');
+
         $('.tanggal').daterangepicker({
             singleDatePicker: true,
             locale: {
@@ -202,7 +204,7 @@
         $('#target').submit(function (e) {
             //$('#UserName').val($('#User').val());
             $('#Active').val(true);
-            });
+        });
 
         });
 </script>

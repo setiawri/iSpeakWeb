@@ -106,25 +106,25 @@
                         Dashboard
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" @(ViewBag.SaleMenu == "" ? "" : Html.Raw(ViewBag.SaleMenu))>
                     <a href="@Url.Action("Index", "Sale")" class="navbar-nav-link">
                         <i class="icon-list3 mr-2"></i>
                         Sale Invoice
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" @(ViewBag.PaymentMenu == "" ? "" : Html.Raw(ViewBag.PaymentMenu))>
                     <a href="@Url.Action("Print", "Payments")" class="navbar-nav-link">
                         <i class="icon-cash3 mr-2"></i>
                         Payment
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" @(ViewBag.SessionsMenu == "" ? "" : Html.Raw(ViewBag.SessionsMenu))>
                     <a href="@Url.Action("Index", "LessonSessions")" class="navbar-nav-link">
                         <i class="icon-meter2 mr-2"></i>
                         Sessions
                     </a>
                 </li>
-                <li class="nav-item dropdown">
+                <li class="nav-item dropdown" @(ViewBag.SettingsMenu == "" ? "" : Html.Raw(ViewBag.SettingsMenu))>
                     <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
                         <i class="icon-cog3 mr-2"></i>
                         Settings
