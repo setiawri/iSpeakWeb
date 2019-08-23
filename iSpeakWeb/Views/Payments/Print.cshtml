@@ -32,7 +32,8 @@
                                 <th>@Html.DisplayNameFor(model => model.No)</th>
                                 <th>@Html.DisplayNameFor(model => model.CashAmount)</th>
                                 <th>@Html.DisplayNameFor(model => model.DebitAmount)</th>
-                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                                <th>@Html.DisplayNameFor(model => model.ConsignmentAmount)</th>
+                                <th>@Html.DisplayNameFor(model => model.Cancelled)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -45,9 +46,23 @@
                                     <td>@Html.DisplayFor(modelItem => item.No)</td>
                                     <td>@Html.DisplayFor(modelItem => item.CashAmount)</td>
                                     <td>@Html.DisplayFor(modelItem => item.DebitAmount)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.ConsignmentAmount)</td>
                                     <td>
-                                        <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a>
+                                        @if (item.Cancelled == true)
+                                        {
+                                            <span class="badge badge-warning">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-dark">No</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Cancelled == false)
+                                        {
+                                            <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a> @:|
+                                            <a href="#" onclick="Cancelled('@item.Id', '@item.No')">Cancel</a>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -83,6 +98,39 @@
         }); //end ajax
     }
 
+    function Cancelled(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to cancel Payment No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Cancelled", "Payments")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
@@ -90,8 +138,8 @@
             columnDefs: [
                 {
                     orderable: false,
-                    width: 100,
-                    targets: [6]
+                    width: 120,
+                    targets: [7]
                 }
             ],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

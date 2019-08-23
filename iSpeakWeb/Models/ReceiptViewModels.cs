@@ -12,10 +12,11 @@ namespace iSpeak.Models
         public PaymentsModels Payment { get; set; }
         public List<SaleInvoiceItemsDetails> listSaleInvoiceItems { get; set; }
         public List<PaymentItemsDetails> listPaymentItems { get; set; }
-        [DisplayFormat(DataFormatString = "{0:N0}")]
-        public decimal TotalCash { get; set; }
-        [DisplayFormat(DataFormatString = "{0:N0}")]
-        public decimal TotalDebit { get; set; }
+        //[DisplayFormat(DataFormatString = "{0:N0}")]
+        //public decimal TotalCash { get; set; }
+        //[DisplayFormat(DataFormatString = "{0:N0}")]
+        //public decimal TotalDebit { get; set; }
+        public string ConsignmentName { get; set; }
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public decimal TotalAmount { get; set; }
     }

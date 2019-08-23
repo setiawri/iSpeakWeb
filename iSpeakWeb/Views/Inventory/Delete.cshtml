@@ -1,0 +1,103 @@
+﻿@model iSpeak.Models.InventoryViewModels
+
+@{
+    ViewBag.Root = "Inventory";
+    ViewBag.Title = "Delete";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <fieldset>
+                    <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.ReceiveDate)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.ReceiveDate)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Product)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Product)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Supplier)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Supplier)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.BuyQty)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.BuyQty)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.AvailableQty)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.AvailableQty)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Unit)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Unit)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.BuyPrice)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.BuyPrice)
+                        </dd>
+                    </dl>
+                </fieldset>
+                <hr />
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        <a href="@Url.Action("Index", "Inventory")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <button type="submit" class="btn btn-danger">Delete <i class="icon-bin ml-2"></i></button>
+                    </div>
+                }
+            </div>
+        </div>
+        <!-- /form inputs -->
+
+    </div>
+    <!-- /content area -->
+
+</div>

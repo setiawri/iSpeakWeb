@@ -157,14 +157,27 @@
                                 <div class="table-responsive">
                                     <table class="table">
                                         <tbody>
-                                            <tr>
-                                                <th>CASH</th>
-                                                <td class="text-right">@Html.DisplayFor(modelItem => modelItem.TotalCash)</td>
-                                            </tr>
-                                            <tr>
-                                                <th>DEBIT</th>
-                                                <td class="text-right">@Html.DisplayFor(modelItem => modelItem.TotalDebit)</td>
-                                            </tr>
+                                            @if (Model.Payment.CashAmount > 0)
+                                            {
+                                                <tr>
+                                                    <th>CASH</th>
+                                                    <td class="text-right">@Html.DisplayFor(modelItem => modelItem.Payment.CashAmount)</td>
+                                                </tr>
+                                            }
+                                            @if (Model.Payment.DebitAmount > 0)
+                                            {
+                                                <tr>
+                                                    <th>DEBIT</th>
+                                                    <td class="text-right">@Html.DisplayFor(modelItem => modelItem.Payment.DebitAmount)</td>
+                                                </tr>
+                                            }
+                                            @if (Model.Payment.ConsignmentAmount > 0)
+                                            {
+                                                <tr>
+                                                    <th>@Html.DisplayFor(modelItem => modelItem.ConsignmentName)</th>
+                                                    <td class="text-right">@Html.DisplayFor(modelItem => modelItem.Payment.ConsignmentAmount)</td>
+                                                </tr>
+                                            }
                                             <tr>
                                                 <th>TOTAL</th>
                                                 <td class="text-right text-primary"><h5 class="font-weight-semibold">@Html.DisplayFor(modelItem => modelItem.TotalAmount)</h5></td>

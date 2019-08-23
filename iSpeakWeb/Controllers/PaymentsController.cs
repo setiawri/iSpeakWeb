@@ -15,38 +15,39 @@ namespace iSpeak.Controllers
     {
         private iSpeakContext db = new iSpeakContext();
 
-        public async Task<ActionResult> Index()
-        {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                var data = (from si in db.SaleInvoices
-                            join b in db.Branches on si.Branches_Id equals b.Id
-                            join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                            //where si.Due > 0
-                            select new SaleInvoicesIndexModels
-                            {
-                                Id = si.Id,
-                                Branches = b.Name,
-                                No = si.No,
-                                Timestamp = si.Timestamp,
-                                Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                                Amount = si.Amount,
-                                Due = si.Due,
-                                Cancelled = si.Cancelled
-                            }).ToListAsync();
-                return View(await data);
-            }
-        }
+        //public async Task<ActionResult> Index()
+        //{
+        //    Permission p = new Permission();
+        //    bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+        //    if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+        //    else
+        //    {
+        //        var data = (from si in db.SaleInvoices
+        //                    join b in db.Branches on si.Branches_Id equals b.Id
+        //                    join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+        //                    //where si.Due > 0
+        //                    select new SaleInvoicesIndexModels
+        //                    {
+        //                        Id = si.Id,
+        //                        Branches = b.Name,
+        //                        No = si.No,
+        //                        Timestamp = si.Timestamp,
+        //                        Customer = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+        //                        Amount = si.Amount,
+        //                        Due = si.Due,
+        //                        Cancelled = si.Cancelled
+        //                    }).ToListAsync();
+        //        return View(await data);
+        //    }
+        //}
 
+        #region Get Payment
         public JsonResult GetPayment(Guid id)
         {
             var list = (from pi in db.PaymentItems
                         join si in db.SaleInvoices on pi.ReferenceId equals si.Id
                         join p in db.Payments on pi.Payments_Id equals p.Id
-                        where si.Id == id
+                        where si.Id == id && p.Cancelled == false
                         orderby p.Timestamp descending
                         select new { pi, si, p }).ToList();
             string message = @"<div class='table-responsive'>
@@ -75,6 +76,23 @@ namespace iSpeak.Controllers
 
             return Json(new { content = message }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
+        #region Cancel Payment
+        public async Task<JsonResult> Cancelled(Guid id)
+        {
+            var payment = await db.Payments.FindAsync(id);
+            payment.Cancelled = true;
+            db.Entry(payment).State = EntityState.Modified;
+
+            var payment_item = await db.PaymentItems.Where(x => x.Payments_Id == id).FirstOrDefaultAsync();
+            var sale_invoice = await db.SaleInvoices.FindAsync(payment_item.ReferenceId);
+            sale_invoice.Due += payment_item.Amount;
+            db.Entry(sale_invoice).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         [HttpGet]
         public ActionResult Create(string id)
@@ -109,35 +127,42 @@ namespace iSpeak.Controllers
                 }
                 ViewBag.Total = total.ToString("#,##0");
                 ViewBag.Due = due.ToString("#,##0");
+                Guid branch_id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+                ViewBag.listConsignment = new SelectList(db.Consignments.Where(x => x.Branches_Id == branch_id).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.Invoices = id;
                 return View(listDetails);
             }
         }
 
-        public JsonResult SavePayments(int cash_amount, int bank_amount, string bank_name, string owner_name, string bank_number, string reff_no, string notes, string bank_type, string invoices_id)
+        public JsonResult SavePayments(int cash_amount, int consignment_amount, Guid? consignment_id, int bank_amount, string bank_name, string owner_name, string bank_number, string reff_no, string notes, string bank_type, string invoices_id)
         {
             string lastHex_string = db.Payments.AsNoTracking().Max(x => x.No);
             int lastHex_int = int.Parse(
                 string.IsNullOrEmpty(lastHex_string) ? 0.ToString("X5") : lastHex_string,
                 System.Globalization.NumberStyles.HexNumber);
 
-            PaymentsModels paymentsModels = new PaymentsModels();
-            paymentsModels.Id = Guid.NewGuid();
-            paymentsModels.No = (lastHex_int + 1).ToString("X5");
-            paymentsModels.Timestamp = DateTime.UtcNow;
-            paymentsModels.CashAmount = cash_amount;
-            paymentsModels.DebitAmount = bank_amount;
-            paymentsModels.DebitBank = (bank_amount == 0) ? "" : bank_name;
-            paymentsModels.DebitOwnerName = (bank_amount == 0) ? "" : owner_name;
-            paymentsModels.DebitNumber = (bank_amount == 0) ? "" : bank_number;
-            paymentsModels.DebitRefNo = (bank_amount == 0) ? "" : reff_no;
-            paymentsModels.Notes = notes;
-            paymentsModels.Cancelled = false;
-            paymentsModels.Confirmed = false;
-            paymentsModels.IsTransfer = (bank_type == "Transfer") ? true : false;
+            PaymentsModels paymentsModels = new PaymentsModels
+            {
+                Id = Guid.NewGuid(),
+                No = (lastHex_int + 1).ToString("X5"),
+                Timestamp = DateTime.UtcNow,
+                CashAmount = cash_amount,
+
+                DebitAmount = bank_amount,
+                DebitBank = (bank_amount == 0) ? "" : bank_name,
+                DebitOwnerName = (bank_amount == 0) ? "" : owner_name,
+                DebitNumber = (bank_amount == 0) ? "" : bank_number,
+                DebitRefNo = (bank_amount == 0) ? "" : reff_no,
+                Consignments_Id = (consignment_amount == 0) ? null : consignment_id,
+                ConsignmentAmount = consignment_amount,
+                Notes = notes,
+                Cancelled = false,
+                Confirmed = false,
+                IsTransfer = (bank_type == "Transfer") ? true : false
+            };
             db.Payments.Add(paymentsModels);
 
-            int total_paid = cash_amount + bank_amount;
+            int total_paid = cash_amount + bank_amount + consignment_amount;
             string[] ids = invoices_id.Split(',');
             for (int i = ids.Length - 1; i >= 0; i--)  //foreach (string id in ids)
             {
@@ -158,13 +183,15 @@ namespace iSpeak.Controllers
                     }
                     db.Entry(saleInvoicesModels).State = EntityState.Modified;
 
-                    PaymentItemsModels paymentItemsModels = new PaymentItemsModels();
-                    paymentItemsModels.Id = Guid.NewGuid();
-                    paymentItemsModels.Payments_Id = paymentsModels.Id;
-                    paymentItemsModels.ReferenceId = saleInvoicesModels.Id;
-                    paymentItemsModels.Amount = (due_inv > saleInvoicesModels.Due) ? due_inv - saleInvoicesModels.Due : saleInvoicesModels.Due - due_inv;
-                    paymentItemsModels.DueBefore = due_inv;
-                    paymentItemsModels.DueAfter = saleInvoicesModels.Due;
+                    PaymentItemsModels paymentItemsModels = new PaymentItemsModels
+                    {
+                        Id = Guid.NewGuid(),
+                        Payments_Id = paymentsModels.Id,
+                        ReferenceId = saleInvoicesModels.Id,
+                        Amount = (due_inv > saleInvoicesModels.Due) ? due_inv - saleInvoicesModels.Due : saleInvoicesModels.Due - due_inv,
+                        DueBefore = due_inv,
+                        DueAfter = saleInvoicesModels.Due
+                    };
                     db.PaymentItems.Add(paymentItemsModels);
                 }
             }
@@ -181,7 +208,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                if (id == null || id == Guid.Empty)
+                if (id == null || id == Guid.Empty) //show payment index
                 {
                     //var login_session = Session["Login"] as LoginViewModel;
                     Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
@@ -195,7 +222,8 @@ namespace iSpeak.Controllers
                             Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
                             CashAmount = item.CashAmount,
                             DebitAmount = item.DebitAmount,
-                            Notes = item.Notes
+                            ConsignmentAmount = item.ConsignmentAmount,
+                            Cancelled = item.Cancelled
                         };
                         Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
@@ -205,7 +233,7 @@ namespace iSpeak.Controllers
                     }
                     return View(list_pim);
                 }
-                else
+                else //show payment receipt
                 {
                     PaymentsModels paymentsModels = db.Payments.Where(x => x.Id == id).FirstOrDefault();
                     BranchesModels branchesModels = new BranchesModels();
@@ -223,13 +251,15 @@ namespace iSpeak.Controllers
                     {
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().Branches_Id;
                         branchesModels = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault();
-
-                        PaymentItemsDetails paymentItemsDetails = new PaymentItemsDetails();
-                        paymentItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().No;
-                        paymentItemsDetails.Amount = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).Sum(x => x.Amount);
-                        paymentItemsDetails.DueBefore = item.pi.DueBefore;
-                        paymentItemsDetails.Payment = (item.pi.DueBefore > item.pi.DueAfter) ? item.pi.DueBefore - item.pi.DueAfter : item.pi.DueAfter - item.pi.DueBefore;
-                        paymentItemsDetails.DueAfter = item.pi.DueAfter;
+                        
+                        PaymentItemsDetails paymentItemsDetails = new PaymentItemsDetails
+                        {
+                            Invoice = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().No,
+                            Amount = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).Sum(x => x.Amount),
+                            DueBefore = item.pi.DueBefore,
+                            Payment = (item.pi.DueBefore > item.pi.DueAfter) ? item.pi.DueBefore - item.pi.DueAfter : item.pi.DueAfter - item.pi.DueBefore,
+                            DueAfter = item.pi.DueAfter
+                        };
                         listItems.Add(paymentItemsDetails);
                         total_paid += paymentItemsDetails.Payment;
 
@@ -237,13 +267,13 @@ namespace iSpeak.Controllers
                         var list_SaleInvoiceItemsModels = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.pi.ReferenceId).OrderBy(x => x.RowNo).ToList();
                         foreach (var subitem in list_SaleInvoiceItemsModels)
                         {
-                            SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
-                            saleInvoiceItemsDetails.Invoice = paymentItemsDetails.Invoice;
-                            saleInvoiceItemsDetails.Description = subitem.Description;
                             var data_customer = (from si in db.SaleInvoices
                                                  join c in db.User on si.Customer_UserAccounts_Id equals c.Id
                                                  where si.Id == item.pi.ReferenceId
                                                  select new { c }).FirstOrDefault();
+                            SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
+                            saleInvoiceItemsDetails.Invoice = paymentItemsDetails.Invoice;
+                            saleInvoiceItemsDetails.Description = subitem.Description;
                             saleInvoiceItemsDetails.Customer = data_customer.c.Firstname + " " + data_customer.c.Middlename + " " + data_customer.c.Lastname;
                             saleInvoiceItemsDetails.Qty = subitem.Qty;
                             saleInvoiceItemsDetails.Price = subitem.Price;
@@ -262,8 +292,9 @@ namespace iSpeak.Controllers
                     receiptViewModels.Payment = paymentsModels;
                     receiptViewModels.listSaleInvoiceItems = listDetails;
                     receiptViewModels.listPaymentItems = listItems;
-                    receiptViewModels.TotalCash = paymentsModels.CashAmount;
-                    receiptViewModels.TotalDebit = paymentsModels.DebitAmount;
+                    //receiptViewModels.TotalCash = paymentsModels.CashAmount;
+                    //receiptViewModels.TotalDebit = paymentsModels.DebitAmount;
+                    receiptViewModels.ConsignmentName = (paymentsModels.Consignments_Id.HasValue) ? db.Consignments.Where(x => x.Id == paymentsModels.Consignments_Id.Value).FirstOrDefault().Name : "";
                     receiptViewModels.TotalAmount = total_paid;
                     return View("Printed", receiptViewModels);
                 }

@@ -173,8 +173,10 @@
     <Compile Include="Common\Permission.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BranchesController.cs" />
+    <Compile Include="Controllers\ConsignmentsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HourlyRatesController.cs" />
+    <Compile Include="Controllers\InventoryController.cs" />
     <Compile Include="Controllers\LandingPageController.cs" />
     <Compile Include="Controllers\LanguagesController.cs" />
     <Compile Include="Controllers\LessonPackagesController.cs" />
@@ -182,6 +184,7 @@
     <Compile Include="Controllers\LessonTypesController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PaymentsController.cs" />
+    <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
@@ -211,8 +214,10 @@
     <Compile Include="Models\AccessModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
+    <Compile Include="Models\ConsignmentsModels.cs" />
     <Compile Include="Models\HourlyRatesModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\InventoryModels.cs" />
     <Compile Include="Models\iSpeakContext.cs" />
     <Compile Include="Models\LanguagesModels.cs" />
     <Compile Include="Models\LessonPackagesModels.cs" />
@@ -223,9 +228,12 @@
     <Compile Include="Models\MasterMenuModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
     <Compile Include="Models\PaymentsModels.cs" />
+    <Compile Include="Models\ProductsModels.cs" />
+    <Compile Include="Models\Products_QtyModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
     <Compile Include="Models\SaleInvoiceItemsModels.cs" />
+    <Compile Include="Models\SaleInvoiceItems_InventoryModels.cs" />
     <Compile Include="Models\SaleInvoicesModels.cs" />
     <Compile Include="Models\SaleInvoicesViewModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
@@ -431,6 +439,18 @@
     <Content Include="Views\Role\Manage.cshtml" />
     <Content Include="Views\Shared\Unauthorized.cshtml" />
     <Content Include="Views\LessonSessions\Edit.cshtml" />
+    <Content Include="Views\Products\Index.cshtml" />
+    <Content Include="Views\Products\Create.cshtml" />
+    <Content Include="Views\Products\Edit.cshtml" />
+    <Content Include="Views\Products\Delete.cshtml" />
+    <Content Include="Views\Inventory\Index.cshtml" />
+    <Content Include="Views\Inventory\Create.cshtml" />
+    <Content Include="Views\Inventory\Edit.cshtml" />
+    <Content Include="Views\Inventory\Delete.cshtml" />
+    <Content Include="Views\Consignments\Index.cshtml" />
+    <Content Include="Views\Consignments\Create.cshtml" />
+    <Content Include="Views\Consignments\Edit.cshtml" />
+    <Content Include="Views\Consignments\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

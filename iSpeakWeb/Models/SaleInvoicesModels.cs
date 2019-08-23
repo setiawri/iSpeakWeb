@@ -29,6 +29,7 @@ namespace iSpeak.Models
         public Guid Id { get; set; }
         public string Branches { get; set; }
         public string No { get; set; }
+        [Display(Name = "Date")]
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime Timestamp { get; set; }
         public string Customer { get; set; }

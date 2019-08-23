@@ -26,5 +26,10 @@ namespace iSpeak.Models
         public DbSet<PaymentsModels> Payments { get; set; }
         public DbSet<PaymentItemsModels> PaymentItems { get; set; }
         public DbSet<LessonSessionsModels> LessonSessions { get; set; }
+        public DbSet<ProductsModels> Products { get; set; }
+        public DbSet<InventoryModels> Inventory { get; set; }
+        public DbSet<SaleInvoiceItems_InventoryModels> SaleInvoiceItems_Inventory { get; set; }
+        public DbSet<ConsignmentsModels> Consignments { get; set; }
+        public DbSet<Products_QtyModels> Products_Qty { get; set; }
     }
 }

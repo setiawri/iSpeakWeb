@@ -26,6 +26,10 @@ namespace iSpeak.Models
         public string DebitOwnerName { get; set; }
         public string DebitNumber { get; set; }
         public string DebitRefNo { get; set; }
+        public Guid? Consignments_Id { get; set; }
+        [Display(Name = "Consignment")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int ConsignmentAmount { get; set; }
         public string Notes { get; set; }
         public bool Cancelled { get; set; }
         public bool Confirmed { get; set; }
@@ -36,6 +40,7 @@ namespace iSpeak.Models
     {
         public Guid Id { get; set; }
         public string No { get; set; }
+        [Display(Name = "Date")]
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime Timestamp { get; set; }
         [Display(Name = "Cash")]
@@ -44,7 +49,10 @@ namespace iSpeak.Models
         [Display(Name = "Debit")]
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int DebitAmount { get; set; }
-        public string Notes { get; set; }
+        [Display(Name = "Consignment")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int ConsignmentAmount { get; set; }
         public string Branch { get; set; }
+        public bool Cancelled { get; set; }
     }
 }

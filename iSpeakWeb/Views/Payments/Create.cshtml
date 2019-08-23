@@ -141,6 +141,16 @@
                             </div>
                             <hr />
                             <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Consignment</label>
+                                <div class="col-sm-4">
+                                    @Html.DropDownList("Consignment", ViewBag.listConsignment as SelectList, new { @class = "form-control" })
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="number" class="form-control text-right mdl-consignment" value="0" onkeyup="math_total()">
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row">
                                 <label class="col-form-label col-sm-4">Notes</label>
                                 <div class="col-sm-8">
                                     <textarea class="form-control mdl-notes" rows="2"></textarea>
@@ -174,7 +184,12 @@
             total_cash = parseFloat($('.mdl-cash').val());
         }
 
-        var total = total_card + total_cash;
+        var total_consignment = 0;
+        if ($('.mdl-consignment').val() != '') {
+            total_consignment = parseFloat($('.mdl-consignment').val());
+        }
+
+        var total = total_card + total_cash + total_consignment;
         $('.mdl-paid').val(total.toLocaleString());
     }
 
@@ -212,6 +227,11 @@
                 cash_amount = parseFloat($('.mdl-cash').val());
             }
 
+            var consignment_amount = 0;
+            if ($('.mdl-consignment').val() != '') {
+                consignment_amount = parseFloat($('.mdl-consignment').val());
+            }
+
             var total_due = parseFloat($('.mdl-due').val().replace(/,/g, ''));
             var total_paid = parseFloat($('.mdl-paid').val().replace(/,/g, ''));
             //console.log('due: ' + total_due + ', paid: ' + total_paid);
@@ -223,6 +243,9 @@
             }
             else if (bank_amount > 0 && $('.mdl-reff').val() == '') {
                 $('.modal-validation').html('The field REF # is required.').show();
+            }
+            else if (consignment_amount > 0 && $('#Consignment').val() == '') {
+                $('.modal-validation').html('The field Consignment is required.').show();
             }
             else {
                 $('.modal-validation').html('').hide();
@@ -242,6 +265,8 @@
                     url: '@Url.Action("SavePayments", "Payments")',
                     data: {
                         cash_amount: cash_amount,
+                        consignment_amount: consignment_amount,
+                        consignment_id: $('#Consignment').val(),
                         bank_amount: bank_amount,
                         bank_name: $('.mdl-bank').val(),
                         owner_name: $('.mdl-name').val(),

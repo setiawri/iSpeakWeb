@@ -33,6 +33,7 @@
                         <li class="nav-item"><a href="#tab-service" class="nav-link" data-toggle="tab">Service</a></li>
                     </ul>
                     <div class="tab-content">
+                        <!-- LESSON -->
                         <div class="tab-pane fade show active" id="tab-lesson">
                             <div class="form-group row">
                                 @Html.LabelFor(model => model.LessonPackages_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
@@ -64,12 +65,34 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- /LESSON -->
+                        <!-- INVENTORY -->
                         <div class="tab-pane fade" id="tab-inventory">
-                            Inventory content.
+                            <div class="form-group row">
+                                @Html.LabelFor(model => model.Products_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                                <div class="col-lg-5">
+                                    @Html.DropDownListFor(model => model.Products_Id, ViewBag.listProduct as SelectList, "Select Product", new { @class = "form-control select2" })
+                                </div>
+                                <div class="col-lg-1 product-available">
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="error-inventory text-danger" style="display: none"></label>
+                                    @Html.ValidationMessageFor(model => model.Products_Id, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-lg-2">Notes</label>
+                                <div class="col-lg-6">
+                                    @Html.Editor("Notes_Inventory", new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
                         </div>
+                        <!-- /INVENTORY -->
+                        <!-- SERVICE -->
                         <div class="tab-pane fade" id="tab-service">
                             Service content.
                         </div>
+                        <!-- /SERVICE -->
                     </div>
                     <hr />
                     <div class="form-group row">
@@ -101,8 +124,8 @@
                             <thead>
                                 <tr>
                                     <th style="width:3% !important"></th>
-                                    <th style="width:25% !important">Description</th>
-                                    <th style="width:6% !important">Qty</th>
+                                    <th style="width:23% !important">Description</th>
+                                    <th style="width:8% !important">Qty</th>
                                     <th style="width:11% !important">Price</th>
                                     <th style="width:11% !important">Travel</th>
                                     <th style="width:11% !important">Tutor</th>
@@ -249,6 +272,73 @@
         math_total_inv();
     }
 
+    function GetProductAvailable(product_id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetProductAvailable", "Products")',
+            data: {
+                product_id: product_id
+            },
+            success: function (data) {
+                $('.product-available').html(data.badge);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function ItemInventory() {
+        if ($('#Products_Id').val() == '') {
+            $('.error-inventory').html('The Product field is required.').show();
+        }
+        else {
+            $('.error-inventory').html('').hide();
+
+            var discount = 0;
+            if ($('#Disc').val() != '') {
+                discount = parseFloat($('#Disc').val());
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetInventoryTotal", "Sale")',
+                data: {
+                    qty: $('#Qty').val(),
+                    product_id: $('#Products_Id').val(),
+                    disc: discount,
+                    voucher_id: $('#Vouchers_Id').val()
+                },
+                success: function (data) {
+                    if (data.error_message != '') {
+                        $('.error-inventory').html(data.error_message).show();
+                    }
+                    else {
+                        $('.error-inventory').html('').hide();
+                        AddItemLesson(
+                            $('#Products_Id option:selected').text(),
+                            $('#Qty').val(),
+                            data.price.toLocaleString(),
+                            0,
+                            0,
+                            discount.toLocaleString(),
+                            data.voucher.toLocaleString(),
+                            data.subtotal.toLocaleString(),
+                            $('#Vouchers_Id').val(),
+                            $('#Notes_Inventory').val(),
+                            '',
+                            $('#Products_Id').val(),
+                            ''
+                        );
+                    }
+                }, //end success
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                } //end error
+            }); //end ajax
+        }
+    }
+
     function RemoveItem(no) {
         $('#item_' + no).remove();
         math_total_disc();
@@ -297,53 +387,15 @@
 
     $(document).ready(function () {
         $('.select2').select2();
-
-        @*$('#btnAddLesson').click(function () {
-            if ($('#LessonPackages_Id').val() == '') {
-                $('.error-lesson').html('The Lesson Package field is required.').show();
-            }
-            else if ($('#Qty_Lesson').val() == '') {
-                $('.error-lesson').html('The Lesson Qty field is required.').show();
-            }
-            else if ($('#Disc_Lesson').val() == '') {
-                $('.error-lesson').html('The Lesson Discount field is required.').show();
-            }
-            else {
-                $('.error-lesson').html('').hide();
-
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("GetItemTotal", "Sale")',
-                    data: {
-                        qty: $('#Qty_Lesson').val(),
-                        lesson_package_id: $('#LessonPackages_Id').val(),
-                        disc: $('#Disc_Lesson').val(),
-                        voucher_id: $('#Vouchers_Id').val()
-                    },
-                    success: function (data) {
-                        AddItemLesson(
-                            $('#LessonPackages_Id option:selected').text() + ' ' + $('#Notes_Lesson').val(),
-                            $('#Qty_Lesson').val(),
-                            data.price,
-                            0,
-                            $('#Disc_Lesson').val(),
-                            data.voucher,
-                            data.subtotal
-                        );
-                    }, //end success
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                    } //end error
-                }); //end ajax
-            }
-        });*@
-
-        @*@{
-            var session_login = Session["Login"] as iSpeak.Models.LoginViewModel;
-        }
-        $('#Branches_Id').val('@session_login.Branches_Id').trigger('change');*@
-
+        
         $('#Branches_Id').val($('#Branch').val()).trigger('change');
+
+        $('#Products_Id').change(function () {
+            $('.product-available').empty();
+            if ($('#Products_Id').val() != '') {
+                GetProductAvailable($('#Products_Id').val());
+            }
+        });
 
         $('#btnAdd').click(function () {
             if ($('#Qty').val() == '') {
@@ -360,7 +412,7 @@
                     ItemLesson();
                 }
                 else if (ref_this[0]['id'] == 'tab-inventory') {
-
+                    ItemInventory();
                 }
                 else { //tab-service
 
