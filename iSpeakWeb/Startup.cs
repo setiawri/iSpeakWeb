@@ -1,5 +1,7 @@
 ﻿using Microsoft.Owin;
+using Microsoft.Owin.Cors;
 using Owin;
+using System.Web.Http;
 
 [assembly: OwinStartupAttribute(typeof(iSpeak.Startup))]
 namespace iSpeak

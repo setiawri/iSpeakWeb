@@ -47,6 +47,16 @@ namespace iSpeak.Models
             userIdentity.AddClaim(new Claim("Branches_Id", Branches_Id.ToString()));
             return userIdentity;
         }
+
+        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager, string authenticationType)
+        {
+            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
+            var userIdentity = await manager.CreateIdentityAsync(this, authenticationType);
+            // Add custom user claims here
+            userIdentity.AddClaim(new Claim("Fullname", Firstname + " " + Middlename + " " + Lastname));
+            userIdentity.AddClaim(new Claim("Branches_Id", Branches_Id.ToString()));
+            return userIdentity;
+        }
     }
 
     public class ApplicationRole : IdentityRole
