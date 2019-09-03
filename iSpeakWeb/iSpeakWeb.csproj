@@ -203,6 +203,8 @@
     <Compile Include="Controllers\LessonTypesController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PaymentsController.cs" />
+    <Compile Include="Controllers\PettyCashRecordsCategoriesController.cs" />
+    <Compile Include="Controllers\PettyCashRecordsController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
@@ -247,6 +249,9 @@
     <Compile Include="Models\MasterMenuModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
     <Compile Include="Models\PaymentsModels.cs" />
+    <Compile Include="Models\PettyCashRecordsCategoriesModels.cs" />
+    <Compile Include="Models\PettyCashRecordsModels.cs" />
+    <Compile Include="Models\PettyCashViewModels.cs" />
     <Compile Include="Models\ProductsModels.cs" />
     <Compile Include="Models\Products_QtyModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
@@ -472,6 +477,12 @@
     <Content Include="Views\Consignments\Create.cshtml" />
     <Content Include="Views\Consignments\Edit.cshtml" />
     <Content Include="Views\Consignments\Delete.cshtml" />
+    <Content Include="Views\PettyCashRecords\Index.cshtml" />
+    <Content Include="Views\PettyCashRecordsCategories\Index.cshtml" />
+    <Content Include="Views\PettyCashRecordsCategories\Create.cshtml" />
+    <Content Include="Views\PettyCashRecordsCategories\Edit.cshtml" />
+    <Content Include="Views\PettyCashRecordsCategories\Delete.cshtml" />
+    <Content Include="Views\PettyCashRecords\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

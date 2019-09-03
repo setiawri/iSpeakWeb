@@ -9,7 +9,7 @@ namespace iSpeak.Models
     public class UserViewModels
     {
         public string Id { get; set; }
-        public string Role { get; set; }
+        public List<string> Roles { get; set; }
         public string RoleId { get; set; }
 
         [Display(Name = "Username")]

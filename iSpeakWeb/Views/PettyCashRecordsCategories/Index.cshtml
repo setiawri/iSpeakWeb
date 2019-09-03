@@ -1,7 +1,7 @@
-﻿@model IEnumerable<iSpeak.Models.UserViewModels>
+﻿@model IEnumerable<iSpeak.Models.PettyCashRecordsCategoriesModels>
 
 @{
-    ViewBag.Root = "User Accounts";
+    ViewBag.Root = "Petty Cash Categories";
     ViewBag.Title = "Index";
 }
 
@@ -9,7 +9,6 @@
 
     <!-- Content area -->
     <div class="content">
-
         <!-- Form inputs -->
         <div class="card">
             <div class="card-header header-elements-inline">
@@ -23,18 +22,14 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Register", "Account")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
-                <div class="form-check mb-1" style="float: right">
-                    @Html.DropDownList("listRole", ViewBag.listRole as SelectList, "ALL", new { @class = "form-control" })
-                </div>
+                <a href="@Url.Action("Create", "PettyCashRecordsCategories")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
                             <tr>
-                                <th>@Html.DisplayNameFor(model => model.Fullname)</th>
-                                <th>@Html.DisplayNameFor(model => model.UserName)</th>
-                                <th>@Html.DisplayNameFor(model => model.Email)</th>
-                                <th>Role</th>
+                                <th>@Html.DisplayNameFor(model => model.Name)</th>
+                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                                <th>@Html.DisplayNameFor(model => model.Default_row)</th>
                                 <th>@Html.DisplayNameFor(model => model.Active)</th>
                                 <th>Action</th>
                             </tr>
@@ -43,26 +38,27 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.UserName)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                                    <td>@foreach (var role in item.Roles)
+                                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                    <td>
+                                        @if (item.Default_row == true)
                                         {
-                                            <span class="badge badge-flat border-danger text-danger-600">@role</span>
+                                            <span class="badge badge-warning">Default Selected</span>
                                         }
                                     </td>
                                     <td>
                                         @if (item.Active == true)
                                         {
-                                            <span class="badge badge-primary d-block">Enabled</span>
+                                            <span class="badge badge-primary">Active</span>
                                         }
                                         else
                                         {
-                                            <span class="badge badge-dark d-block">Disabled</span>
+                                            <span class="badge badge-dark">Not Active</span>
                                         }
                                     </td>
                                     <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
                                     </td>
                                 </tr>
                             }
@@ -72,7 +68,6 @@
             </div>
         </div>
         <!-- /form inputs -->
-
     </div>
     <!-- /content area -->
 
@@ -85,8 +80,8 @@
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
-                width: 100,
-                targets: [5]
+                width: 120,
+                targets: [3]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {
@@ -98,16 +93,8 @@
         });
 
         $('.datatable').DataTable({
-            pagingType: 'full_numbers'
-        });
-
-        $('#listRole').change(function () {
-            if ($('#listRole').val() == '') {
-                $('input[type=search]').val('').keyup();
-            }
-            else {
-                $('input[type=search]').val($('#listRole').val()).keyup();
-            }
+            pagingType: 'full_numbers',
+            order: [[0, 'asc']]
         });
     });
 </script>

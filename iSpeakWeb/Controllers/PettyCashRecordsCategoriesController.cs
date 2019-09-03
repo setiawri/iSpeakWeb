@@ -12,7 +12,7 @@ using System.Web.Mvc;
 namespace iSpeak.Controllers
 {
     [Authorize]
-    public class SuppliersController : Controller
+    public class PettyCashRecordsCategoriesController : Controller
     {
         private iSpeakContext db = new iSpeakContext();
 
@@ -23,7 +23,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                return View(await db.Suppliers.OrderBy(x => x.Name).ToListAsync());
+                return View(await db.PettyCashRecordsCategories.ToListAsync());
             }
         }
 
@@ -40,19 +40,28 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Name,Notes,Active")] SuppliersModels suppliersModels)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Name,Notes")] PettyCashRecordsCategoriesModels pettyCashRecordsCategoriesModels)
         {
+            var check = db.PettyCashRecordsCategories.AsNoTracking().Where(x =>
+                x.Name == pettyCashRecordsCategoriesModels.Name).ToList();
+
+            if (check.Count > 0)
+            {
+                ModelState.AddModelError("Duplicate", "This Petty Cash Category already existed.");
+            }
+
             if (ModelState.IsValid)
             {
-                suppliersModels.Id = Guid.NewGuid();
-                suppliersModels.Active = true;
-                db.Suppliers.Add(suppliersModels);
+                pettyCashRecordsCategoriesModels.Id = Guid.NewGuid();
+                pettyCashRecordsCategoriesModels.Default_row = false;
+                pettyCashRecordsCategoriesModels.Active = true;
+                db.PettyCashRecordsCategories.Add(pettyCashRecordsCategoriesModels);
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
-            return View(suppliersModels);
+            return View(pettyCashRecordsCategoriesModels);
         }
 
         public async Task<ActionResult> Edit(Guid? id)
@@ -66,27 +75,36 @@ namespace iSpeak.Controllers
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 }
-                SuppliersModels suppliersModels = await db.Suppliers.FindAsync(id);
-                if (suppliersModels == null)
+                PettyCashRecordsCategoriesModels pettyCashRecordsCategoriesModels = await db.PettyCashRecordsCategories.FindAsync(id);
+                if (pettyCashRecordsCategoriesModels == null)
                 {
                     return HttpNotFound();
                 }
-                return View(suppliersModels);
+                return View(pettyCashRecordsCategoriesModels);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Notes,Active")] SuppliersModels suppliersModels)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Name,Notes,Default_row,Active")] PettyCashRecordsCategoriesModels pettyCashRecordsCategoriesModels)
         {
+            var check = db.PettyCashRecordsCategories.AsNoTracking().Where(x =>
+                x.Id != pettyCashRecordsCategoriesModels.Id
+                && x.Name == pettyCashRecordsCategoriesModels.Name).ToList();
+
+            if (check.Count > 0)
+            {
+                ModelState.AddModelError("Duplicate", "This Petty Cash Category already existed.");
+            }
+
             if (ModelState.IsValid)
             {
-                db.Entry(suppliersModels).State = EntityState.Modified;
+                db.Entry(pettyCashRecordsCategoriesModels).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-
-            return View(suppliersModels);
+            
+            return View(pettyCashRecordsCategoriesModels);
         }
 
         public async Task<ActionResult> Delete(Guid? id)
@@ -96,7 +114,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                return View(await db.Suppliers.Where(x => x.Id == id).FirstOrDefaultAsync());
+                return View(await db.PettyCashRecordsCategories.Where(x => x.Id == id).FirstOrDefaultAsync());
             }
         }
 
@@ -104,8 +122,8 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(Guid id)
         {
-            SuppliersModels suppliersModels = await db.Suppliers.FindAsync(id);
-            db.Suppliers.Remove(suppliersModels);
+            PettyCashRecordsCategoriesModels pettyCashRecordsCategoriesModels = await db.PettyCashRecordsCategories.FindAsync(id);
+            db.PettyCashRecordsCategories.Remove(pettyCashRecordsCategoriesModels);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }

@@ -21,10 +21,30 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                List<UserViewModels> userViewModels = new List<UserViewModels>();
                 bool isSetRole = p.IsGranted(User.Identity.Name, "user_setroles");
                 if (isSetRole)
                 {
-                    return View(db.User.ToList());
+                    foreach (var usr in db.User.ToList())
+                    {
+                        var roles = (from ur in db.UserRole
+                                     join r in db.Role on ur.RoleId equals r.Id
+                                     where ur.UserId == usr.Id
+                                     orderby r.Name
+                                     select new { r }).ToList();
+
+                        userViewModels.Add(new UserViewModels
+                        {
+                            Id = usr.Id,
+                            Fullname = usr.Firstname + " " + usr.Middlename + " " + usr.Lastname,
+                            UserName = usr.UserName,
+                            Email = usr.Email,
+                            Roles = roles.Select(x => x.r.Name).ToList(), //string.Join(", ", roles.Select(x => x.r.Name).ToArray()),
+                            Active = usr.Active
+                        });
+                    }
+                    ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Name", "Name");
+                    return View(userViewModels);
                 }
                 else
                 {
@@ -33,12 +53,20 @@ namespace iSpeak.Controllers
                                      join r in db.Role on ur.RoleId equals r.Id
                                      where r.Name == "Student"
                                      select new { u, ur, r }).ToList();
-                    List<UserModels> users = new List<UserModels>();
                     foreach (var usr in list_user)
                     {
-                        users.Add(usr.u);
+                        userViewModels.Add(new UserViewModels
+                        {
+                            Id = usr.u.Id,
+                            Fullname = usr.u.Firstname + " " + usr.u.Middlename + " " + usr.u.Lastname,
+                            UserName = usr.u.UserName,
+                            Email = usr.u.Email,
+                            Roles = new List<string> { usr.r.Name },
+                            Active = usr.u.Active
+                        });
                     }
-                    return View(users);
+                    ViewBag.listRole = new SelectList(db.Role.Where(x => x.Name == "Student").OrderBy(x => x.Name).ToList(), "Name", "Name");
+                    return View(userViewModels);
                 }
             }
         }

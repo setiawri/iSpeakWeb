@@ -1,0 +1,362 @@
+﻿@model IEnumerable<iSpeak.Models.PettyCashViewModels>
+
+@{
+    ViewBag.Root = "Petty Cash";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Create", "PettyCashRecords")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <div class="row mt-2">
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">Start</label>
+                            <div class="input-group">
+                                @Html.Editor("Start", new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                <span class="input-group-append">
+                                    <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">End</label>
+                            <div class="input-group">
+                                @Html.Editor("End", new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                <span class="input-group-append">
+                                    <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <label class="control-label">Category</label>
+                            @Html.DropDownList("Category", ViewBag.listCategory as SelectList, "ALL", new { @class = "form-control select2" })
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="form-check mt-1">
+                                <label class="form-check-label">
+                                    <input type="checkbox" id="chkNotApprove" class="check-styled-danger" data-fouc>
+                                    ONLY Not Approve
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-sm btn-primary form-control" id="btnFilter">Filter Data <i class="icon-search4 ml-2"></i></button>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-sm btn-secondary form-control" data-toggle="modal" data-target="#modal_calc">Calculate <i class="icon-calculator2 ml-2"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.No)</th>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.Category)</th>
+                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                                <th>@Html.DisplayNameFor(model => model.Amount)</th>
+                                <th>@Html.DisplayNameFor(model => model.Balance)</th>
+                                <th>@Html.DisplayNameFor(model => model.IsChecked)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Category)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Balance)</td>
+                                        <td>
+                                            @if (item.IsChecked == true)
+                                            {
+                                                <span class="badge badge-success">Approved</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-dark">None</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+        <!-- Horizontal form modal -->
+        <div id="modal_calc" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h6 class="modal-title">Calculate</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-8 text-right">Total Input</label>
+                                <div class="col-sm-4">
+                                    <input type="text" tabindex="112" class="form-control text-right mdl-total" value="0" readonly/>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-2 text-right">100rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="100" class="form-control text-right mdl-100k" value="0" onkeyup="math_total()" />
+                                </div>
+                                <label class="col-form-label col-sm-2 text-right">2rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="105" class="form-control text-right mdl-2k" value="0" onkeyup="math_total()" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-2 text-right">50rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="101" class="form-control text-right mdl-50k" value="0" onkeyup="math_total()" />
+                                </div>
+                                <label class="col-form-label col-sm-2 text-right">1rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="106" class="form-control text-right mdl-1k" value="0" onkeyup="math_total()" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-2 text-right">20rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="102" class="form-control text-right mdl-20k" value="0" onkeyup="math_total()" />
+                                </div>
+                                <label class="col-form-label col-sm-2 text-right">500</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="107" class="form-control text-right mdl-500" value="0" onkeyup="math_total()" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-2 text-right">10rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="103" class="form-control text-right mdl-10k" value="0" onkeyup="math_total()" />
+                                </div>
+                                <label class="col-form-label col-sm-2 text-right">200</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="108" class="form-control text-right mdl-200" value="0" onkeyup="math_total()" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-2 text-right">5rb</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="104" class="form-control text-right mdl-5k" value="0" onkeyup="math_total()" />
+                                </div>
+                                <label class="col-form-label col-sm-2 text-right">100</label>
+                                <div class="col-sm-4">
+                                    <input type="number" tabindex="109" class="form-control text-right mdl-100" value="0" onkeyup="math_total()" />
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-2 text-right">Balance</label>
+                                <div class="col-sm-4">
+                                    <input type="text" tabindex="113" class="form-control text-right mdl-balance" value="0" readonly/>
+                                </div>
+                                <label class="col-form-label col-sm-2 text-right">&nbsp;</label>
+                                <div class="col-sm-4">
+                                    <input type="text" tabindex="114" class="form-control text-right mdl-remaining" value="0" readonly/>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" tabindex="10" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="reset" tabindex="11" class="btn bg-info">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /horizontal form modal -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        var dt = new Date(parseFloat(results[1]));
+        return dt.getFullYear() + "/" + ('0' + (dt.getMonth() + 1)).slice(-2) + "/" + ('0' + dt.getDate()).slice(-2) + " " + ('0' + dt.getHours()).slice(-2) + ":" + ('0' + dt.getMinutes()).slice(-2);
+    }
+
+    function Approve(Id, Notes, Amount) {
+        bootbox.confirm({
+            message: "Are you sure want to approve transaction " + Notes + ": " + parseFloat(Amount).toLocaleString() + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("SetApproved", "PettyCashRecords")',
+                        data: {
+                            pettycash_id: Id
+                        },
+                        success: function (data) {
+                            FilterClick();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
+    function FilterClick() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPettyCash", "PettyCashRecords")',
+            data: {
+                branch_id: $('#Branch').val(),
+                start: $('#Start').val(),
+                end: $('#End').val(),
+                category_id: $('#Category').val(),
+                is_not_approve: $('#chkNotApprove').prop('checked')
+            },
+            success: function (data) {
+                var datatable = $('.datatable').DataTable();
+                datatable.clear().draw();
+                $.each(data.list, function (index, row) {
+                    datatable.row.add([
+                        row.No,
+                        ToJavaScriptDate(row.Timestamp),
+                        row.Category,
+                        row.Notes,
+                        parseFloat(row.Amount).toLocaleString(),
+                        parseFloat(row.Balance).toLocaleString(),
+                        row.Status_render
+                    ]).draw();
+                });
+                $('.mdl-balance').val(parseFloat(data.balance).toLocaleString());
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function math_total() {
+        var total_100k = parseFloat($('.mdl-100k').val()) * 100000
+        var total_50k = parseFloat($('.mdl-50k').val()) * 50000
+        var total_20k = parseFloat($('.mdl-20k').val()) * 20000
+        var total_10k = parseFloat($('.mdl-10k').val()) * 10000
+        var total_5k = parseFloat($('.mdl-5k').val()) * 5000
+        var total_2k = parseFloat($('.mdl-2k').val()) * 2000
+        var total_1k = parseFloat($('.mdl-1k').val()) * 1000
+        var total_500 = parseFloat($('.mdl-500').val()) * 500
+        var total_200 = parseFloat($('.mdl-200').val()) * 200
+        var total_100 = parseFloat($('.mdl-100').val()) * 100
+
+        var total_calc = total_100k + total_50k + total_20k + total_10k + total_5k + total_2k + total_1k + total_500 + total_200 + total_100;
+        var balance = parseFloat($('.mdl-balance').val().replace(/,/g, ''));
+        var remaining = balance - total_calc;
+
+        $('.mdl-total').val(total_calc.toLocaleString());
+        $('.mdl-remaining').val(remaining.toLocaleString());
+    }
+
+    $(document).ready(function () {
+        $('.select2').select2();
+
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
+        });
+
+        $('.check-styled').uniform();
+        $('.check-styled-danger').uniform({
+            wrapperClass: 'border-danger-600 text-danger-800'
+        });
+
+        // Setting datatable defaults
+        $.extend($.fn.dataTable.defaults, {
+            autoWidth: false,
+            columnDefs: [{
+                orderable: false,
+                targets: '_all'
+                //width: 120,
+                //targets: [7]
+            }],
+            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+            language: {
+                search: '<span>Filter:</span> _INPUT_',
+                searchPlaceholder: 'Type to filter...',
+                lengthMenu: '<span>Show:</span> _MENU_',
+                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+            }
+        });
+
+        var table = $('.datatable').DataTable({
+            pagingType: 'full_numbers',
+            order: [[0, 'desc']]
+        });
+
+        if ('@ViewBag.Approve' == 'False') {
+            table.column(6).visible(false);
+        }
+
+        $('#btnFilter').click(function () {
+            FilterClick();
+        });
+    });
+</script>

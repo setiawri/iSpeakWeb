@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,41 +18,53 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            var data = await (from i in db.Inventory
-                              join b in db.Branches on i.Branches_Id equals b.Id
-                              join pr in db.Products on i.Products_Id equals pr.Id
-                              join u in db.Units on pr.Units_Id equals u.Id
-                              join s in db.Suppliers on i.Suppliers_Id equals s.Id
-                              where i.Branches_Id == user_login.Branches_Id
-                              select new { i, b, pr, u, s }).ToListAsync();
-
-            List<InventoryViewModels> list = new List<InventoryViewModels>();
-            foreach (var item in data)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                list.Add(new InventoryViewModels
-                {
-                    Id = item.i.Id,
-                    Branch = item.b.Name,
-                    Product = item.pr.Description,
-                    Unit = item.u.Name,
-                    ReceiveDate = TimeZoneInfo.ConvertTimeFromUtc(item.i.ReceiveDate, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
-                    BuyQty = item.i.BuyQty,
-                    AvailableQty = item.i.AvailableQty,
-                    Supplier = item.s.Name,
-                    BuyPrice = item.i.BuyPrice
-                });
-            }
+                var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+                var data = await (from i in db.Inventory
+                                  join b in db.Branches on i.Branches_Id equals b.Id
+                                  join pr in db.Products on i.Products_Id equals pr.Id
+                                  join u in db.Units on pr.Units_Id equals u.Id
+                                  join s in db.Suppliers on i.Suppliers_Id equals s.Id
+                                  where i.Branches_Id == user_login.Branches_Id
+                                  select new { i, b, pr, u, s }).ToListAsync();
 
-            return View(list);
+                List<InventoryViewModels> list = new List<InventoryViewModels>();
+                foreach (var item in data)
+                {
+                    list.Add(new InventoryViewModels
+                    {
+                        Id = item.i.Id,
+                        Branch = item.b.Name,
+                        Product = item.pr.Description,
+                        Unit = item.u.Name,
+                        ReceiveDate = TimeZoneInfo.ConvertTimeFromUtc(item.i.ReceiveDate, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                        BuyQty = item.i.BuyQty,
+                        AvailableQty = item.i.AvailableQty,
+                        Supplier = item.s.Name,
+                        BuyPrice = item.i.BuyPrice
+                    });
+                }
+
+                return View(list);
+            }
         }
 
         public ActionResult Create()
         {
-            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listProduct = new SelectList(db.Products.Where(x => x.ForSale == true && x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
-            ViewBag.listSupplier = new SelectList(db.Suppliers.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listProduct = new SelectList(db.Products.Where(x => x.ForSale == true && x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
+                ViewBag.listSupplier = new SelectList(db.Suppliers.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View();
+            }
         }
 
         [HttpPost]
@@ -95,19 +108,25 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Edit(Guid? id)
         {
-            if (id == null)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                InventoryModels inventoryModels = await db.Inventory.FindAsync(id);
+                if (inventoryModels == null)
+                {
+                    return HttpNotFound();
+                }
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listProduct = new SelectList(db.Products.Where(x => x.ForSale == true && x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
+                ViewBag.listSupplier = new SelectList(db.Suppliers.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View(inventoryModels);
             }
-            InventoryModels inventoryModels = await db.Inventory.FindAsync(id);
-            if (inventoryModels == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listProduct = new SelectList(db.Products.Where(x => x.ForSale == true && x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
-            ViewBag.listSupplier = new SelectList(db.Suppliers.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View(inventoryModels);
         }
 
         [HttpPost]
@@ -144,23 +163,29 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Delete(Guid? id)
         {
-            var data = (from i in db.Inventory
-                        join pr in db.Products on i.Products_Id equals pr.Id
-                        join u in db.Units on pr.Units_Id equals u.Id
-                        join s in db.Suppliers on i.Suppliers_Id equals s.Id
-                        where i.Id == id
-                        select new InventoryViewModels
-                        {
-                            Id = i.Id,
-                            Product = pr.Description,
-                            Unit = u.Name,
-                            ReceiveDate = i.ReceiveDate,
-                            BuyQty = i.BuyQty,
-                            AvailableQty = i.AvailableQty,
-                            Supplier = s.Name,
-                            BuyPrice = i.BuyPrice
-                        }).FirstOrDefaultAsync();
-            return View(await data);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var data = (from i in db.Inventory
+                            join pr in db.Products on i.Products_Id equals pr.Id
+                            join u in db.Units on pr.Units_Id equals u.Id
+                            join s in db.Suppliers on i.Suppliers_Id equals s.Id
+                            where i.Id == id
+                            select new InventoryViewModels
+                            {
+                                Id = i.Id,
+                                Product = pr.Description,
+                                Unit = u.Name,
+                                ReceiveDate = i.ReceiveDate,
+                                BuyQty = i.BuyQty,
+                                AvailableQty = i.AvailableQty,
+                                Supplier = s.Name,
+                                BuyPrice = i.BuyPrice
+                            }).FirstOrDefaultAsync();
+                return View(await data);
+            }
         }
 
         [HttpPost, ActionName("Delete")]

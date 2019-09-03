@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -76,25 +77,37 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var list = (from pr in db.Products
-                        join u in db.Units on pr.Units_Id equals u.Id
-                        select new ProductsViewModels
-                        {
-                            Id = pr.Id,
-                            Description = pr.Description,
-                            Barcode = pr.Barcode,
-                            ForSale = pr.ForSale,
-                            Unit = u.Name,
-                            SellPrice = pr.SellPrice,
-                            Active = pr.Active
-                        }).ToListAsync();
-            return View(await list);
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var list = (from pr in db.Products
+                            join u in db.Units on pr.Units_Id equals u.Id
+                            select new ProductsViewModels
+                            {
+                                Id = pr.Id,
+                                Description = pr.Description,
+                                Barcode = pr.Barcode,
+                                ForSale = pr.ForSale,
+                                Unit = u.Name,
+                                SellPrice = pr.SellPrice,
+                                Active = pr.Active
+                            }).ToListAsync();
+                return View(await list);
+            }
         }
 
         public ActionResult Create()
         {
-            ViewBag.listUnit = new SelectList(db.Units.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                ViewBag.listUnit = new SelectList(db.Units.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
+                return View();
+            }
         }
 
         [HttpPost]
@@ -126,17 +139,23 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Edit(Guid? id)
         {
-            if (id == null)
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                if (id == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+                ProductsModels productsModels = await db.Products.FindAsync(id);
+                if (productsModels == null)
+                {
+                    return HttpNotFound();
+                }
+                ViewBag.listUnit = new SelectList(db.Units.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
+                return View(productsModels);
             }
-            ProductsModels productsModels = await db.Products.FindAsync(id);
-            if (productsModels == null)
-            {
-                return HttpNotFound();
-            }
-            ViewBag.listUnit = new SelectList(db.Units.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
-            return View(productsModels);
         }
 
         [HttpPost]
@@ -166,7 +185,13 @@ namespace iSpeak.Controllers
 
         public async Task<ActionResult> Delete(Guid? id)
         {
-            return View(await db.Products.Where(x => x.Id == id).FirstOrDefaultAsync());
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View(await db.Products.Where(x => x.Id == id).FirstOrDefaultAsync());
+            }
         }
 
         [HttpPost, ActionName("Delete")]

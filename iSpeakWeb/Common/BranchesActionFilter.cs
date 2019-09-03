@@ -26,9 +26,14 @@ namespace iSpeak.Common
             bool isSessions = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_sessions");
             filterContext.Controller.ViewBag.SessionsMenu = (isSessions) ? "" : "style='display: none'";
 
+            bool isInventory = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_inventory");
+            filterContext.Controller.ViewBag.InventoryMenu = (isInventory) ? "" : "style='display: none'";
+
+            bool isPettyCash = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_pettycash");
+            filterContext.Controller.ViewBag.PettyCashMenu = (isPettyCash) ? "" : "style='display: none'";
+
             bool isSettings = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_settings");
             filterContext.Controller.ViewBag.SettingsMenu = (isSettings) ? "" : "style='display: none'";
-
         }
     }
 }

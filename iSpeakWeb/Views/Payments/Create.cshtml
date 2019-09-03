@@ -264,6 +264,7 @@
                     type: "POST",
                     url: '@Url.Action("SavePayments", "Payments")',
                     data: {
+                        branch_id: $('#Branch').val(),
                         cash_amount: cash_amount,
                         consignment_amount: consignment_amount,
                         consignment_id: $('#Consignment').val(),

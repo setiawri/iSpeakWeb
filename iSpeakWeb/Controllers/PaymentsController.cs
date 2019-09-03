@@ -134,7 +134,7 @@ namespace iSpeak.Controllers
             }
         }
 
-        public JsonResult SavePayments(int cash_amount, int consignment_amount, Guid? consignment_id, int bank_amount, string bank_name, string owner_name, string bank_number, string reff_no, string notes, string bank_type, string invoices_id)
+        public JsonResult SavePayments(Guid branch_id, int cash_amount, int consignment_amount, Guid? consignment_id, int bank_amount, string bank_name, string owner_name, string bank_number, string reff_no, string notes, string bank_type, string invoices_id)
         {
             string lastHex_string = db.Payments.AsNoTracking().Max(x => x.No);
             int lastHex_int = int.Parse(
@@ -194,6 +194,28 @@ namespace iSpeak.Controllers
                     };
                     db.PaymentItems.Add(paymentItemsModels);
                 }
+            }
+
+            if (cash_amount > 0)
+            {
+                string lastHex_string_pcr = db.PettyCashRecords.AsNoTracking().Max(x => x.No);
+                int lastHex_int_pcr = int.Parse(
+                    string.IsNullOrEmpty(lastHex_string_pcr) ? 0.ToString("X5") : lastHex_string_pcr,
+                    System.Globalization.NumberStyles.HexNumber);
+
+                PettyCashRecordsModels pettyCashRecordsModels = new PettyCashRecordsModels
+                {
+                    Id = Guid.NewGuid(),
+                    Branches_Id = branch_id,
+                    RefId = paymentsModels.Id,
+                    No = (lastHex_int_pcr + 1).ToString("X5"),
+                    Timestamp = DateTime.UtcNow,
+                    PettyCashRecordsCategories_Id = db.PettyCashRecordsCategories.Where(x => x.Name == "Penjualan Tunai").FirstOrDefault().Id,
+                    Notes = "Cash Payment [" + paymentsModels.No + "]",
+                    Amount = cash_amount,
+                    IsChecked = false
+                };
+                db.PettyCashRecords.Add(pettyCashRecordsModels);
             }
 
             db.SaveChanges();
