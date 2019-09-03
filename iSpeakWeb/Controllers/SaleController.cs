@@ -120,6 +120,18 @@ namespace iSpeak.Controllers
             return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
         }
 
+        #region Cancel Sale Invoice
+        public async Task<JsonResult> Cancelled(Guid id)
+        {
+            var sale_invoice = await db.SaleInvoices.FindAsync(id);
+            sale_invoice.Cancelled = true;
+            db.Entry(sale_invoice).State = EntityState.Modified;
+            
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
         [HttpGet]
         public ActionResult Create()
         {

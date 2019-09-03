@@ -31,23 +31,6 @@
                     </label>
                 </div>
 
-                @*<div class="row col-lg-6">
-                    <div class="col-lg-3">
-                        <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success">Create Invoice <i class="icon-plus22 ml-2"></i></a>
-                    </div>
-                    <div class="col-lg-3">
-                        <button type="button" class="btn btn-sm btn-primary" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="form-check">
-                            <label class="form-check-label">
-                                <input type="checkbox" class="check-styled" data-fouc>
-                                Hide Completed Payment
-                            </label>
-                        </div>
-                    </div>
-                </div>*@
-                
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -70,7 +53,14 @@
                                     <td>
                                         @if (item.Due > 0)
                                         {
-                                            <input type="checkbox" id="@item.Id" class="check-styled" />
+                                            if (item.Cancelled == true)
+                                            {
+                                                <span class="text-danger"><i class="icon-cancel-square2"></i></span>
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" id="@item.Id" class="check-styled" />
+                                            }
                                         }
                                         else
                                         {
@@ -86,7 +76,14 @@
                                     <td>
                                         @if (item.Due > 0)
                                         {
-                                            <span class="badge badge-warning d-block">Waiting Payment</span>
+                                            if (item.Cancelled == true)
+                                            {
+                                                <span class="badge badge-dark d-block">Cancelled</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning d-block">Waiting Payment</span>
+                                            }
                                         }
                                         else
                                         {
@@ -94,8 +91,17 @@
                                         }
                                     </td>
                                     <td>
-                                        <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> |
-                                        <a href="#" onclick="View_Log('@item.Id')">Log</a>
+                                        @if (item.Amount == item.Due && item.Cancelled == false) //blm ada pembayaran (bisa cancel)
+                                        {
+                                            <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> @:|
+                                            <a href="#" onclick="View_Log('@item.Id')">Log</a> @:|
+                                            <a href="#" onclick="Cancelled('@item.Id', '@item.No')">Cancel</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> @:|
+                                            <a href="#" onclick="View_Log('@item.Id')">Log</a>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -152,15 +158,55 @@
         }); //end ajax
     }
 
+    function Cancelled(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to cancel Sale Invoice No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Cancelled", "Sale")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
             autoWidth: false,
-            columnDefs: [{
-                orderable: false,
-                width: 100,
-                targets: [0, 8]
-            }],
+            columnDefs: [
+                {
+                    orderable: false,
+                    width: 50,
+                    targets: [0]
+                },
+                {
+                    orderable: false,
+                    width: 150,
+                    targets: [8]
+                }
+            ],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {
                 search: '<span>Filter:</span> _INPUT_',

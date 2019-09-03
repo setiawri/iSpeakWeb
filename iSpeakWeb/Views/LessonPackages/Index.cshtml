@@ -24,7 +24,7 @@
             <div class="card-body">
                 <a href="@Url.Action("Create", "LessonPackages")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover datatable">
                         <thead>
                             <tr>
                                 <th>@Html.DisplayNameFor(model => model.Name)</th>
@@ -70,3 +70,27 @@
     <!-- /content area -->
 
 </div>
+
+<script type="text/javascript">
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            width: 120,
+            targets: [6]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var datatable = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+</script>
