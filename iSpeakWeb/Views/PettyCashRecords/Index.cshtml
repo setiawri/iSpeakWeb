@@ -52,7 +52,7 @@
                             @Html.DropDownList("Category", ViewBag.listCategory as SelectList, "ALL", new { @class = "form-control select2" })
                         </div>
                     </div>
-                    <div class="col-lg-2">
+                    <div class="col-lg-2 chk-not-approved">
                         <div class="form-group">
                             <label class="control-label">&nbsp;</label>
                             <div class="form-check mt-1">
@@ -91,6 +91,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Amount)</th>
                                 <th>@Html.DisplayNameFor(model => model.Balance)</th>
                                 <th>@Html.DisplayNameFor(model => model.IsChecked)</th>
+                                <th>@Html.DisplayNameFor(model => model.UserInput)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -115,6 +116,7 @@
                                                 <span class="badge badge-dark">None</span>
                                             }
                                         </td>
+                                        <td>@Html.DisplayFor(modelItem => item.UserInput)</td>
                                     </tr>
                                 }
                             }
@@ -277,12 +279,13 @@
                 $.each(data.list, function (index, row) {
                     datatable.row.add([
                         row.No,
-                        ToJavaScriptDate(row.Timestamp),
+                        row.Timestamp, //ToJavaScriptDate(row.Timestamp),
                         row.Category,
                         row.Notes,
                         parseFloat(row.Amount).toLocaleString(),
                         parseFloat(row.Balance).toLocaleString(),
-                        row.Status_render
+                        row.Status_render,
+                        row.UserInput
                     ]).draw();
                 });
                 $('.mdl-balance').val(parseFloat(data.balance).toLocaleString());
@@ -323,6 +326,9 @@
             }
         });
 
+        $('#Start').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.initDateStart)');
+        $('#Start').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.initDateStart)');
+
         $('.check-styled').uniform();
         $('.check-styled-danger').uniform({
             wrapperClass: 'border-danger-600 text-danger-800'
@@ -353,6 +359,7 @@
 
         if ('@ViewBag.Approve' == 'False') {
             table.column(6).visible(false);
+            $('.chk-not-approved').hide();
         }
 
         $('#btnFilter').click(function () {

@@ -90,7 +90,22 @@
                         <!-- /INVENTORY -->
                         <!-- SERVICE -->
                         <div class="tab-pane fade" id="tab-service">
-                            Service content.
+                            <div class="form-group row">
+                                @Html.LabelFor(model => model.Services_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                                <div class="col-lg-6">
+                                    @Html.DropDownListFor(model => model.Services_Id, ViewBag.listService as SelectList, "Select Service", new { @class = "form-control select2" })
+                                </div>
+                                <div class="col-lg-4">
+                                    <label class="error-service text-danger" style="display: none"></label>
+                                    @Html.ValidationMessageFor(model => model.Services_Id, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-lg-2">Notes</label>
+                                <div class="col-lg-6">
+                                    @Html.Editor("Notes_Service", new { htmlAttributes = new { @class = "form-control" } })
+                                </div>
+                            </div>
                         </div>
                         <!-- /SERVICE -->
                     </div>
@@ -134,8 +149,7 @@
                                     <th style="width:11% !important">Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody id="data-body">
-                            </tbody>
+                            <tbody id="data-body"></tbody>
                             <tfoot>
                                 <tr>
                                     <th colspan="6" class="text-right">TOTAL</th>
@@ -162,7 +176,8 @@
                             @Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })
                         </div>
                         <div class="col-lg-4">
-                            <a href="@Url.Action("Register", "Account")" class="btn btn-success">New <i class="icon-plus22 ml-2"></i></a>
+                            @*<a href="@Url.Action("Register", "Account")" class="btn btn-success">New <i class="icon-plus22 ml-2"></i></a>*@
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_cust">New <i class="icon-plus22 ml-2"></i></button>
                         </div>
                         <div class="col-lg-4">
                             @Html.ValidationMessageFor(model => model.Customers_Id, "", new { @class = "text-danger" })
@@ -181,8 +196,139 @@
                     </div>
                 </div>
             </div>
-			<!-- /form inputs -->
+            <!-- /form inputs -->
         }
+        <!-- Horizontal form modal -->
+        <div id="modal_cust" class="modal fade" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h6 class="modal-title">Add New Customer</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Role</label>
+                                        <div class="col-sm-9">
+                                            @Html.ListBox("CustomerRole", new SelectList(ViewBag.listRole, "Value", "Text", "Student"), new { @class = "form-control select2", @multiple = "multiple" })
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Birthday</label>
+                                        <div class="col-sm-9">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control tanggal mdl-birthday" />
+                                                <span class="input-group-append">
+                                                    <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Full Name</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control mdl-firstname" placeholder="First" onkeyup="user_generate()" />
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control mdl-middlename" placeholder="Middle" />
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input type="text" class="form-control mdl-lastname" placeholder="Last" onkeyup="user_generate()" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Username</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control mdl-username" placeholder="Username" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Email</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control mdl-email" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Phone Number</label>
+                                        <div class="col-sm-9">
+                                            <div class="form-group row">
+                                                <div class="col-sm-6">
+                                                    <input type="text" class="form-control mdl-phone1" placeholder="Phone 1" />
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <input type="text" class="form-control mdl-phone2" placeholder="Phone 2" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Address</label>
+                                        <div class="col-sm-9">
+                                            <textarea class="form-control mdl-address" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Notes</label>
+                                        <div class="col-sm-9">
+                                            <textarea class="form-control mdl-notes" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Password</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control mdl-password" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row">
+                                        <label class="col-form-label col-sm-3 text-right">Confirm Password</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control mdl-confirmpassword" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-primary mdl-save">Save Customer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /horizontal form modal -->
     </div>
     <!-- /content area -->
 
@@ -190,6 +336,13 @@
 
 <script type="text/javascript">
     var item_no = 100;
+
+    function user_generate() {
+        var str1 = $('.mdl-firstname').val().substring(0, 3);
+        var str2 = $('.mdl-lastname').val().substring(0, 3);
+        var dob = new Date($('.mdl-birthday').val());
+        $('.mdl-username').val(str1 + str2 + ('0' + dob.getDate()).slice(-2) + ('0' + (dob.getMonth() + 1)).slice(-2));
+    }
 
     function ItemLesson() {
         if ($('#LessonPackages_Id').val() == '') {
@@ -339,6 +492,57 @@
         }
     }
 
+    function ItemService() {
+        if ($('#Services_Id').val() == '') {
+            $('.error-service').html('The Service field is required.').show();
+        }
+        else {
+            $('.error-service').html('').hide();
+
+            var discount = 0;
+            if ($('#Disc').val() != '') {
+                discount = parseFloat($('#Disc').val());
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetServiceTotal", "Sale")',
+                data: {
+                    qty: $('#Qty').val(),
+                    service_id: $('#Services_Id').val(),
+                    disc: discount,
+                    voucher_id: $('#Vouchers_Id').val()
+                },
+                success: function (data) {
+                    if (data.error_message != '') {
+                        $('.error-service').html(data.error_message).show();
+                    }
+                    else {
+                        $('.error-service').html('').hide();
+                        AddItemLesson(
+                            $('#Services_Id option:selected').text(),
+                            $('#Qty').val(),
+                            data.price.toLocaleString(),
+                            0,
+                            0,
+                            discount.toLocaleString(),
+                            data.voucher.toLocaleString(),
+                            data.subtotal.toLocaleString(),
+                            $('#Vouchers_Id').val(),
+                            $('#Notes_Service').val(),
+                            '',
+                            '',
+                            $('#Services_Id').val()
+                        );
+                    }
+                }, //end success
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                } //end error
+            }); //end ajax
+        }
+    }
+
     function RemoveItem(no) {
         $('#item_' + no).remove();
         math_total_disc();
@@ -390,6 +594,75 @@
         
         $('#Branches_Id').val($('#Branch').val()).trigger('change');
 
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
+        });
+
+        $('.mdl-birthday').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
+        $('.mdl-birthday').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
+
+        $('.mdl-save').click(function () {
+            if ($('#CustomerRole').val() == '') {
+                $('.modal-validation').html('The Role field is required.').show();
+            }
+            else if ($('.mdl-firstname').val() == '') {
+                $('.modal-validation').html('The First Name field is required.').show();
+            }
+            else if ($('.mdl-username').val() == '') {
+                $('.modal-validation').html('The Username field is required.').show();
+            }
+            else if ($('.mdl-password').val() == '') {
+                $('.modal-validation').html('The Password field is required.').show();
+            }
+            else if ($('.mdl-password').val().length < 6) {
+                $('.modal-validation').html('The Password must be at least 6 characters long.').show();
+            }
+            else if ($('.mdl-password').val() != $('.mdl-confirmpassword').val()) {
+                $('.modal-validation').html('The password and confirmation password do not match.').show();
+            }
+            else {
+                $('.modal-validation').html('').hide();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("RegisterAjaxSync", "Account")',
+                    data: {
+                        branch_id: $('#Branches_Id').val(),
+                        roles: $('#CustomerRole').val(),
+                        birthday: $('.mdl-birthday').val(),
+                        first_name: $('.mdl-firstname').val(),
+                        middle_name: $('.mdl-middlename').val(),
+                        last_name: $('.mdl-lastname').val(),
+                        username: $('.mdl-username').val(),
+                        email: $('.mdl-email').val(),
+                        phone1: $('.mdl-phone1').val(),
+                        phone2: $('.mdl-phone2').val(),
+                        address: $('.mdl-address').val(),
+                        notes: $('.mdl-notes').val(),
+                        password: $('.mdl-password').val()
+                    },
+                    success: function (data) {
+                        //refresh DDL Customer
+                        $("#Customers_Id").empty();
+                        $("#Customers_Id").append("<option value=''>Select Customer</option");
+
+                        $.each(data.ddl, function (index, row) {
+                            $("#Customers_Id").append("<option value='" + row.Value + "'>" + row.Text + "</option>")
+                        });
+
+                        //close modal
+                        $('#modal_cust').modal('toggle');
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
+        });
+
         $('#Products_Id').change(function () {
             $('.product-available').empty();
             if ($('#Products_Id').val() != '') {
@@ -415,7 +688,7 @@
                     ItemInventory();
                 }
                 else { //tab-service
-
+                    ItemService();
                 }
             }
         });

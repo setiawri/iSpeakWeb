@@ -120,6 +120,18 @@ namespace iSpeak.Controllers
             return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
         }
 
+        public async Task<JsonResult> GetServiceTotal(int qty, Guid service_id, decimal disc, string voucher_id)
+        {
+            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
+            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+
+            price = db.Services.Where(x => x.Id == service_id).FirstOrDefault().SellPrice;
+            voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            subtotal = (qty * price) - disc - voucher;
+
+            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+        }
+
         #region Cancel Sale Invoice
         public async Task<JsonResult> Cancelled(Guid id)
         {
@@ -213,11 +225,32 @@ namespace iSpeak.Controllers
                     });
                 }
                 #endregion
+                #region List Role
+                List<SelectListItem> role_list = new List<SelectListItem>();
+                bool setRole = p.IsGranted(User.Identity.Name, "user_setroles");
+                if (setRole)
+                {
+                    foreach (var role in db.Role.OrderBy(x => x.Name))
+                    {
+                        role_list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                    }
+                }
+                else
+                {
+                    foreach (var role in db.Role.Where(x => x.Name == "Student").OrderBy(x => x.Name))
+                    {
+                        role_list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                    }
+                }
+                #endregion
                 ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.listVoucher = new SelectList(voucher_list, "Id", "Name");
                 ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
                 ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
                 ViewBag.listProduct = new SelectList(products, "Id", "Name");
+                ViewBag.listService = new SelectList(db.Services.Where(x => x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
+                ViewBag.listRole = role_list;
+                ViewBag.DOB = DateTime.UtcNow.Date;
 
                 return View();
             }

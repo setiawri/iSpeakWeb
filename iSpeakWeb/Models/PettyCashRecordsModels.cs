@@ -22,5 +22,6 @@ namespace iSpeak.Models
         public string Notes { get; set; }
         public int Amount { get; set; }
         public bool IsChecked { get; set; }
+        public string UserAccounts_Id { get; set; }
     }
 }

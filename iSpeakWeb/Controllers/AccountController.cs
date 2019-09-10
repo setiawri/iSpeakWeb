@@ -280,6 +280,55 @@ namespace iSpeak.Controllers
             return View(model);
         }
 
+        //Register New User Using AjaxCall
+        public async Task<JsonResult> RegisterAjaxSync(Guid branch_id, string[] roles, DateTime birthday, string first_name, string middle_name, string last_name, string username, string email, string phone1, string phone2, string address, string notes, string password)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = username,
+                Email = email,
+                Firstname = first_name,
+                Middlename = middle_name,
+                Lastname = last_name,
+                Address = address,
+                Phone1 = phone1,
+                Phone2 = phone2,
+                Birthday = birthday,
+                Notes = notes,
+                Active = true,
+                Branches_Id = branch_id
+            };
+            var result = await UserManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                foreach (var role in roles)
+                {
+                    result = await UserManager.AddToRoleAsync(user.Id, role);
+                }
+            }
+
+            #region List Customer
+            var customers = (from u in db.User
+                             join ur in db.UserRole on u.Id equals ur.UserId
+                             join r in db.Role on ur.RoleId equals r.Id
+                             where r.Name == "Student"
+                             orderby u.Firstname
+                             select new { u }).ToList();
+            List<object> customer_list = new List<object>();
+            foreach (var item in customers)
+            {
+                customer_list.Add(new
+                {
+                    item.u.Id,
+                    Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
+                });
+            }
+            var listCustomer = new SelectList(customer_list, "Id", "Name");
+            #endregion
+
+            return Json(new { status = "200", ddl = listCustomer }, JsonRequestBehavior.AllowGet);
+        }
+
         //
         // GET: /Account/ConfirmEmail
         [AllowAnonymous]

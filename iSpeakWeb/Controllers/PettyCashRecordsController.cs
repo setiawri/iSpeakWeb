@@ -18,7 +18,7 @@ namespace iSpeak.Controllers
         #region GetPettyCash
         public async Task<JsonResult> GetPettyCash(Guid branch_id, DateTime start, DateTime end, string category_id, bool is_not_approve)
         {
-            DateTime fromDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(start.Year, start.Month, start.Day));
+            DateTime fromDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(start.Year, start.Month, start.Day, 0, 0, 0));
             DateTime toDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(end.Year, end.Month, end.Day, 23, 59, 59));
             var items = (is_not_approve)
                 //show not approved
@@ -37,17 +37,20 @@ namespace iSpeak.Controllers
             int balance = 0;
             foreach (var item in items)
             {
+                var data_user = db.User.Where(x => x.Id == item.pcr.UserAccounts_Id).FirstOrDefault();
+                string user_input = data_user == null ? "" : data_user.Firstname + " " + data_user.Middlename + " " + data_user.Lastname;
                 list.Add(new PettyCashViewModels
                 {
                     Id = item.pcr.Id,
                     No = item.pcr.No,
-                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.pcr.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.pcr.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("yyyy/MM/dd HH:mm"),
                     Category = item.pcc.Name,
                     Notes = item.pcr.Notes,
                     Amount = item.pcr.Amount,
                     Balance = balance += item.pcr.Amount,
                     IsChecked = item.pcr.IsChecked,
-                    Status_render = (item.pcr.IsChecked) ? "<span class='badge badge-success'>Approved</span>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark'>None</span></a>"
+                    Status_render = (item.pcr.IsChecked) ? "<span class='badge badge-success'>Approved</span>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark'>None</span></a>",
+                    UserInput = user_input
                     //Action_render = "<a href='" + Url.Content("~") + "PettyCashRecords/Edit/" + item.pcr.Id + "'>Edit</a> | <a href='" + Url.Content("~") + "PettyCashRecords/Delete/" + item.pcr.Id + "'>Delete</a>"
                 });
             }
@@ -77,6 +80,7 @@ namespace iSpeak.Controllers
             {
                 ViewBag.Approve = p.IsGranted(User.Identity.Name, "pettycashrecords_approve");
                 ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
+                ViewBag.initDateStart = DateTime.UtcNow.AddMonths(-1);
                 return View();
             }
         }
@@ -111,6 +115,7 @@ namespace iSpeak.Controllers
                 pettyCashRecordsModels.No = (lastHex_int + 1).ToString("X5");
                 pettyCashRecordsModels.Timestamp = DateTime.UtcNow;
                 pettyCashRecordsModels.IsChecked = false;
+                pettyCashRecordsModels.UserAccounts_Id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id;
                 db.PettyCashRecords.Add(pettyCashRecordsModels);
 
                 await db.SaveChangesAsync();

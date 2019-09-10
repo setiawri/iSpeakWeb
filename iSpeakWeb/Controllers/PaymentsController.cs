@@ -54,7 +54,7 @@ namespace iSpeak.Controllers
                                     <table class='table table-striped table-bordered'>
                                         <thead>
                                             <tr>
-                                                <th>Invoice No.</th>
+                                                <th>Payment No.</th>
                                                 <th>Timestamp</th>
                                                 <th>Due Before</th>
                                                 <th>Payment</th>
@@ -65,7 +65,7 @@ namespace iSpeak.Controllers
             foreach (var item in list)
             {
                 message += @"<tr>
-                                <td>" + item.p.No + @"</td>
+                                <td><a href='" + Url.Content("~") + "Payments/Print' target='_blank'>" + item.p.No + @"</a></td>
                                 <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
                                 <td>" + item.pi.DueBefore.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.Amount.ToString("#,##0") + @"</td>
@@ -213,7 +213,8 @@ namespace iSpeak.Controllers
                     PettyCashRecordsCategories_Id = db.PettyCashRecordsCategories.Where(x => x.Name == "Penjualan Tunai").FirstOrDefault().Id,
                     Notes = "Cash Payment [" + paymentsModels.No + "]",
                     Amount = cash_amount,
-                    IsChecked = false
+                    IsChecked = false,
+                    UserAccounts_Id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id
                 };
                 db.PettyCashRecords.Add(pettyCashRecordsModels);
             }

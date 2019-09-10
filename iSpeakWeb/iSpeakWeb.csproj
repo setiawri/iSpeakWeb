@@ -208,6 +208,7 @@
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
+    <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
     <Compile Include="Controllers\UnitsController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -260,6 +261,7 @@
     <Compile Include="Models\SaleInvoiceItems_InventoryModels.cs" />
     <Compile Include="Models\SaleInvoicesModels.cs" />
     <Compile Include="Models\SaleInvoicesViewModels.cs" />
+    <Compile Include="Models\ServicesModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
     <Compile Include="Models\TokenIdentity.cs" />
     <Compile Include="Models\UnitsModels.cs" />
@@ -483,6 +485,10 @@
     <Content Include="Views\PettyCashRecordsCategories\Edit.cshtml" />
     <Content Include="Views\PettyCashRecordsCategories\Delete.cshtml" />
     <Content Include="Views\PettyCashRecords\Create.cshtml" />
+    <Content Include="Views\Services\Index.cshtml" />
+    <Content Include="Views\Services\Create.cshtml" />
+    <Content Include="Views\Services\Edit.cshtml" />
+    <Content Include="Views\Services\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

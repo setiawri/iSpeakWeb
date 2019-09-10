@@ -1,0 +1,71 @@
+﻿@model iSpeak.Models.ServicesModels
+
+@{
+    ViewBag.Root = "Services";
+    ViewBag.Title = "Delete";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <fieldset>
+                    <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                    <dl class="dl-horizontal">
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Description)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Description)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.SellPrice)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.SellPrice)
+                        </dd>
+
+                        <dt>
+                            @Html.DisplayNameFor(model => model.Notes)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Notes)
+                        </dd>
+                    </dl>
+                </fieldset>
+                <hr />
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        <a href="@Url.Action("Index", "Services")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <button type="submit" class="btn btn-danger">Delete <i class="icon-bin ml-2"></i></button>
+                    </div>
+                }
+            </div>
+        </div>
+        <!-- /form inputs -->
+
+    </div>
+    <!-- /content area -->
+
+</div>

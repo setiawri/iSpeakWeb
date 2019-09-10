@@ -39,7 +39,7 @@
                                 }
                                 <th>@Html.DisplayNameFor(model => model.TravelCost)</th>
                                 <th>@Html.DisplayNameFor(model => model.TutorTravelCost)</th>
-                                @*<th>@Html.DisplayNameFor(model => model.Deleted)</th>*@
+                                <th>@Html.DisplayNameFor(model => model.Deleted)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -58,19 +58,28 @@
                                     }
                                     <td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
                                     <td>@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
-                                    @*<td>
+                                    <td>
                                         @if (item.Deleted == false)
                                         {
-                                            <span class="badge badge-primary d-block">NO</span>
+                                            <span class="badge badge-dark d-block">NO</span>
                                         }
                                         else
                                         {
-                                            <span class="badge badge-dark d-block">YES</span>
+                                            <span class="badge badge-danger d-block">YES</span>
                                         }
-                                    </td>*@
+                                    </td>
                                     <td>
-                                        <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        @if (item.Deleted == false)
+                                        {
+                                            <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> @:|
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) @:|
+                                            <a href="#" onclick="Cancelled('@item.Id')">Cancel</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> @:|
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -110,6 +119,39 @@
                 bootbox.alert("Error " + result);
             } //end error
         }); //end ajax
+    }
+
+    function Cancelled(id) {
+        bootbox.confirm({
+            message: "Are you sure want to cancel this Session ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Cancelled", "LessonSessions")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
     }
 
     $(document).ready(function () {

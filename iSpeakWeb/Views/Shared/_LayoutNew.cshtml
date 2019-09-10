@@ -155,7 +155,7 @@
                         <div class="dropdown-header">Admin</div>
                         <a href="@Url.Action("Index", "Role")" class="dropdown-item"><i class="icon-shield2"></i> Role</a>
                         <a href="@Url.Action("Index", "User")" class="dropdown-item"><i class="icon-users2"></i> User</a>
-                        <div class="dropdown-header">Data Master</div>
+                        @*<div class="dropdown-header">Data Master</div>
                         <div class="dropdown-submenu">
                             <a href="#" class="dropdown-item dropdown-toggle"><i class="icon-menu2"></i> General</a>
                             <div class="dropdown-menu">
@@ -167,7 +167,23 @@
                                 <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Hourly Rates</a>
                                 <a href="@Url.Action("Index", "Vouchers")" class="dropdown-item">Vouchers</a>
                             </div>
-                        </div>
+                        </div>*@
+                    </div>
+                </li>
+                <li class="nav-item dropdown" @(ViewBag.MasterDataMenu == "" ? "" : Html.Raw(ViewBag.MasterDataMenu))>
+                    <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
+                        <i class="icon-menu2 mr-2"></i>
+                        Master Data
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="@Url.Action("Index", "Branches")" class="dropdown-item">Branches</a>
+                        <a href="@Url.Action("Index", "Consignments")" class="dropdown-item">Consignments</a>
+                        <a href="@Url.Action("Index", "Languages")" class="dropdown-item">Languages</a>
+                        <a href="@Url.Action("Index", "LessonTypes")" class="dropdown-item">Lesson Types</a>
+                        <a href="@Url.Action("Index", "LessonPackages")" class="dropdown-item">Lesson Packages</a>
+                        <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Hourly Rates</a>
+                        <a href="@Url.Action("Index", "Vouchers")" class="dropdown-item">Vouchers</a>
+                        <a href="@Url.Action("Index", "Services")" class="dropdown-item">Services</a>
                     </div>
                 </li>
             </ul>

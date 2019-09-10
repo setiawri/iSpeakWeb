@@ -149,6 +149,21 @@ namespace iSpeak.Controllers
             return Json(new { content = message }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region Cancel Sessions
+        public async Task<JsonResult> Cancelled(Guid id)
+        {
+            var lesson_session = await db.LessonSessions.FindAsync(id);
+            lesson_session.Deleted = true;
+            db.Entry(lesson_session).State = EntityState.Modified;
+
+            var sale_inv_item = await db.SaleInvoiceItems.Where(x => x.Id == lesson_session.SaleInvoiceItems_Id).FirstOrDefaultAsync();
+            sale_inv_item.SessionHours_Remaining += lesson_session.SessionHours;
+            db.Entry(sale_inv_item).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #endregion
 
         public async Task<ActionResult> Index()

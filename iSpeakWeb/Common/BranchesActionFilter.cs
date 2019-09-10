@@ -34,6 +34,9 @@ namespace iSpeak.Common
 
             bool isSettings = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_settings");
             filterContext.Controller.ViewBag.SettingsMenu = (isSettings) ? "" : "style='display: none'";
+
+            bool isMasterData = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_masterdata");
+            filterContext.Controller.ViewBag.MasterDataMenu = (isMasterData) ? "" : "style='display: none'";
         }
     }
 }
