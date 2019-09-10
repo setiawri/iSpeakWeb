@@ -51,8 +51,22 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Submit Bulk Menu -->
+                <!-- Save Changes -->
                 <div class="form-group row">
+                    <div class="col-sm-12">
+                        <div class="form-group row">
+                            <div class="col-sm-8">
+                                <a href="@Url.Action("Index", "Role")" class="btn btn-sm btn-secondary">Back to Role List <i class="icon-circle-left2 ml-2"></i></a>
+                                <button type="button" class="btn btn-sm btn-success" id="btnChecked">Select All <i class="icon-checkbox-checked2 ml-2"></i></button>
+                                <button type="button" class="btn btn-sm btn-warning" id="btnUnchecked">Deselect All <i class="icon-checkbox-unchecked2 ml-2"></i></button>
+                                <button type="button" class="btn btn-sm btn-primary" id="btnSave">Save Changes <i class="icon-paperplane ml-2"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Save Changes -->
+                <!-- Submit Bulk Menu -->
+                <div class="form-group row" style="display: none">
                     <div class="col-lg-6">
                         <div class="form-group row">
                             <div class="col-lg-5">
@@ -96,11 +110,12 @@
                         <thead>
                             <tr>
                                 <th style="width: 5% !important">@Html.DisplayNameFor(model => model.MenuOrder)</th>
+                                <th style="width: 5% !important">Active</th>
                                 <th style="width: 30% !important">@Html.DisplayNameFor(model => model.ParentMenu)</th>
-                                <th style="width: 50% !important">@Html.DisplayNameFor(model => model.MenuName)</th>
+                                <th style="width: 45% !important">@Html.DisplayNameFor(model => model.MenuName)</th>
                                 @*<th>@Html.DisplayNameFor(model => model.WebMenuAccess)</th>
                                 <th>@Html.DisplayNameFor(model => model.RoleName)</th>*@
-                                <th style="width: 15% !important">Enable Access</th>
+                                <th style="width: 15% !important">Status</th>
                             </tr>
                         </thead>
                         <tbody id="data-body">
@@ -112,6 +127,16 @@
                                     <tr>
                                         <td>
                                             @(row++)
+                                        </td>
+                                        <td>
+                                            @if (item.IsSelected)
+                                            {
+                                                <input type="checkbox" id="@item.WebMenuAccess" class="check-styled" selected />
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" id="@item.WebMenuAccess" class="check-styled" />
+                                            }
                                         </td>
                                         <td>
                                             @Html.DisplayFor(modelItem => item.ParentMenu)
@@ -166,6 +191,11 @@
                 $('#data-body').empty();
                 //console.log(data.content);
                 $('#data-body').append(data.content);
+
+                $('.check-styled').uniform();
+                $('.check-styled-primary').uniform({
+                    wrapperClass: 'border-primary-600 text-primary-800'
+                });
             }, //end success
             error: function (result) {
                 alert("Error " + result);
@@ -205,10 +235,50 @@
         $("#datatable").dataTable({
             "paging": false
         });
-
+        
         GetData('@ViewBag.Id');
 
-        $('#btnSubmit').click(function () {
+        $('#btnChecked').click(function () {
+            $('#data-body tr').find('.check-styled').prop('checked', true).uniform('refresh');
+        });
+
+        $('#btnUnchecked').click(function () {
+            $('#data-body tr').find('.check-styled').prop('checked', false).uniform('refresh');
+        });
+
+        $('#btnSave').click(function () {
+            var ids_selected = '';
+            $('#data-body tr').find('.check-styled').each(function () {
+                if ($(this).prop('checked') == true) {
+                    ids_selected = $('input:checkbox.check-styled:checked').map(function () {
+                        return this.id;
+                    }).get();
+                }
+            });
+
+            var ids = '';
+            if (ids_selected != '') {
+                ids = ids_selected.join(',');
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SaveAccess", "Role")',
+                data: {
+                    IdRole: '@ViewBag.Id',
+                    Ids_selected: ids
+                },
+                success: function (data) {
+                    window.location.reload();
+                }, //end success
+                error: function (error) {
+                    console.log(error);
+                    alert(error);
+                } //end error
+            }); //end ajax
+        });
+
+        @*$('#btnSubmit').click(function () {
             $.ajax({
                 type: "POST",
                 url: '@Url.Action("BulkAccess", "Role")',
@@ -225,6 +295,6 @@
                     alert(error);
                 } //end error
             }); //end ajax
-        });
+        });*@
     });
 </script>

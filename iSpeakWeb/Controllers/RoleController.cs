@@ -143,26 +143,68 @@ namespace iSpeak.Controllers
                              ParentMenu = m.ParentMenu,
                              MenuName = m.MenuName,
                              WebMenuAccess = m.WebMenuAccess.ToUpper(),
-                             RoleName = access.RoleName ?? string.Empty
+                             RoleName = access.RoleName ?? string.Empty,
+                             IsSelected = string.IsNullOrEmpty(access.RoleName) ? false : true
                          }).ToList();
 
             string content = ""; int row = 1;
             foreach (var menu in menus)
             {
-                string action = string.IsNullOrEmpty(menu.RoleName)
-                    ? "<a href='#'><span class='badge badge-dark d-block' onclick='ActionMenu(\"" + menu.WebMenuAccess + "\",\"" + id + "\",\"enable\")'>Disabled</span></a>"
-                    : "<a href='#'><span class='badge badge-success d-block' onclick='ActionMenu(\"" + menu.WebMenuAccess + "\",\"" + id + "\",\"disabled\")'>Enabled</span></a>";
+                //string action = string.IsNullOrEmpty(menu.RoleName)
+                //    ? "<a href='#'><span class='badge badge-dark d-block' onclick='ActionMenu(\"" + menu.WebMenuAccess + "\",\"" + id + "\",\"enable\")'>Disabled</span></a>"
+                //    : "<a href='#'><span class='badge badge-success d-block' onclick='ActionMenu(\"" + menu.WebMenuAccess + "\",\"" + id + "\",\"disabled\")'>Enabled</span></a>";
+
+                string status_access = string.IsNullOrEmpty(menu.RoleName)
+                    ? "<span class='badge badge-dark d-block'>Disabled</span>"
+                    : "<span class='badge badge-success d-block'>Enabled</span>";
+
+                string selected = menu.IsSelected ? "checked" : "";
 
                 content += @"<tr>
                                 <td>" + row + @"</td>
+                                <td><input type='checkbox' id='" + menu.WebMenuAccess + "' class='check-styled' " + selected + @"/></td>
                                 <td>" + menu.ParentMenu + @"</td>
                                 <td>" + menu.MenuName + @"</td>
-                                <td>" + action + @"</td>
+                                <td>" + status_access + @"</td>
                             </tr>";
                 row++;
             }
 
             return Json(new { status = "200", content }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SaveAccess(string IdRole, string Ids_selected)
+        {
+            List<AccessModels> list_am = db.Access.Where(x => x.RoleId == IdRole).ToList();
+            if (list_am.Count>0)
+            {
+                foreach (var am in list_am)
+                {
+                    db.Access.Remove(am);
+                }
+            }
+            db.SaveChanges();
+
+            if (!string.IsNullOrEmpty(Ids_selected))
+            {
+                string[] ids = Ids_selected.Split(',');
+                if (ids.Length > 0)
+                {
+                    foreach (string id in ids)
+                    {
+                        AccessModels am = new AccessModels
+                        {
+                            Id = Guid.NewGuid(),
+                            RoleId = IdRole,
+                            WebMenuAccess = id.ToLower()
+                        };
+                        db.Access.Add(am);
+                    }
+                }
+                db.SaveChanges();
+            }
+
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult SingleAccess(string WebMenuAccess, string IdRole, string Action)
