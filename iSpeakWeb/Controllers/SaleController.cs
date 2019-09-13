@@ -81,10 +81,13 @@ namespace iSpeak.Controllers
                         Customer = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
                         Amount = item.si.Amount,
                         Due = item.si.Due,
-                        Cancelled = item.si.Cancelled
+                        Cancelled = item.si.Cancelled,
+                        IsChecked = item.si.IsChecked
                     });
                 }
 
+                ViewBag.Cancel = p.IsGranted(User.Identity.Name, "sale_cancel");
+                ViewBag.Approve = p.IsGranted(User.Identity.Name, "sale_approve");
                 return View(list);
             }
         }
@@ -139,6 +142,17 @@ namespace iSpeak.Controllers
             sale_invoice.Cancelled = true;
             db.Entry(sale_invoice).State = EntityState.Modified;
             
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Approve Sale Invoice
+        public async Task<JsonResult> Approved(Guid id)
+        {
+            var sale_invoice = await db.SaleInvoices.FindAsync(id);
+            sale_invoice.IsChecked = true;
+            db.Entry(sale_invoice).State = EntityState.Modified;
+
             await db.SaveChangesAsync();
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
@@ -280,7 +294,8 @@ namespace iSpeak.Controllers
                     Notes = saleInvoicesViewModels.Notes,
                     Amount = Amount,
                     Due = Amount,
-                    Cancelled = false
+                    Cancelled = false,
+                    IsChecked = false
                 };
                 db.SaleInvoices.Add(saleInvoicesModels);
 

@@ -34,6 +34,7 @@
                                 <th>@Html.DisplayNameFor(model => model.DebitAmount)</th>
                                 <th>@Html.DisplayNameFor(model => model.ConsignmentAmount)</th>
                                 <th>@Html.DisplayNameFor(model => model.Cancelled)</th>
+                                <th>@Html.DisplayNameFor(model => model.Confirmed)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -48,20 +49,25 @@
                                     <td>@Html.DisplayFor(modelItem => item.DebitAmount)</td>
                                     <td>@Html.DisplayFor(modelItem => item.ConsignmentAmount)</td>
                                     <td>
-                                        @if (item.Cancelled == true)
+                                        @if (item.Cancelled == false)
                                         {
-                                            <span class="badge badge-warning">Yes</span>
+                                            <a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel</span></a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Confirmed)
+                                        {
+                                            <span class="badge badge-success d-block">Approved</span>
                                         }
                                         else
                                         {
-                                            <span class="badge badge-dark">No</span>
+                                            <a href="#"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
                                         }
                                     </td>
                                     <td>
                                         @if (item.Cancelled == false)
                                         {
-                                            <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a> @:|
-                                            <a href="#" onclick="Cancelled('@item.Id', '@item.No')">Cancel</a>
+                                            <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a>
                                         }
                                     </td>
                                 </tr>
@@ -131,6 +137,39 @@
         });
     }
 
+    function Approve(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to approve Payment No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Approved", "Payments")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
@@ -138,8 +177,8 @@
             columnDefs: [
                 {
                     orderable: false,
-                    width: 120,
-                    targets: [7]
+                    width: 100,
+                    targets: [8]
                 }
             ],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
@@ -151,10 +190,18 @@
             }
         });
 
-        $('.datatable').DataTable({
+        var table = $('.datatable').DataTable({
             pagingType: 'full_numbers',
             order: [[1, 'desc']]
         });
+
+        if ('@ViewBag.Cancel' == 'False') {
+            table.column(6).visible(false);
+        }
+
+        if ('@ViewBag.Approve' == 'False') {
+            table.column(7).visible(false);
+        }
 
         $('.check-styled').uniform();
         

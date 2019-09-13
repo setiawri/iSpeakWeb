@@ -22,6 +22,7 @@ namespace iSpeak.Models
         public int Amount { get; set; }
         public int Due { get; set; }
         public bool Cancelled { get; set; }
+        public bool IsChecked { get; set; }
     }
 
     public class SaleInvoicesIndexModels
@@ -38,6 +39,8 @@ namespace iSpeak.Models
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int Due { get; set; }
         public bool Cancelled { get; set; }
+        [Display(Name = "Approved")]
+        public bool IsChecked { get; set; }
     }
 
     public class SaleInvoiceItemDetails

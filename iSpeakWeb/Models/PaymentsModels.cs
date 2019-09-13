@@ -54,5 +54,7 @@ namespace iSpeak.Models
         public int ConsignmentAmount { get; set; }
         public string Branch { get; set; }
         public bool Cancelled { get; set; }
+        [Display(Name = "Approved")]
+        public bool Confirmed { get; set; }
     }
 }

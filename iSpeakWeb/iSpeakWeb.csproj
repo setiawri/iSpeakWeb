@@ -206,9 +206,11 @@
     <Compile Include="Controllers\PettyCashRecordsCategoriesController.cs" />
     <Compile Include="Controllers\PettyCashRecordsController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
+    <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
     <Compile Include="Controllers\UnitsController.cs" />
     <Compile Include="Controllers\UserController.cs" />
@@ -235,6 +237,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccessModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\BirthdayViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\ConsignmentsModels.cs" />
     <Compile Include="Models\HourlyRatesModels.cs" />
@@ -248,6 +251,7 @@
     <Compile Include="Models\LessonTypesModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MasterMenuModels.cs" />
+    <Compile Include="Models\NewStudentViewModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
     <Compile Include="Models\PaymentsModels.cs" />
     <Compile Include="Models\PettyCashRecordsCategoriesModels.cs" />
@@ -262,8 +266,11 @@
     <Compile Include="Models\SaleInvoicesModels.cs" />
     <Compile Include="Models\SaleInvoicesViewModels.cs" />
     <Compile Include="Models\ServicesModels.cs" />
+    <Compile Include="Models\SettingsModels.cs" />
+    <Compile Include="Models\SettingsViewModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
     <Compile Include="Models\TokenIdentity.cs" />
+    <Compile Include="Models\TutorPayrollViewModels.cs" />
     <Compile Include="Models\UnitsModels.cs" />
     <Compile Include="Models\UserModels.cs" />
     <Compile Include="Models\UserViewModels.cs" />
@@ -305,6 +312,7 @@
     <Content Include="assets\css\landingpage\style.css" />
     <Content Include="assets\css\layout.min.css" />
     <Content Include="assets\css\print\invoice-print.css" />
+    <Content Include="assets\images\happy_bday.jpg" />
     <Content Include="assets\images\landing_page.jpg" />
     <Content Include="assets\images\logo.png" />
     <Content Include="assets\images\logo_light.png" />
@@ -489,6 +497,9 @@
     <Content Include="Views\Services\Create.cshtml" />
     <Content Include="Views\Services\Edit.cshtml" />
     <Content Include="Views\Services\Delete.cshtml" />
+    <Content Include="Views\Settings\Index.cshtml" />
+    <Content Include="Views\Reports\Payroll.cshtml" />
+    <Content Include="Views\Reports\NewStudent.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

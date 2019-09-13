@@ -93,6 +93,17 @@ namespace iSpeak.Controllers
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region Approve Payment
+        public async Task<JsonResult> Approved(Guid id)
+        {
+            var payment = await db.Payments.FindAsync(id);
+            payment.Confirmed = true;
+            db.Entry(payment).State = EntityState.Modified;
+            
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         [HttpGet]
         public ActionResult Create(string id)
@@ -210,7 +221,7 @@ namespace iSpeak.Controllers
                     RefId = paymentsModels.Id,
                     No = (lastHex_int_pcr + 1).ToString("X5"),
                     Timestamp = DateTime.UtcNow,
-                    PettyCashRecordsCategories_Id = db.PettyCashRecordsCategories.Where(x => x.Name == "Penjualan Tunai").FirstOrDefault().Id,
+                    PettyCashRecordsCategories_Id = db.Settings.Where(x => x.Id == SettingsValue.GUID_AutoEntryForCashPayments).FirstOrDefault().Value_Guid.Value, //db.PettyCashRecordsCategories.Where(x => x.Name == "Penjualan Tunai").FirstOrDefault().Id,
                     Notes = "Cash Payment [" + paymentsModels.No + "]",
                     Amount = cash_amount,
                     IsChecked = false,
@@ -246,7 +257,8 @@ namespace iSpeak.Controllers
                             CashAmount = item.CashAmount,
                             DebitAmount = item.DebitAmount,
                             ConsignmentAmount = item.ConsignmentAmount,
-                            Cancelled = item.Cancelled
+                            Cancelled = item.Cancelled,
+                            Confirmed = item.Confirmed
                         };
                         Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
@@ -254,6 +266,9 @@ namespace iSpeak.Controllers
                         if (branch_id == user_branch)
                             list_pim.Add(pim);
                     }
+
+                    ViewBag.Cancel = p.IsGranted(User.Identity.Name, "payments_cancel");
+                    ViewBag.Approve = p.IsGranted(User.Identity.Name, "payments_approve");
                     return View(list_pim);
                 }
                 else //show payment receipt

@@ -43,6 +43,8 @@
                                 <th>@Html.DisplayNameFor(model => model.Amount)</th>
                                 <th>@Html.DisplayNameFor(model => model.Due)</th>
                                 <th>Status</th>
+                                <th>@Html.DisplayNameFor(model => model.Cancelled)</th>
+                                <th>@Html.DisplayNameFor(model => model.IsChecked)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -93,15 +95,25 @@
                                     <td>
                                         @if (item.Amount == item.Due && item.Cancelled == false) //blm ada pembayaran (bisa cancel)
                                         {
-                                            <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> @:|
-                                            <a href="#" onclick="View_Log('@item.Id')">Log</a> @:|
-                                            <a href="#" onclick="Cancelled('@item.Id', '@item.No')">Cancel</a>
+                                            <a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel</span></a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.IsChecked)
+                                        {
+                                            <span class="badge badge-success d-block">Approved</span>
                                         }
                                         else
                                         {
-                                            <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> @:|
-                                            <a href="#" onclick="View_Log('@item.Id')">Log</a>
+                                            if (item.Due == 0)
+                                            {
+                                                <a href="#"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
+                                            }
                                         }
+                                    </td>
+                                    <td>
+                                        <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> |
+                                        <a href="#" onclick="View_Log('@item.Id')">Log</a>
                                     </td>
                                 </tr>
                             }
@@ -191,6 +203,39 @@
         });
     }
 
+    function Approve(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to approve Sale Invoice No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Approved", "Sale")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
@@ -204,7 +249,7 @@
                 {
                     orderable: false,
                     width: 150,
-                    targets: [8]
+                    targets: [10]
                 }
             ],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
@@ -216,13 +261,21 @@
             }
         });
 
-        $('.datatable').DataTable({
+        var table = $('.datatable').DataTable({
             pagingType: 'full_numbers',
             order: [[3, 'desc'], [2, 'desc']],
             search: {
                 search: 'Waiting Payment'
             }
         });
+
+        if ('@ViewBag.Cancel' == 'False') {
+            table.column(8).visible(false);
+        }
+
+        if ('@ViewBag.Approve' == 'False') {
+            table.column(9).visible(false);
+        }
 
         $('.check-styled').uniform();
         $('.check-styled-primary').uniform({

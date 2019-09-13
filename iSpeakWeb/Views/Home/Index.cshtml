@@ -1,12 +1,206 @@
-﻿@{
+﻿@using iSpeak.Common
+@model iSpeak.Models.BirthdayHome
+
+@{
     ViewBag.Title = "Home Page";
 }
+
+<style>
+    .wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .wrapper:after {
+        content: '';
+        display: block;
+        padding-top: 50%;
+    }
+
+    .wrapper img {
+        width: auto;
+        height: 100%;
+        max-width: none;
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+    }
+</style>
 
 <div class="content-wrapper">
 
     <!-- Content area -->
     <div class="content">
+        <!-- Form Birthday Student -->
+        <div class="form-group row birthday-list">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">Birthday This Month</h5>
+                        <div class="header-elements">
+                            <div class="list-icons">
+                                <a class="list-icons-item" data-action="collapse"></a>
+                                <a class="list-icons-item" data-action="reload"></a>
+                                <a class="list-icons-item" data-action="remove"></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover datatable1">
+                                <thead>
+                                    <tr>
+                                        <th>CountDay</th>
+                                        <th>Fullname</th>
+                                        <th>Birthday</th>
+                                        <th>Information</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.ThisMonth)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                            <td>
+                                                @if (item.CountDay > 0)
+                                                {
+                                                    <span class="badge badge-warning">@string.Format("In next {0} days", item.CountDay)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-primary">Today</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">Birthday Next Month</h5>
+                        <div class="header-elements">
+                            <div class="list-icons">
+                                <a class="list-icons-item" data-action="collapse"></a>
+                                <a class="list-icons-item" data-action="reload"></a>
+                                <a class="list-icons-item" data-action="remove"></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover datatable2">
+                                <thead>
+                                    <tr>
+                                        <th>CountDay</th>
+                                        <th>Fullname</th>
+                                        <th>Birthday</th>
+                                        <th>Information</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.NextMonth)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                            <td>
+                                                @if (item.CountDay > 0)
+                                                {
+                                                    <span class="badge badge-warning">@string.Format("In next {0} days", item.CountDay)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-primary">Today</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /form Birthday Student -->
+        <!-- Birthday Notif -->
+        <div class="form-group row birthday-notif">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">Happy Birthday @User.Identity.GetFullName() !</h5>
+                        <div class="header-elements">
+                            <div class="list-icons">
+                                <a class="list-icons-item" data-action="collapse"></a>
+                                <a class="list-icons-item" data-action="reload"></a>
+                                <a class="list-icons-item" data-action="remove"></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="ftco-blocks-cover-1">
+                            <div class="wrapper">
+                                <img src="@Url.Content("~/assets/images/happy_bday.jpg")" alt="happy-bday" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /birthday Notif -->
     </div>
     <!-- /content area -->
 
 </div>
+
+<script type="text/javascript">
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            //width: 120,
+            targets: '_all'
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var datatable1 = $('.datatable1').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+
+    var datatable2 = $('.datatable2').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+
+    $(document).ready(function () {
+        datatable1.column(0).visible(false);
+        datatable2.column(0).visible(false);
+
+        if ('@Model.IsStudentBirthday' == 'False') {
+            $('.birthday-notif').hide();
+        }
+
+        if ('@Model.ShowBirthdayList' == 'False') {
+            $('.birthday-list').hide();
+        }
+    });
+
+</script>
