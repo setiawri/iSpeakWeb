@@ -53,6 +53,7 @@ namespace iSpeak.Models
         public decimal disc { get; set; }
         public decimal voucher { get; set; }
         public int subtotal { get; set; }
+        public decimal hours { get; set; }
         public Guid? voucher_id { get; set; }
         public string note { get; set; }
         public Guid? lesson_id { get; set; }

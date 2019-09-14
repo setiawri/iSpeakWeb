@@ -34,6 +34,7 @@ namespace iSpeak.Models
     {
         public string Invoice { get; set; }
         public string Description { get; set; }
+        public string Notes { get; set; }
         public int Qty { get; set; }
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int Price { get; set; }

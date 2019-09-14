@@ -39,7 +39,7 @@ namespace iSpeak.Controllers
                             Fullname = usr.Firstname + " " + usr.Middlename + " " + usr.Lastname,
                             UserName = usr.UserName,
                             Email = usr.Email,
-                            Roles = roles.Select(x => x.r.Name).ToList(), //string.Join(", ", roles.Select(x => x.r.Name).ToArray()),
+                            Roles = roles.Select(x => x.r.Name).ToList(),
                             Active = usr.Active
                         });
                     }
@@ -48,10 +48,11 @@ namespace iSpeak.Controllers
                 }
                 else
                 {
+                    string role_id_allowed = db.Settings.Find(SettingsValue.GUID_UserSetRoleAllowed).Value_Guid.Value.ToString();
                     var list_user = (from u in db.User
                                      join ur in db.UserRole on u.Id equals ur.UserId
                                      join r in db.Role on ur.RoleId equals r.Id
-                                     where r.Name == "Student"
+                                     where r.Id == role_id_allowed
                                      select new { u, ur, r }).ToList();
                     foreach (var usr in list_user)
                     {
@@ -65,7 +66,7 @@ namespace iSpeak.Controllers
                             Active = usr.u.Active
                         });
                     }
-                    ViewBag.listRole = new SelectList(db.Role.Where(x => x.Name == "Student").OrderBy(x => x.Name).ToList(), "Name", "Name");
+                    ViewBag.listRole = new SelectList(db.Role.Where(x => x.Id == role_id_allowed).OrderBy(x => x.Name).ToList(), "Name", "Name");
                     return View(userViewModels);
                 }
             }

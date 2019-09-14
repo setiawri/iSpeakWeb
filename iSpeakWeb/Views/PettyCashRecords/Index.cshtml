@@ -262,6 +262,39 @@
         });
     }
 
+    function CancelApprove(Id, Notes, Amount) {
+        bootbox.confirm({
+            message: "Are you sure want to cancel Approve transaction " + Notes + ": " + parseFloat(Amount).toLocaleString() + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CancelApproved", "PettyCashRecords")',
+                        data: {
+                            pettycash_id: Id
+                        },
+                        success: function (data) {
+                            FilterClick();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     function FilterClick() {
         $.ajax({
             type: "POST",
@@ -354,7 +387,7 @@
 
         var table = $('.datatable').DataTable({
             pagingType: 'full_numbers',
-            order: [[0, 'desc']]
+            order: [[1, 'desc']]
         });
 
         if ('@ViewBag.Approve' == 'False') {

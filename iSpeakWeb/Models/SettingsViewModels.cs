@@ -10,5 +10,7 @@ namespace iSpeak.Models
     {
         [Display(Name = "Auto Entry for Cash Payments")]
         public Guid AutoEntryForCashPayments { get; set; }
+        [Display(Name = "User Set Role Allowed (No Access)")]
+        public Guid UserSetRoleAllowed { get; set; }
     }
 }

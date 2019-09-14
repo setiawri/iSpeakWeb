@@ -189,6 +189,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                string role_id_allowed = db.Settings.Find(SettingsValue.GUID_UserSetRoleAllowed).Value_Guid.Value.ToString();
                 List<SelectListItem> list = new List<SelectListItem>();
                 bool setRole = p.IsGranted(User.Identity.Name, "user_setroles");
                 if (setRole)
@@ -200,12 +201,13 @@ namespace iSpeak.Controllers
                 }
                 else
                 {
-                    foreach (var role in RoleManager.Roles.Where(x => x.Name == "Student").OrderBy(x => x.Name))
+                    foreach (var role in RoleManager.Roles.Where(x => x.Id == role_id_allowed).OrderBy(x => x.Name))
                     {
                         list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
                     }
                 }
                 ViewBag.Roles = list;
+                ViewBag.RoleValueDefault = db.Role.Find(role_id_allowed).Name;
                 ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.DOB = DateTime.UtcNow.Date;
                 return View();
@@ -269,7 +271,8 @@ namespace iSpeak.Controllers
             }
             else
             {
-                foreach (var role in RoleManager.Roles.Where(x => x.Name == "Student").OrderBy(x => x.Name))
+                string role_id_allowed = db.Settings.Find(SettingsValue.GUID_UserSetRoleAllowed).Value_Guid.Value.ToString();
+                foreach (var role in RoleManager.Roles.Where(x => x.Id == role_id_allowed).OrderBy(x => x.Name))
                 {
                     list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
                 }

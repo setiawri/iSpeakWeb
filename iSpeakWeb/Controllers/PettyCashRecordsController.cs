@@ -49,7 +49,7 @@ namespace iSpeak.Controllers
                     Amount = item.pcr.Amount,
                     Balance = balance += item.pcr.Amount,
                     IsChecked = item.pcr.IsChecked,
-                    Status_render = (item.pcr.IsChecked) ? "<span class='badge badge-success'>Approved</span>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark'>None</span></a>",
+                    Status_render = (item.pcr.IsChecked) ? "<a href='#'><span onclick='CancelApprove(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-success'>Approved</span></a>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark'>None</span></a>",
                     UserInput = user_input
                     //Action_render = "<a href='" + Url.Content("~") + "PettyCashRecords/Edit/" + item.pcr.Id + "'>Edit</a> | <a href='" + Url.Content("~") + "PettyCashRecords/Delete/" + item.pcr.Id + "'>Delete</a>"
                 });
@@ -64,6 +64,18 @@ namespace iSpeak.Controllers
             string status = "OK";
             PettyCashRecordsModels pettyCashRecordsModels = await db.PettyCashRecords.Where(x => x.Id == pettycash_id).FirstOrDefaultAsync();
             pettyCashRecordsModels.IsChecked = true;
+            db.Entry(pettyCashRecordsModels).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
+            return Json(new { status }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region CancelApproved
+        public async Task<JsonResult> CancelApproved(Guid pettycash_id)
+        {
+            string status = "OK";
+            PettyCashRecordsModels pettyCashRecordsModels = await db.PettyCashRecords.Where(x => x.Id == pettycash_id).FirstOrDefaultAsync();
+            pettyCashRecordsModels.IsChecked = false;
             db.Entry(pettyCashRecordsModels).State = EntityState.Modified;
             await db.SaveChangesAsync();
 

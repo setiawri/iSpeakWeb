@@ -16,6 +16,7 @@ namespace iSpeak.Controllers
     {
         private iSpeakContext db = new iSpeakContext();
 
+        #region Get Item
         public JsonResult GetItem(Guid id)
         {
             var list = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == id).OrderBy(x => x.RowNo).ToList();
@@ -53,6 +54,87 @@ namespace iSpeak.Controllers
 
             return Json(new { content = message }, JsonRequestBehavior.AllowGet);
         }
+        #endregion
+        #region Get Session Hours
+        public async Task<JsonResult> GetSessionHours(Guid package_id)
+        {
+            var lesson_pckg = await db.LessonPackages.FindAsync(package_id);
+            return Json(new { hours = string.Format("{0:N2}", lesson_pckg.SessionHours) }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Get Lesson Total
+        public async Task<JsonResult> GetItemTotal(int qty, Guid lesson_package_id, string hours, int travel, decimal disc, string voucher_id)
+        {
+            //var lessonPackage = db.LessonPackages.Where(x => x.Id == lesson_package_id).FirstOrDefault();
+            var lesson = await (from lp in db.LessonPackages
+                                 join l in db.Languages on lp.Languages_Id equals l.Id
+                                 join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
+                                 where lp.Id == lesson_package_id
+                                 select new { lp, l, lt }).FirstOrDefaultAsync();
+            string description = "[" + lesson.lt.Name + ", " + lesson.l.Name + "] " + lesson.lp.Name + " (" + hours + " hours)";
+            int price = lesson.lp.Price;
+            decimal voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            decimal subtotal = (qty * price) + travel - disc - voucher;
+
+            return Json(new { description, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Get Inventory Total
+        public async Task<JsonResult> GetInventoryTotal(int qty, Guid product_id, decimal disc, string voucher_id)
+        {
+            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
+            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+            var product_qty = await db.Products_Qty.Where(x => x.Branches_Id == user_login.Branches_Id && x.Products_Id == product_id).FirstOrDefaultAsync();
+
+            if (qty > product_qty.Qty)
+            {
+                error_message = "The Max Qty is " + string.Format("{0:N0}", product_qty.Qty) + ".";
+            }
+            else
+            {
+                price = db.Products.Where(x => x.Id == product_id).FirstOrDefault().SellPrice;
+                voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+                subtotal = (qty * price) - disc - voucher;
+            }
+
+            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Get Service Total
+        public async Task<JsonResult> GetServiceTotal(int qty, Guid service_id, decimal disc, string voucher_id)
+        {
+            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
+            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+
+            price = db.Services.Where(x => x.Id == service_id).FirstOrDefault().SellPrice;
+            voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            subtotal = (qty * price) - disc - voucher;
+
+            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Cancel Sale Invoice
+        public async Task<JsonResult> Cancelled(Guid id)
+        {
+            var sale_invoice = await db.SaleInvoices.FindAsync(id);
+            sale_invoice.Cancelled = true;
+            db.Entry(sale_invoice).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Approve Sale Invoice
+        public async Task<JsonResult> Approved(Guid id)
+        {
+            var sale_invoice = await db.SaleInvoices.FindAsync(id);
+            sale_invoice.IsChecked = true;
+            db.Entry(sale_invoice).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         public async Task<ActionResult> Index()
         {
@@ -91,73 +173,7 @@ namespace iSpeak.Controllers
                 return View(list);
             }
         }
-
-        public JsonResult GetItemTotal(int qty, Guid lesson_package_id, int travel, decimal disc, string voucher_id)
-        {
-            var lessonPackage = db.LessonPackages.Where(x => x.Id == lesson_package_id).FirstOrDefault();
-            string description = lessonPackage.Name;
-            int price = lessonPackage.Price;
-            decimal voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
-            decimal subtotal = (qty * price) + travel - disc - voucher;
-
-            return Json(new { description = description, price = price, voucher = voucher, subtotal = subtotal }, JsonRequestBehavior.AllowGet);
-        }
-
-        public async Task<JsonResult> GetInventoryTotal(int qty, Guid product_id, decimal disc, string voucher_id)
-        {
-            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
-            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            var product_qty = await db.Products_Qty.Where(x => x.Branches_Id == user_login.Branches_Id && x.Products_Id == product_id).FirstOrDefaultAsync();
-
-            if (qty > product_qty.Qty)
-            {
-                error_message = "The Max Qty is " + string.Format("{0:N0}", product_qty.Qty) + ".";
-            }
-            else
-            {
-                price = db.Products.Where(x => x.Id == product_id).FirstOrDefault().SellPrice;
-                voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
-                subtotal = (qty * price) - disc - voucher;
-            }
-
-            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
-        }
-
-        public async Task<JsonResult> GetServiceTotal(int qty, Guid service_id, decimal disc, string voucher_id)
-        {
-            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
-            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-
-            price = db.Services.Where(x => x.Id == service_id).FirstOrDefault().SellPrice;
-            voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
-            subtotal = (qty * price) - disc - voucher;
-
-            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
-        }
-
-        #region Cancel Sale Invoice
-        public async Task<JsonResult> Cancelled(Guid id)
-        {
-            var sale_invoice = await db.SaleInvoices.FindAsync(id);
-            sale_invoice.Cancelled = true;
-            db.Entry(sale_invoice).State = EntityState.Modified;
-            
-            await db.SaveChangesAsync();
-            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
-        }
-        #endregion
-        #region Approve Sale Invoice
-        public async Task<JsonResult> Approved(Guid id)
-        {
-            var sale_invoice = await db.SaleInvoices.FindAsync(id);
-            sale_invoice.IsChecked = true;
-            db.Entry(sale_invoice).State = EntityState.Modified;
-
-            await db.SaveChangesAsync();
-            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
-        }
-        #endregion
-
+        
         [HttpGet]
         public ActionResult Create()
         {
@@ -220,7 +236,7 @@ namespace iSpeak.Controllers
                     lesson_list.Add(new
                     {
                         item.Id,
-                        Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.Price.ToString("#,##0") + ")"
+                        Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + string.Format("{0:N0}", item.Price) + ")"
                     });
                 }
                 #endregion
@@ -240,6 +256,7 @@ namespace iSpeak.Controllers
                 }
                 #endregion
                 #region List Role
+                string role_id_allowed = db.Settings.Find(SettingsValue.GUID_UserSetRoleAllowed).Value_Guid.Value.ToString();
                 List<SelectListItem> role_list = new List<SelectListItem>();
                 bool setRole = p.IsGranted(User.Identity.Name, "user_setroles");
                 if (setRole)
@@ -251,7 +268,7 @@ namespace iSpeak.Controllers
                 }
                 else
                 {
-                    foreach (var role in db.Role.Where(x => x.Name == "Student").OrderBy(x => x.Name))
+                    foreach (var role in db.Role.Where(x => x.Id == role_id_allowed).OrderBy(x => x.Name))
                     {
                         role_list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
                     }
@@ -264,6 +281,7 @@ namespace iSpeak.Controllers
                 ViewBag.listProduct = new SelectList(products, "Id", "Name");
                 ViewBag.listService = new SelectList(db.Services.Where(x => x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
                 ViewBag.listRole = role_list;
+                ViewBag.RoleValueDefault = db.Role.Find(role_id_allowed).Name;
                 ViewBag.DOB = DateTime.UtcNow.Date;
 
                 return View();
@@ -317,8 +335,8 @@ namespace iSpeak.Controllers
                         Products_Id = item.inventory_id,
                         Services_Id = item.service_id,
                         LessonPackages_Id = item.lesson_id,
-                        SessionHours = item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
-                        SessionHours_Remaining = item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
+                        SessionHours = item.hours, //item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
+                        SessionHours_Remaining = item.hours, //item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
                         TravelCost = item.travel,
                         TutorTravelCost = item.tutor
                     };
@@ -394,7 +412,7 @@ namespace iSpeak.Controllers
                 lesson_list.Add(new
                 {
                     item.Id,
-                    Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.Price.ToString("#,##0") + ")"
+                    Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + string.Format("{0:N0}", item.Price) + ")"
                 });
             }
             #endregion

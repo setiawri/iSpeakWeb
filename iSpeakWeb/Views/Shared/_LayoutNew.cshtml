@@ -125,26 +125,16 @@
                     </a>
                 </li>
                 <li class="nav-item dropdown" @(ViewBag.InventoryMenu == "" ? "" : Html.Raw(ViewBag.InventoryMenu))>
-                    <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
+                    <a href="@Url.Action("Index", "Inventory")" class="navbar-nav-link">
                         <i class="icon-clipboard6 mr-2"></i>
                         Inventory
                     </a>
-                    <div class="dropdown-menu">
-                        <a href="@Url.Action("Index", "Suppliers")" class="dropdown-item">Suppliers</a>
-                        <a href="@Url.Action("Index", "Products")" class="dropdown-item">Products</a>
-                        <a href="@Url.Action("Index", "Inventory")" class="dropdown-item">Inventory</a>
-                        <a href="@Url.Action("Index", "Units")" class="dropdown-item">Units</a>
-                    </div>
                 </li>
                 <li class="nav-item dropdown" @(ViewBag.PettyCashMenu == "" ? "" : Html.Raw(ViewBag.PettyCashMenu))>
-                    <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
+                    <a href="@Url.Action("Index", "PettyCashRecords")" class="navbar-nav-link">
                         <i class="icon-drawer mr-2"></i>
                         Petty Cash
                     </a>
-                    <div class="dropdown-menu">
-                        <a href="@Url.Action("Index", "PettyCashRecordsCategories")" class="dropdown-item">Petty Cash Categories</a>
-                        <a href="@Url.Action("Index", "PettyCashRecords")" class="dropdown-item">Petty Cash Records</a>
-                    </div>
                 </li>
                 <li class="nav-item dropdown" @(ViewBag.ReportsMenu == "" ? "" : Html.Raw(ViewBag.ReportsMenu))>
                     <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
@@ -162,6 +152,7 @@
                         Master Data
                     </a>
                     <div class="dropdown-menu">
+                        <a href="@Url.Action("Index", "Role")" class="dropdown-item">User Roles</a>
                         <a href="@Url.Action("Index", "Branches")" class="dropdown-item">Branches</a>
                         <a href="@Url.Action("Index", "Consignments")" class="dropdown-item">Consignments</a>
                         <a href="@Url.Action("Index", "Languages")" class="dropdown-item">Languages</a>
@@ -169,21 +160,30 @@
                         <a href="@Url.Action("Index", "LessonPackages")" class="dropdown-item">Lesson Packages</a>
                         <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Hourly Rates</a>
                         <a href="@Url.Action("Index", "Vouchers")" class="dropdown-item">Vouchers</a>
+                        <a href="@Url.Action("Index", "Suppliers")" class="dropdown-item">Suppliers</a>
+                        <a href="@Url.Action("Index", "Products")" class="dropdown-item">Products</a>
+                        <a href="@Url.Action("Index", "Units")" class="dropdown-item">Units</a>
                         <a href="@Url.Action("Index", "Services")" class="dropdown-item">Services</a>
+                        <a href="@Url.Action("Index", "PettyCashRecordsCategories")" class="dropdown-item">Petty Cash Categories</a>
                         <a href="@Url.Action("Index", "Settings")" class="dropdown-item">Settings</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown" @(ViewBag.AccountsMenu == "" ? "" : Html.Raw(ViewBag.AccountsMenu))>
+                    <a href="@Url.Action("Index", "User")" class="navbar-nav-link">
+                        <i class="icon-users2 mr-2"></i>
+                        Accounts
+                    </a>
+                </li>
+                @*<li class="nav-item dropdown" @(ViewBag.AccountsMenu == "" ? "" : Html.Raw(ViewBag.AccountsMenu))>
                     <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
                         <i class="icon-user-tie mr-2"></i>
                         Accounts
                     </a>
                     <div class="dropdown-menu">
                         <div class="dropdown-header">Admin</div>
-                        <a href="@Url.Action("Index", "Role")" class="dropdown-item"><i class="icon-shield2"></i> Role</a>
                         <a href="@Url.Action("Index", "User")" class="dropdown-item"><i class="icon-users2"></i> User</a>
                     </div>
-                </li>
+                </li>*@
             </ul>
         </div>
     </div>

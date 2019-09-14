@@ -312,6 +312,7 @@ namespace iSpeak.Controllers
                             SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
                             saleInvoiceItemsDetails.Invoice = paymentItemsDetails.Invoice;
                             saleInvoiceItemsDetails.Description = subitem.Description;
+                            saleInvoiceItemsDetails.Notes = subitem.Notes;
                             saleInvoiceItemsDetails.Customer = data_customer.c.Firstname + " " + data_customer.c.Middlename + " " + data_customer.c.Lastname;
                             saleInvoiceItemsDetails.Qty = subitem.Qty;
                             saleInvoiceItemsDetails.Price = subitem.Price;

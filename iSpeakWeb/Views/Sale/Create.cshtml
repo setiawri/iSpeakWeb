@@ -46,6 +46,16 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-form-label col-lg-2">Session Hours</label>
+                                <div class="col-lg-6">
+                                    <div class="form-group row">
+                                        <div class="col-lg-3">
+                                            @Html.Editor("SessionHours", new { htmlAttributes = new { @class = "form-control", @placeholder = "Session Hours" } })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-form-label col-lg-2">Travel Cost / Tutor Cost</label>
                                 <div class="col-lg-6">
                                     <div class="form-group row">
@@ -215,7 +225,7 @@
                                     <div class="row">
                                         <label class="col-form-label col-sm-3 text-right">Role</label>
                                         <div class="col-sm-9">
-                                            @Html.ListBox("CustomerRole", new SelectList(ViewBag.listRole, "Value", "Text", "Student"), new { @class = "form-control select2", @multiple = "multiple" })
+                                            @Html.ListBox("CustomerRole", new SelectList(ViewBag.listRole, "Value", "Text", ViewBag.RoleValueDefault), new { @class = "form-control select2", @multiple = "multiple" })
                                         </div>
                                     </div>
                                 </div>
@@ -372,13 +382,14 @@
                 data: {
                     qty: $('#Qty').val(),
                     lesson_package_id: $('#LessonPackages_Id').val(),
+                    hours: $('#SessionHours').val(),
                     travel: travel_cost,
                     disc: discount,
                     voucher_id: $('#Vouchers_Id').val()
                 },
                 success: function (data) {
                     AddItemLesson(
-                        $('#LessonPackages_Id option:selected').text(),
+                        data.description,
                         $('#Qty').val(),
                         data.price.toLocaleString(),
                         travel_cost.toLocaleString(),
@@ -386,6 +397,7 @@
                         discount.toLocaleString(),
                         data.voucher.toLocaleString(),
                         data.subtotal.toLocaleString(),
+                        $('#SessionHours').val(),
                         $('#Vouchers_Id').val(),
                         $('#Notes_Lesson').val(),
                         $('#LessonPackages_Id').val(),
@@ -400,7 +412,7 @@
         }
     }
 
-    function AddItemLesson(desc, qty, price, travel, tutor, disc, voucher, subtotal, voucher_id, note, lesson_id, inventory_id, service_id) {
+    function AddItemLesson(desc, qty, price, travel, tutor, disc, voucher, subtotal, hours, voucher_id, note, lesson_id, inventory_id, service_id) {
         item_no += 1;
 
         var rowItem = '<tr id="item_' + item_no + '">'
@@ -413,6 +425,7 @@
             + '<td><input type="text" readonly class="form-control input-xs disc text-right" value="' + disc + '" /></td>'
             + '<td><input type="text" readonly class="form-control input-xs voucher text-right" value="' + voucher + '" /></td>'
             + '<td><input type="text" readonly class="form-control input-xs subtotal text-right" value="' + subtotal + '" /></td>'
+            + '<td style="display: none"><input type="text" readonly class="form-control input-xs hours" value="' + hours + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs voucher_id" value="' + voucher_id + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs note" value="' + note + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs lesson_id" value="' + lesson_id + '" /></td>'
@@ -477,6 +490,7 @@
                             discount.toLocaleString(),
                             data.voucher.toLocaleString(),
                             data.subtotal.toLocaleString(),
+                            0,
                             $('#Vouchers_Id').val(),
                             $('#Notes_Inventory').val(),
                             '',
@@ -528,6 +542,7 @@
                             discount.toLocaleString(),
                             data.voucher.toLocaleString(),
                             data.subtotal.toLocaleString(),
+                            0,
                             $('#Vouchers_Id').val(),
                             $('#Notes_Service').val(),
                             '',
@@ -603,6 +618,24 @@
 
         $('.mdl-birthday').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
         $('.mdl-birthday').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
+
+        $('#LessonPackages_Id').change(function () {
+            if ($('#LessonPackages_Id').val() != '') {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetSessionHours", "Sale")',
+                    data: {
+                        package_id: $('#LessonPackages_Id').val()
+                    },
+                    success: function (data) {
+                        $('#SessionHours').val(data.hours);
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
+        });
 
         $('.mdl-save').click(function () {
             if ($('#CustomerRole').val() == '') {
@@ -706,6 +739,7 @@
                 var disc = parseFloat($(this).find('input.disc').val().replace(/,/g, ''));
                 var voucher = parseFloat($(this).find('input.voucher').val().replace(/,/g, ''));
                 var subtotal = parseFloat($(this).find('input.subtotal').val().replace(/,/g, ''));
+                var hours = parseFloat($(this).find('input.hours').val().replace(/,/g, ''));
                 var voucher_id = $(this).find('input.voucher_id').val();
                 var note = $(this).find('input.note').val();
                 var lesson_id = $(this).find('input.lesson_id').val();
@@ -715,7 +749,7 @@
                 total += subtotal;
                 var obj = {
                     desc: desc, qty: qty, price: price, travel: travel, tutor: tutor, disc: disc, voucher: voucher, subtotal: subtotal,
-                    voucher_id: voucher_id, note: note, lesson_id: lesson_id, inventory_id: inventory_id, service_id: service_id
+                    hours: hours, voucher_id: voucher_id, note: note, lesson_id: lesson_id, inventory_id: inventory_id, service_id: service_id
                 };
                 arrItem.push(obj);
             });
