@@ -254,11 +254,14 @@
     <Compile Include="Models\NewStudentViewModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
     <Compile Include="Models\PaymentsModels.cs" />
+    <Compile Include="Models\PayrollPaymentsModels.cs" />
+    <Compile Include="Models\PayrollPaymentsViewModels.cs" />
     <Compile Include="Models\PettyCashRecordsCategoriesModels.cs" />
     <Compile Include="Models\PettyCashRecordsModels.cs" />
     <Compile Include="Models\PettyCashViewModels.cs" />
     <Compile Include="Models\ProductsModels.cs" />
     <Compile Include="Models\Products_QtyModels.cs" />
+    <Compile Include="Models\ReceiptPayrollViewModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
     <Compile Include="Models\SaleInvoiceItemsModels.cs" />
@@ -280,6 +283,7 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="assets\css\animate.min.css" />
     <Content Include="assets\css\bootstrap-datetimepicker.css" />
     <Content Include="assets\css\bootstrap.min.css" />
     <Content Include="assets\css\bootstrap_limitless.min.css" />
@@ -500,6 +504,8 @@
     <Content Include="Views\Settings\Index.cshtml" />
     <Content Include="Views\Reports\Payroll.cshtml" />
     <Content Include="Views\Reports\NewStudent.cshtml" />
+    <Content Include="Views\Reports\PayrollPayments.cshtml" />
+    <Content Include="Views\Reports\Print.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

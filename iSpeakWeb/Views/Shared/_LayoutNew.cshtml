@@ -17,6 +17,7 @@
     <link href="~/assets/css/components.min.css" rel="stylesheet" type="text/css">
     <link href="~/assets/css/colors.min.css" rel="stylesheet" type="text/css">
     <link href="~/assets/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+    <link href="~/assets/css/animate.min.css" rel="stylesheet" />
     <!-- /global stylesheets -->
     <!-- Core JS files -->
     <script src="~/assets/js/main/jquery.min.js"></script>
@@ -144,6 +145,7 @@
                     <div class="dropdown-menu">
                         <a href="@Url.Action("NewStudent", "Reports")" class="dropdown-item">New Student</a>
                         <a href="@Url.Action("Payroll", "Reports")" class="dropdown-item">Tutor Payroll</a>
+                        <a href="@Url.Action("PayrollPayments", "Reports")" class="dropdown-item">Payroll Payments</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown" @(ViewBag.MasterDataMenu == "" ? "" : Html.Raw(ViewBag.MasterDataMenu))>

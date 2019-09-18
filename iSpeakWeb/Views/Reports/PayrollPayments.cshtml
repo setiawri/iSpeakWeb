@@ -1,0 +1,317 @@
+﻿@model IEnumerable<iSpeak.Models.PayrollPaymentsViewModels>
+
+@{
+    ViewBag.Root = "Payroll Payments";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Payment List -->
+        <div class="card payment-list animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.No)</th>
+                                <th>@Html.DisplayNameFor(model => model.Amount)</th>
+                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                                <th>@Html.DisplayNameFor(model => model.Tutor)</th>
+                                <th>@Html.DisplayNameFor(model => model.Cancelled)</th>
+                                <th>@Html.DisplayNameFor(model => model.IsChecked)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body">
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
+                                    <td>
+                                        @if (item.Cancelled == false)
+                                        {
+                                            <a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel Payroll</span></a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-flat border-danger d-block text-danger-600">Cancelled</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.IsChecked)
+                                        {
+                                            <a href="#"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id', '@item.No')">Approved</span></a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Cancelled == false)
+                                        {
+                                            <a href="@Url.Action("Print", "Reports", new { id = item.Id, tutor_id = item.Tutor_Id })">Print</a> @:|
+                                            <a href="#" onclick="Details('@item.Id')">Details</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /Payment List -->
+        <!-- Payment Details -->
+        <div class="card payment-details animated bounceInLeft" style="display: none">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title title-details"></h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="form-group">
+                            <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to Payroll Payments List <i class="icon-circle-left2 ml-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3" style="float: right">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text bg-slate-700 border-slate-700 text-white">
+                                        Total Payroll
+                                    </span>
+                                </span>
+                                <input type="text" class="form-control bg-slate text-white border-transparent payroll-total" placeholder="Total Amount">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable2">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Session Hours</th>
+                                <th>Hourly Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /Payment Details -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+
+    function Previous() {
+        $('.payment-list').show();
+        $('.payment-details').hide();
+    }
+
+    function Details(id) {
+        $('.payment-list').hide();
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetDetailsPayments", "Reports")',
+            data: {
+                payments_id: id
+            },
+            success: function (data) {
+                console.log(data.obj);
+                var datatable = $('.datatable2').DataTable();
+                datatable.clear().draw();
+                $.each(data.obj, function (index, row) {
+                    datatable.row.add([
+                        row.Timestamp,
+                        row.Description,
+                        row.SessionHours,
+                        row.HourlyRate
+                    ]).draw();
+                });
+                
+                $('.title-details').html(data.tutor_name);
+                $('.payroll-total').val(data.amount);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+
+        $('.payment-details').show();
+    }
+
+    function Cancelled(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to cancel Payroll Payment No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Cancelled", "Reports")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
+    function Approve(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to approve Payroll Payment No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Approved", "Reports")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
+    function CancelApprove(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to Cancel Approve Payroll Payment No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CancelApproved", "Reports")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        // Setting datatable defaults
+        $.extend($.fn.dataTable.defaults, {
+            autoWidth: false,
+            columnDefs: [
+                {
+                    orderable: false,
+                    targets: '_all'
+                    //width: 120,
+                    //targets: [7]
+                }
+            ],
+            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+            language: {
+                search: '<span>Filter:</span> _INPUT_',
+                searchPlaceholder: 'Type to filter...',
+                lengthMenu: '<span>Show:</span> _MENU_',
+                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+            }
+        });
+
+        var table = $('.datatable').DataTable({
+            pagingType: 'full_numbers',
+            order: [[0, 'desc']]
+        });
+
+        var table2 = $('.datatable2').DataTable({
+            pagingType: 'full_numbers',
+            order: [[0, 'asc']]
+        });
+
+        if ('@ViewBag.Cancel' == 'False') {
+            table.column(5).visible(false);
+        }
+
+        if ('@ViewBag.Approve' == 'False') {
+            table.column(6).visible(false);
+        }
+
+        $('.check-styled').uniform();
+
+    });
+</script>

@@ -39,10 +39,8 @@
                     <div class="card-header header-elements-inline">
                         <h5 class="card-title">Birthday This Month</h5>
                         <div class="header-elements">
-                            <div class="list-icons">
-                                <a class="list-icons-item" data-action="collapse"></a>
-                                <a class="list-icons-item" data-action="reload"></a>
-                                <a class="list-icons-item" data-action="remove"></a>
+                            <div style="float: right">
+                                @Html.DropDownList("listRole_this", ViewBag.listRole as SelectList, new { @class = "form-control select2" })
                             </div>
                         </div>
                     </div>
@@ -54,6 +52,7 @@
                                         <th>CountDay</th>
                                         <th>Fullname</th>
                                         <th>Birthday</th>
+                                        <th>Role</th>
                                         <th>Information</th>
                                     </tr>
                                 </thead>
@@ -64,6 +63,7 @@
                                             <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
                                             <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
                                             <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Role)</td>
                                             <td>
                                                 @if (item.CountDay > 0)
                                                 {
@@ -87,10 +87,8 @@
                     <div class="card-header header-elements-inline">
                         <h5 class="card-title">Birthday Next Month</h5>
                         <div class="header-elements">
-                            <div class="list-icons">
-                                <a class="list-icons-item" data-action="collapse"></a>
-                                <a class="list-icons-item" data-action="reload"></a>
-                                <a class="list-icons-item" data-action="remove"></a>
+                            <div style="float: right">
+                                @Html.DropDownList("listRole_next", ViewBag.listRole as SelectList, new { @class = "form-control select2" })
                             </div>
                         </div>
                     </div>
@@ -102,6 +100,7 @@
                                         <th>CountDay</th>
                                         <th>Fullname</th>
                                         <th>Birthday</th>
+                                        <th>Role</th>
                                         <th>Information</th>
                                     </tr>
                                 </thead>
@@ -112,6 +111,7 @@
                                             <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
                                             <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
                                             <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                            <td>@Html.DisplayFor(modelItem => item.Role)</td>
                                             <td>
                                                 @if (item.CountDay > 0)
                                                 {
@@ -166,11 +166,11 @@
     // Setting datatable defaults
     $.extend($.fn.dataTable.defaults, {
         autoWidth: false,
-        columnDefs: [{
-            orderable: false,
-            //width: 120,
-            targets: '_all'
-        }],
+        //columnDefs: [{
+        //    orderable: false,
+        //    //width: 120,
+        //    targets: '_all'
+        //}],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
         language: {
             search: '<span>Filter:</span> _INPUT_',
@@ -182,15 +182,25 @@
 
     var datatable1 = $('.datatable1').DataTable({
         pagingType: 'full_numbers',
+        search: {
+            search: 'Student'
+        },
         order: [[0, 'asc']]
     });
 
     var datatable2 = $('.datatable2').DataTable({
         pagingType: 'full_numbers',
+        search: {
+            search: 'Student'
+        },
         order: [[0, 'asc']]
     });
 
     $(document).ready(function () {
+        $('.select2').select2({
+            minimumResultsForSearch: -1
+        });
+
         datatable1.column(0).visible(false);
         datatable2.column(0).visible(false);
 
@@ -201,6 +211,26 @@
         if ('@Model.ShowBirthdayList' == 'False') {
             $('.birthday-list').hide();
         }
+
+        $('#listRole_this').val('Student').trigger('change');
+        $('#listRole_this').change(function () {
+            if ($('#listRole_this').val() == '') {
+                $('input[aria-controls=DataTables_Table_0]').val('').keyup();
+            }
+            else {
+                $('input[aria-controls=DataTables_Table_0]').val($('#listRole_this').val()).keyup();
+            }
+        });
+
+        $('#listRole_next').val('Student').trigger('change');
+        $('#listRole_next').change(function () {
+            if ($('#listRole_next').val() == '') {
+                $('input[aria-controls=DataTables_Table_1]').val('').keyup();
+            }
+            else {
+                $('input[aria-controls=DataTables_Table_1]').val($('#listRole_next').val()).keyup();
+            }
+        });
     });
 
 </script>

@@ -25,11 +25,20 @@
                 <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success mb-1">Create Invoice <i class="icon-plus22 ml-2"></i></a>
                 <button type="button" class="btn btn-sm btn-primary mb-1" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
                 <div class="form-check mb-1" style="float: right">
+                    @Html.DropDownList("listStatus", new List<SelectListItem>
+                    {
+                        new SelectListItem { Text = "All Status", Value = "" },
+                        new SelectListItem { Text = "Waiting Payment", Value = "Waiting Payment", Selected = true },
+                        new SelectListItem { Text = "Completed", Value = "Completed" },
+                        new SelectListItem { Text = "Cancelled", Value = "Cancelled" }
+                    }, new { @class = "form-control select2" })
+                </div>
+                @*<div class="form-check mb-1" style="float: right">
                     <label class="form-check-label">
                         <input type="checkbox" id="chkHide" class="check-styled-primary" data-fouc>
                         Show Completed Payment
                     </label>
-                </div>
+                </div>*@
 
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -101,7 +110,7 @@
                                     <td>
                                         @if (item.IsChecked)
                                         {
-                                            <span class="badge badge-success d-block">Approved</span>
+                                            <a href="#"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id', '@item.No')">Approved</span></a>
                                         }
                                         else
                                         {
@@ -236,6 +245,39 @@
         });
     }
 
+    function CancelApprove(id, no) {
+        bootbox.confirm({
+            message: "Are you sure want to cancel Approve Sale Invoice No: " + no + " ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CancelApproved", "Sale")',
+                        data: {
+                            id: id
+                        },
+                        success: function (data) {
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
@@ -276,6 +318,19 @@
         if ('@ViewBag.Approve' == 'False') {
             table.column(9).visible(false);
         }
+
+        $('.select2').select2({
+            minimumResultsForSearch: -1
+        });
+
+        $('#listStatus').change(function () {
+            if ($('#listStatus').val() == '') {
+                $('input[type=search]').val('').keyup();
+            }
+            else {
+                $('input[type=search]').val($('#listStatus').val()).keyup();
+            }
+        });
 
         $('.check-styled').uniform();
         $('.check-styled-primary').uniform({

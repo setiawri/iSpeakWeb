@@ -89,25 +89,25 @@ namespace iSpeak.Controllers
             return View(suppliersModels);
         }
 
-        public async Task<ActionResult> Delete(Guid? id)
-        {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                return View(await db.Suppliers.Where(x => x.Id == id).FirstOrDefaultAsync());
-            }
-        }
+        //public async Task<ActionResult> Delete(Guid? id)
+        //{
+        //    Permission p = new Permission();
+        //    bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+        //    if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+        //    else
+        //    {
+        //        return View(await db.Suppliers.Where(x => x.Id == id).FirstOrDefaultAsync());
+        //    }
+        //}
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(Guid id)
-        {
-            SuppliersModels suppliersModels = await db.Suppliers.FindAsync(id);
-            db.Suppliers.Remove(suppliersModels);
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> DeleteConfirmed(Guid id)
+        //{
+        //    SuppliersModels suppliersModels = await db.Suppliers.FindAsync(id);
+        //    db.Suppliers.Remove(suppliersModels);
+        //    await db.SaveChangesAsync();
+        //    return RedirectToAction("Index");
+        //}
     }
 }

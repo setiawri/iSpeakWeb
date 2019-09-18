@@ -121,15 +121,18 @@ namespace iSpeak.Controllers
                     var list = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id.ToString() == inv_id).OrderBy(x => x.RowNo).ToList();
                     foreach (var item in list)
                     {
-                        SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
-                        saleInvoiceItemsDetails.Invoice = db.SaleInvoices.Where(x => x.Id.ToString() == inv_id).FirstOrDefault().No;
-                        saleInvoiceItemsDetails.Description = item.Description;
-                        saleInvoiceItemsDetails.Qty = item.Qty;
-                        saleInvoiceItemsDetails.Price = item.Price;
-                        saleInvoiceItemsDetails.Travel = item.TravelCost;
-                        saleInvoiceItemsDetails.Tutor = item.TutorTravelCost;
-                        saleInvoiceItemsDetails.Voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
-                        saleInvoiceItemsDetails.Discount = item.DiscountAmount;
+                        SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails
+                        {
+                            Invoice = db.SaleInvoices.Where(x => x.Id.ToString() == inv_id).FirstOrDefault().No,
+                            Description = item.Description,
+                            Notes = item.Notes,
+                            Qty = item.Qty,
+                            Price = item.Price,
+                            Travel = item.TravelCost,
+                            Tutor = item.TutorTravelCost,
+                            Voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0,
+                            Discount = item.DiscountAmount
+                        };
                         saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
                         listDetails.Add(saleInvoiceItemsDetails);
                         total += saleInvoiceItemsDetails.Amount;

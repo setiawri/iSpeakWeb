@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,8 +18,8 @@ namespace iSpeak.Controllers
         #region GetNewStudent
         public async Task<JsonResult> GetNewStudent(string branch_id, int month, int year)
         {
-            DateTime dateFrom = new DateTime(year, month, 1, 0, 0, 0);
-            DateTime dateTo = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
+            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
             List<NewStudentViewModels> list = await db.Database.SqlQuery<NewStudentViewModels>(@"
                 SELECT
                 u.Firstname+' '+u.Middlename+' '+u.Lastname Name,inv.qty_lesson Qty
@@ -31,7 +32,7 @@ namespace iSpeak.Controllers
 			                AND s.Cancelled=0
 			                AND s.Due=0
                             AND si.LessonPackages_Id IS NOT NULL
-                            AND s.Timestamp BETWEEN '" + dateFrom.ToString("yyyy-MM-dd") + "' AND '" + dateTo.ToString("yyyy-MM-dd 23:59:59.000") + @"'
+                            AND s.Timestamp BETWEEN '" + dateFrom + "' AND '" + dateTo + @"'
 	                GROUP BY s.Customer_UserAccounts_Id
                 ) inv ON u.Id=inv.student_id
             ").ToListAsync();
@@ -42,8 +43,8 @@ namespace iSpeak.Controllers
         #region GetTutorPayroll
         public async Task<JsonResult> GetTutorPayroll(Guid branch_id, int month, int year)
         {
-            DateTime dateFrom = new DateTime(year, month, 1, 0, 0, 0);
-            DateTime dateTo = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
+            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
             List<TutorPayrollViewModels> list = new List<TutorPayrollViewModels>();
 
             var tutors = await (from u in db.User
@@ -73,8 +74,8 @@ namespace iSpeak.Controllers
                     {
                         TutorId = tutor.u.Id,
                         Name = tutor.u.Firstname + " " + tutor.u.Middlename + " " + tutor.u.Lastname,
-                        TotalHours = sessions.Sum(x => x.ls.SessionHours),
-                        TotalPayable = tot_payable,
+                        TotalHours = string.Format("{0:N2}", sessions.Sum(x => x.ls.SessionHours)),
+                        TotalPayable = string.Format("{0:N2}", Math.Ceiling(tot_payable)),
                         Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.u.Id + "\")'>Details</a>"
                     });
                 }
@@ -86,8 +87,9 @@ namespace iSpeak.Controllers
         #region GetDetails
         public async Task<JsonResult> GetDetails(Guid branch_id, int month, int year, string tutor_id)
         {
-            DateTime dateFrom = new DateTime(year, month, 1, 0, 0, 0);
-            DateTime dateTo = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
+            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
+            List<TutorPayrollDetailsViewModels> list = new List<TutorPayrollDetailsViewModels>();
             var result = await (from ls in db.LessonSessions
                                 join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
                                 join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
@@ -97,41 +99,283 @@ namespace iSpeak.Controllers
                                 orderby ls.Timestamp
                                 select new { ls, u, sii }).ToListAsync();
 
-            string tutor_name = "";
-            string message = @"<div class='table-responsive'>
-                                    <table class='table table-striped table-bordered'>
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Description</th>
-                                                <th>Session Hours</th>
-                                                <th>Hourly Rate</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>";
+            string tutor_name = ""; decimal payroll_total = 0;
+            //string message = @"<div class='table-responsive'>
+            //                        <table class='table table-striped table-bordered'>
+            //                            <thead>
+            //                                <tr>
+            //                                    <th>Date</th>
+            //                                    <th>Description</th>
+            //                                    <th>Session Hours</th>
+            //                                    <th>Hourly Rate</th>
+            //                                </tr>
+            //                            </thead>
+            //                            <tbody>";
             foreach (var item in result)
             {
                 tutor_name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname;
-                message += @"<tr>
-                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", item.ls.Timestamp) + @"</td>
-                                <td>" + item.sii.Description + @"</td>
-                                <td>" + string.Format("{0:N2}", item.ls.SessionHours) + @"</td>
-                                <td>" + string.Format("{0:N2}", item.ls.HourlyRates_Rate) + @"</td>
-                            </tr>";
+                if (item.ls.PayrollPayments_Id == null)
+                {
+                    payroll_total += item.ls.SessionHours * item.ls.HourlyRates_Rate;
+                }
+                //message += @"<tr>
+                //                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", item.ls.Timestamp) + @"</td>
+                //                <td>" + item.sii.Description + @"</td>
+                //                <td>" + string.Format("{0:N2}", item.ls.SessionHours) + @"</td>
+                //                <td>" + string.Format("{0:N2}", item.ls.HourlyRates_Rate) + @"</td>
+                //            </tr>";
+                list.Add(new TutorPayrollDetailsViewModels
+                {
+                    LessonSessions_Id = item.ls.Id,
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.ls.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+                    Description = item.sii.Description,
+                    SessionHours = string.Format("{0:N2}", item.ls.SessionHours),
+                    HourlyRate = string.Format("{0:N2}", item.ls.HourlyRates_Rate),
+                    Paid = item.ls.PayrollPayments_Id == null ? "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>" : "<span class='text-primary'><i class='icon-checkmark'></i></span>"
+                });
+            }
+
+            return Json(new { tutor_name, amount = string.Format("{0:N2}", Math.Ceiling(payroll_total)), obj = list }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region GetDetailsPayments
+        public async Task<JsonResult> GetDetailsPayments(Guid payments_id)
+        {
+            List<TutorPayrollDetailsViewModels> list = new List<TutorPayrollDetailsViewModels>();
+            var result = await (from pp in db.PayrollPayments
+                                join ls in db.LessonSessions on pp.Id equals ls.PayrollPayments_Id
+                                join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                                join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                                join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                                where pp.Id == payments_id
+                                orderby ls.Timestamp
+                                select new { ls, u, sii }).ToListAsync();
+
+            string tutor_name = ""; decimal payroll_total = 0;
+            foreach (var item in result)
+            {
+                tutor_name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname;
+                payroll_total += item.ls.SessionHours * item.ls.HourlyRates_Rate;
+
+                list.Add(new TutorPayrollDetailsViewModels
+                {
+                    LessonSessions_Id = item.ls.Id,
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.ls.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+                    Description = item.sii.Description,
+                    SessionHours = string.Format("{0:N2}", item.ls.SessionHours),
+                    HourlyRate = string.Format("{0:N2}", item.ls.HourlyRates_Rate),
+                    Paid = item.ls.PayrollPayments_Id == null ? "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>" : "<span class='text-primary'><i class='icon-checkmark'></i></span>"
+                });
+            }
+
+            return Json(new { tutor_name, amount = string.Format("{0:N2}", Math.Ceiling(payroll_total)), obj = list }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region SavePayrollPayments
+        public async Task<JsonResult> SavePayrollPayments(Guid branch_id, int month, int year, string tutor_id, DateTime timestamp, decimal total_paid, string notes)
+        {
+            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
+            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
+            
+            var result = await (from ls in db.LessonSessions
+                                join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                                join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                                join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                                where si.Branches_Id == branch_id
+                                    && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.PayrollPayments_Id == null
+                                    && ls.Timestamp >= dateFrom && ls.Timestamp <= dateTo
+                                orderby ls.Timestamp
+                                select new { ls, u, sii }).ToListAsync();
+
+            DateTime dateNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            string lastHex_string = db.PayrollPayments.AsNoTracking().Max(x => x.No);
+            int lastHex_int = int.Parse(
+                string.IsNullOrEmpty(lastHex_string) ? 0.ToString("X5") : lastHex_string,
+                System.Globalization.NumberStyles.HexNumber);
+            PayrollPaymentsModels payrollPaymentsModels = new PayrollPaymentsModels
+            {
+                Id = Guid.NewGuid(),
+                Timestamp = TimeZoneInfo.ConvertTimeToUtc(new DateTime(timestamp.Year, timestamp.Month, timestamp.Day, dateNow.Hour, dateNow.Minute, dateNow.Second)),
+                No = (lastHex_int + 1).ToString("X5"),
+                Amount = total_paid,
+                Notes = notes,
+                UserAccounts_Id = tutor_id,
+                IsChecked = false,
+                Cancelled = false
+            };
+            db.PayrollPayments.Add(payrollPaymentsModels);
+
+            foreach (var item in result)
+            {
+                LessonSessionsModels lessonSessionsModels = await db.LessonSessions.FindAsync(item.ls.Id);
+                lessonSessionsModels.PayrollPayments_Id = payrollPaymentsModels.Id;
+                db.Entry(lessonSessionsModels).State = EntityState.Modified;
+            }
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200", payroll_id = payrollPaymentsModels.Id }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Cancel Payment
+        public async Task<JsonResult> Cancelled(Guid id)
+        {
+            var payment = await db.PayrollPayments.FindAsync(id);
+            payment.Cancelled = true;
+            db.Entry(payment).State = EntityState.Modified;
+
+            var sessions = await db.LessonSessions.Where(x => x.PayrollPayments_Id == payment.Id).ToListAsync();
+            foreach (var item in sessions)
+            {
+                LessonSessionsModels lessonSessionsModels = await db.LessonSessions.FindAsync(item.Id);
+                lessonSessionsModels.PayrollPayments_Id = null;
+                db.Entry(lessonSessionsModels).State = EntityState.Modified;
             }
             
-            return Json(new { tutor_name, obj = message }, JsonRequestBehavior.AllowGet);
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Approve Payment
+        public async Task<JsonResult> Approved(Guid id)
+        {
+            var payment = await db.PayrollPayments.FindAsync(id);
+            payment.IsChecked = true;
+            db.Entry(payment).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region CancelApproved
+        public async Task<JsonResult> CancelApproved(Guid id)
+        {
+            var payment = await db.PayrollPayments.FindAsync(id);
+            payment.IsChecked = false;
+            db.Entry(payment).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
         public ActionResult NewStudent()
         {
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View();
+            }
         }
 
         public ActionResult Payroll()
         {
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                return View();
+            }
+        }
+
+        public async Task<ActionResult> PayrollPayments()
+        {
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                var result = await (from pp in db.PayrollPayments
+                                    join u in db.User on pp.UserAccounts_Id equals u.Id
+                                    select new { pp, u }).ToListAsync();
+
+                List<PayrollPaymentsViewModels> list = new List<PayrollPaymentsViewModels>();
+                foreach (var item in result)
+                {
+                    list.Add(new PayrollPaymentsViewModels
+                    {
+                        Id = item.pp.Id,
+                        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.pp.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                        No = item.pp.No,
+                        Amount = item.pp.Amount,
+                        Notes = item.pp.Notes,
+                        Tutor = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
+                        Cancelled = item.pp.Cancelled,
+                        IsChecked = item.pp.IsChecked,
+                        Tutor_Id = item.u.Id
+                    });
+                }
+
+                ViewBag.Cancel = p.IsGranted(User.Identity.Name, "payrollpayments_cancel");
+                ViewBag.Approve = p.IsGranted(User.Identity.Name, "payrollpayments_approve");
+                return View(list);
+            }
+        }
+
+        public async Task<ActionResult> Print(Guid id, string tutor_id)
+        {
+            var payroll_payment = await (from pp in db.PayrollPayments
+                                         join u in db.User on pp.UserAccounts_Id equals u.Id
+                                         where pp.Id == id
+                                         select new { pp, u }).FirstOrDefaultAsync();
+
+            var result = await db.Database.SqlQuery<PayrollByStudent>(@"
+                SELECT
+                u.Id Student_Id, u.Firstname+' '+u.Middlename+' '+u.Lastname StudentName,y.TotalHours,z.TotalRate --CEILING(z.TotalRate) TotalRate
+                FROM AspNetUsers u
+                INNER JOIN (
+	                SELECT si.Customer_UserAccounts_Id
+	                FROM SaleInvoices si
+	                INNER JOIN SaleInvoiceItems sii ON si.Id=sii.SaleInvoices_Id
+	                INNER JOIN LessonSessions ls ON sii.Id=ls.SaleInvoiceItems_Id
+	                INNER JOIN PayrollPayments pp ON ls.PayrollPayments_Id=pp.Id
+	                WHERE ls.Deleted=0 AND ls.Tutor_UserAccounts_Id='" + tutor_id + "' AND pp.Id='" + id + @"'
+	                GROUP BY si.Customer_UserAccounts_Id
+                ) v ON u.Id=v.Customer_UserAccounts_Id
+                INNER JOIN (
+	                SELECT si.Customer_UserAccounts_Id
+	                FROM SaleInvoices si
+	                INNER JOIN SaleInvoiceItems sii ON si.Id=sii.SaleInvoices_Id
+	                INNER JOIN LessonSessions ls ON sii.Id=ls.SaleInvoiceItems_Id
+                    INNER JOIN PayrollPayments pp ON ls.PayrollPayments_Id=pp.Id
+	                WHERE ls.Deleted=0 AND ls.Tutor_UserAccounts_Id='" + tutor_id + "' AND pp.Id='" + id + @"'
+	                GROUP BY si.Customer_UserAccounts_Id
+                ) x ON u.Id=x.Customer_UserAccounts_Id
+                INNER JOIN (
+	                SELECT si.Customer_UserAccounts_Id,SUM(ls.SessionHours) TotalHours
+	                FROM SaleInvoices si
+	                INNER JOIN SaleInvoiceItems sii ON si.Id=sii.SaleInvoices_Id
+	                INNER JOIN LessonSessions ls ON sii.Id=ls.SaleInvoiceItems_Id
+                    INNER JOIN PayrollPayments pp ON ls.PayrollPayments_Id=pp.Id
+	                WHERE ls.Deleted=0 AND ls.Tutor_UserAccounts_Id='" + tutor_id + "' AND pp.Id='" + id + @"'
+	                GROUP BY si.Customer_UserAccounts_Id
+                ) y ON x.Customer_UserAccounts_Id=y.Customer_UserAccounts_Id
+                INNER JOIN (
+	                SELECT usr.Id,SUM(a.Fee) TotalRate
+	                FROM AspNetUsers usr
+	                INNER JOIN (
+		                SELECT si.Customer_UserAccounts_Id,ls.SessionHours*ls.HourlyRates_Rate Fee
+		                FROM SaleInvoices si
+		                INNER JOIN SaleInvoiceItems sii ON si.Id=sii.SaleInvoices_Id
+		                INNER JOIN LessonSessions ls ON sii.Id=ls.SaleInvoiceItems_Id
+                        INNER JOIN PayrollPayments pp ON ls.PayrollPayments_Id=pp.Id
+		                WHERE ls.Deleted=0 AND ls.Tutor_UserAccounts_Id='" + tutor_id + "' AND pp.Id='" + id + @"'
+	                ) a ON usr.Id=a.Customer_UserAccounts_Id
+	                GROUP BY usr.Id
+                ) z ON y.Customer_UserAccounts_Id=z.Id
+                ORDER BY u.Firstname
+            ").ToListAsync();
+
+            ReceiptPayrollViewModels model = new ReceiptPayrollViewModels
+            {
+                PayrollDate = TimeZoneInfo.ConvertTimeFromUtc(payroll_payment.pp.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                TutorName = payroll_payment.u.Firstname + " " + payroll_payment.u.Middlename + " " + payroll_payment.u.Lastname,
+                ListPayroll = result
+            };
+
+            return View(model);
         }
     }
 }

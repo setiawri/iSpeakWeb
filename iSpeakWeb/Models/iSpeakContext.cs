@@ -35,5 +35,6 @@ namespace iSpeak.Models
         public DbSet<PettyCashRecordsModels> PettyCashRecords { get; set; }
         public DbSet<ServicesModels> Services { get; set; }
         public DbSet<SettingsModels> Settings { get; set; }
+        public DbSet<PayrollPaymentsModels> PayrollPayments { get; set; }
     }
 }

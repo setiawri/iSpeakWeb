@@ -21,11 +21,12 @@ namespace iSpeak.Controllers
             var this_month = await (from u in db.User
                                     join ur in db.UserRole on u.Id equals ur.UserId
                                     join r in db.Role on ur.RoleId equals r.Id
-                                    where r.Name.ToLower() == "student" && u.Birthday.Month == date_now.Month && u.Birthday.Day >= date_now.Day
+                                    where u.Birthday.Month == date_now.Month && u.Birthday.Day >= date_now.Day
                                     select new BirthdayViewModels
                                     {
                                         Fullname = u.Firstname + " " + u.Middlename + " " + u.Lastname,
                                         Birthday = u.Birthday,
+                                        Role = r.Name,
                                         CountDay = u.Birthday.Day - date_now.Day
                                     }).ToListAsync();
 
@@ -33,17 +34,19 @@ namespace iSpeak.Controllers
             var next_month_linq = await (from u in db.User
                                     join ur in db.UserRole on u.Id equals ur.UserId
                                     join r in db.Role on ur.RoleId equals r.Id
-                                    where r.Name.ToLower() == "student" && u.Birthday.Month == date_next.Month
-                                    select new { u }).ToListAsync();
+                                    where u.Birthday.Month == date_next.Month
+                                    select new { u, r }).ToListAsync();
 
             List<BirthdayViewModels> next_month = new List<BirthdayViewModels>();
             foreach (var item in next_month_linq)
             {
+                DateTime birthday_this_year = new DateTime(date_next.Year, item.u.Birthday.Month, item.u.Birthday.Day);
                 next_month.Add(new BirthdayViewModels
                 {
                     Fullname = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
                     Birthday = item.u.Birthday,
-                    CountDay = (item.u.Birthday - date_now).Days + 1
+                    Role = item.r.Name,
+                    CountDay = (birthday_this_year - date_now).Days + 1
                 });
             }
             #endregion
@@ -67,7 +70,8 @@ namespace iSpeak.Controllers
                 IsStudentBirthday = student_bday == null ? false : true,
                 ShowBirthdayList = is_admin == null ? false : true
             };
-            
+
+            ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Name", "Name");
             return View(birthdayAlert);
         }
 

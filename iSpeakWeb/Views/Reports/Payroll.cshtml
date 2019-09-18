@@ -5,12 +5,20 @@
     ViewBag.Title = "Tutor Payroll";
 }
 
+<style>
+    .animated {
+        -webkit-animation-duration: 1s;
+        -moz-animation-duration: 1s;
+        animation-duration: 1s;
+    }
+</style>
+
 <div class="content-wrapper">
 
     <!-- Content area -->
     <div class="content">
         <!-- Form inputs -->
-        <div class="card">
+        <div class="card payroll-index animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Title</h5>
                 <div class="header-elements">
@@ -87,6 +95,106 @@
             </div>
         </div>
         <!-- /form inputs -->
+        <!-- Form Details -->
+        <div class="card payroll-details animated bounceInLeft" style="display: none">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title title-details"></h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="form-group">
+                            <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to Payroll List <i class="icon-circle-left2 ml-2"></i></a>
+                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal_pay">Pay<i class="icon-checkmark3 ml-2"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-lg-3" style="float: right">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text bg-slate-700 border-slate-700 text-white">
+                                        Total Payroll
+                                    </span>
+                                </span>
+                                <input type="text" class="form-control bg-slate text-white border-transparent payroll-total" placeholder="Total Amount">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable2">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Session Hours</th>
+                                <th>Hourly Rate</th>
+                                <th>Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form Details -->
+        <!-- Pay form modal -->
+        <div id="modal_pay" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success">
+                        <h6 class="modal-title">Payments</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Date</label>
+                                <div class="col-sm-4">
+                                    <div class="input-group">
+                                        <input type="datetime" class="form-control tanggal mdl-timestamp" />
+                                        <span class="input-group-append">
+                                            <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Total Payment</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control text-right mdl-paid" readonly>
+                                </div>
+                                <div class="col-sm-4" style="display: none">
+                                    <input type="text" class="form-control mdl-tutor-id" readonly>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control mdl-notes" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /pay form modal -->
     </div>
     <!-- /content area -->
 
@@ -94,7 +202,14 @@
 
 <script type="text/javascript">
 
+    function Previous() {
+        $('.payroll-index').show();
+        $('.payroll-details').hide();
+    }
+
     function Details(branch_id, month, year, tutor_id) {
+        $('.payroll-index').hide();
+
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetDetails", "Reports")',
@@ -106,22 +221,48 @@
             },
             success: function (data) {
                 //console.log(data.obj);
-                var dialog = bootbox.alert({
-                    title: 'Payroll Details ' + data.tutor_name,
-                    size: 'large',
-                    message: data.obj,
-                    backdrop: true
+                //var dialog = bootbox.alert({
+                //    title: 'Payroll Details ' + data.tutor_name,
+                //    size: 'large',
+                //    message: data.obj,
+                //    backdrop: true
+                //});
+                var datatable = $('.datatable2').DataTable();
+                datatable.clear().draw();
+                $.each(data.obj, function (index, row) {
+                    datatable.row.add([
+                        row.Timestamp,
+                        row.Description,
+                        row.SessionHours,
+                        row.HourlyRate,
+                        row.Paid
+                    ]).draw();
                 });
+                
+                $('.title-details').html(data.tutor_name);
+                $('.payroll-total').val(data.amount);
+                $('.mdl-paid').val(data.amount);
+                $('.mdl-tutor-id').val(tutor_id);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
             } //end error
         }); //end ajax
+
+        $('.payroll-details').show();
     }
 
     $(document).ready(function () {
+        
         $('.select2').select2({
             minimumResultsForSearch: -1
+        });
+
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
         });
 
         $('.period-month').val('@DateTime.UtcNow.Month').trigger('change');
@@ -149,6 +290,11 @@
             order: [[0, 'asc']]
         });
 
+        var table2 = $('.datatable2').DataTable({
+            pagingType: 'full_numbers',
+            order: [[0, 'asc']]
+        });
+
         if ('@ViewBag.Approve' == 'False') {
             table.column(6).visible(false);
             $('.chk-not-approved').hide();
@@ -172,7 +318,7 @@
                         datatable.row.add([
                             row.Name,
                             row.TotalHours,
-                            parseFloat(row.TotalPayable).toLocaleString(),
+                            row.TotalPayable,
                             row.Details
                         ]).draw();
                     });
@@ -182,5 +328,37 @@
                 } //end error
             }); //end ajax
         });
+
+        $('.mdl-btn-submit').click(function () {
+            if ($('.mdl-paid').val() == '0.00') {
+                $('.modal-validation').html('The field Total Payment is required.').show();
+            }
+            else {
+                $('.modal-validation').html('').hide();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("SavePayrollPayments", "Reports")',
+                    data: {
+                        branch_id: $('#Branch').val(),
+                        month: $('.period-month').val(),
+                        year: $('.period-year').val(),
+                        tutor_id: $('.mdl-tutor-id').val(),
+                        timestamp: $('.mdl-timestamp').val(),
+                        total_paid: parseFloat($('.mdl-paid').val().replace(/,/g, '')),
+                        notes: $('.mdl-notes').val()
+                    },
+                    success: function (data) {
+                        var url = '@Url.Action("Print", "Reports", new { id = "_id" })';
+                        window.location.href = url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val();
+                        //window.location.href = '@Url.Action("PayrollPayments", "Reports")';
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
+        });
+
     });
 </script>

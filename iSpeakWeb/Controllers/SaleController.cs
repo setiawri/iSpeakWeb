@@ -40,7 +40,7 @@ namespace iSpeak.Controllers
                 decimal voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
                 decimal subtotal = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - voucher;
                 message += @"<tr>
-                                <td>" + item.Description + @"</td>
+                                <td>" + item.Description + "<br/>" + item.Notes + @"</td>
                                 <td>" + item.Qty + @"</td>
                                 <td>" + item.Price.ToString("#,##0") + @"</td>
                                 <td>" + item.TravelCost.ToString("#,##0") + @"</td>
@@ -129,6 +129,17 @@ namespace iSpeak.Controllers
         {
             var sale_invoice = await db.SaleInvoices.FindAsync(id);
             sale_invoice.IsChecked = true;
+            db.Entry(sale_invoice).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Cancel Approve Sale Invoice
+        public async Task<JsonResult> CancelApproved(Guid id)
+        {
+            var sale_invoice = await db.SaleInvoices.FindAsync(id);
+            sale_invoice.IsChecked = false;
             db.Entry(sale_invoice).State = EntityState.Modified;
 
             await db.SaveChangesAsync();

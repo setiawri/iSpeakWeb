@@ -38,7 +38,6 @@
                                     <td>@Html.DisplayFor(modelItem => item.Name)</td>
                                     <td>
                                         @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                                        @Html.ActionLink("Delete", "Delete", new { id = item.Id }) |
                                         @Html.ActionLink("Manage", "Manage", new { id = item.Id })
                                     </td>
                                 </tr>
@@ -60,7 +59,7 @@
         autoWidth: false,
         columnDefs: [{
             orderable: false,
-            width: 200,
+            width: 120,
             targets: [1]
         }],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

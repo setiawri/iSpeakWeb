@@ -52,8 +52,7 @@
                                         }
                                     </td>
                                     <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                                        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
                                     </td>
                                 </tr>
                             }
@@ -74,7 +73,7 @@
         autoWidth: false,
         columnDefs: [{
             orderable: false,
-            width: 120,
+            width: 100,
             targets: [4]
         }],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

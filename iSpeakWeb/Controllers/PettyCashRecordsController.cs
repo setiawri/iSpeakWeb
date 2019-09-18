@@ -49,7 +49,7 @@ namespace iSpeak.Controllers
                     Amount = item.pcr.Amount,
                     Balance = balance += item.pcr.Amount,
                     IsChecked = item.pcr.IsChecked,
-                    Status_render = (item.pcr.IsChecked) ? "<a href='#'><span onclick='CancelApprove(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-success'>Approved</span></a>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark'>None</span></a>",
+                    Status_render = (item.pcr.IsChecked) ? "<a href='#'><span onclick='CancelApprove(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-success d-block'>Approved</span></a>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark d-block'>None</span></a>",
                     UserInput = user_input
                     //Action_render = "<a href='" + Url.Content("~") + "PettyCashRecords/Edit/" + item.pcr.Id + "'>Edit</a> | <a href='" + Url.Content("~") + "PettyCashRecords/Delete/" + item.pcr.Id + "'>Delete</a>"
                 });

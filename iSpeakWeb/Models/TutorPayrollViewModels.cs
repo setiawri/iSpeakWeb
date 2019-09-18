@@ -12,11 +12,19 @@ namespace iSpeak.Models
         [Display(Name = "Tutor Name")]
         public string Name { get; set; }
         [Display(Name = "Total Hours")]
-        [DisplayFormat(DataFormatString = "{0:N2}")]
-        public decimal TotalHours { get; set; }
+        public string TotalHours { get; set; }
         [Display(Name = "Total Payable")]
-        [DisplayFormat(DataFormatString = "{0:N2}")]
-        public decimal TotalPayable { get; set; }
+        public string TotalPayable { get; set; }
         public string Details { get; set; }
+    }
+
+    public class TutorPayrollDetailsViewModels
+    {
+        public Guid LessonSessions_Id { get; set; }
+        public string Timestamp { get; set; }
+        public string Description { get; set; }
+        public string SessionHours { get; set; }
+        public string HourlyRate { get; set; }
+        public string Paid { get; set; }
     }
 }

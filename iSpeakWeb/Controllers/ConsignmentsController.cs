@@ -93,25 +93,25 @@ namespace iSpeak.Controllers
             return View(consignmentsModels);
         }
 
-        public async Task<ActionResult> Delete(Guid? id)
-        {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                return View(await db.Consignments.Where(x => x.Id == id).FirstOrDefaultAsync());
-            }
-        }
+        //public async Task<ActionResult> Delete(Guid? id)
+        //{
+        //    Permission p = new Permission();
+        //    bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+        //    if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+        //    else
+        //    {
+        //        return View(await db.Consignments.Where(x => x.Id == id).FirstOrDefaultAsync());
+        //    }
+        //}
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(Guid id)
-        {
-            ConsignmentsModels consignmentsModels = await db.Consignments.FindAsync(id);
-            db.Consignments.Remove(consignmentsModels);
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> DeleteConfirmed(Guid id)
+        //{
+        //    ConsignmentsModels consignmentsModels = await db.Consignments.FindAsync(id);
+        //    db.Consignments.Remove(consignmentsModels);
+        //    await db.SaveChangesAsync();
+        //    return RedirectToAction("Index");
+        //}
     }
 }

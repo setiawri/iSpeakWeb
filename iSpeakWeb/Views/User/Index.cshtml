@@ -25,7 +25,7 @@
             <div class="card-body">
                 <a href="@Url.Action("Register", "Account")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
                 <div class="form-check mb-1" style="float: right">
-                    @Html.DropDownList("listRole", ViewBag.listRole as SelectList, "ALL", new { @class = "form-control" })
+                    @Html.DropDownList("listRole", ViewBag.listRole as SelectList, "All Roles", new { @class = "form-control select2" })
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -99,6 +99,10 @@
 
         $('.datatable').DataTable({
             pagingType: 'full_numbers'
+        });
+
+        $('.select2').select2({
+            minimumResultsForSearch: -1
         });
 
         $('#listRole').change(function () {

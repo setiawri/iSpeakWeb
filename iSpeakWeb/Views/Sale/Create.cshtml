@@ -52,6 +52,9 @@
                                         <div class="col-lg-3">
                                             @Html.Editor("SessionHours", new { htmlAttributes = new { @class = "form-control", @placeholder = "Session Hours" } })
                                         </div>
+                                        <div class="col-lg-9">
+                                            <label class="error-hours text-danger" style="display: none"></label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -149,7 +152,8 @@
                             <thead>
                                 <tr>
                                     <th style="width:3% !important"></th>
-                                    <th style="width:23% !important">Description</th>
+                                    <th style="width:13% !important">Description</th>
+                                    <th style="width:10% !important">Notes</th>
                                     <th style="width:8% !important">Qty</th>
                                     <th style="width:11% !important">Price</th>
                                     <th style="width:11% !important">Travel</th>
@@ -162,7 +166,7 @@
                             <tbody id="data-body"></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="6" class="text-right">TOTAL</th>
+                                    <th colspan="7" class="text-right">TOTAL</th>
                                     <th class="text-right total-disc">0</th>
                                     <th class="text-right total-voucher">0</th>
                                     <th class="text-right total-inv">0</th>
@@ -358,8 +362,12 @@
         if ($('#LessonPackages_Id').val() == '') {
             $('.error-lesson').html('The Lesson Package field is required.').show();
         }
+        else if ($('#SessionHours').val() == '') {
+            $('.error-hours').html('The Session Hours field is required.').show();
+        }
         else {
             $('.error-lesson').html('').hide();
+            $('.error-hours').html('').hide();
             
             var travel_cost = 0;
             if ($('#Travel').val() != '') {
@@ -404,6 +412,12 @@
                         '',
                         ''
                     );
+
+                    $('#LessonPackages_Id').val('').trigger('change');
+                    $('#SessionHours').val('');
+                    $('#Travel').val('');
+                    $('#Tutor').val('');
+                    $('#Notes_Lesson').val('');
                 }, //end success
                 error: function (result) {
                     bootbox.alert("Error " + result);
@@ -418,6 +432,7 @@
         var rowItem = '<tr id="item_' + item_no + '">'
             + '<td align="center" style="vertical-align:middle"><a href="#" onclick="RemoveItem(' + item_no + ')" class="text-danger"><i class="icon-cross icon-2x"></i></a></td>'
             + '<td><input type="text" readonly class="form-control input-xs desc" value="' + desc + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs note" value="' + note + '" /></td>'
             + '<td><input type="text" readonly class="form-control input-xs qty text-right" value="' + qty + '" /></td>'
             + '<td><input type="text" readonly class="form-control input-xs price text-right" value="' + price + '" /></td>'
             + '<td><input type="text" readonly class="form-control input-xs travel text-right" value="' + travel + '" /></td>'
@@ -427,7 +442,6 @@
             + '<td><input type="text" readonly class="form-control input-xs subtotal text-right" value="' + subtotal + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs hours" value="' + hours + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs voucher_id" value="' + voucher_id + '" /></td>'
-            + '<td style="display: none"><input type="text" readonly class="form-control input-xs note" value="' + note + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs lesson_id" value="' + lesson_id + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs inventory_id" value="' + inventory_id + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs service_id" value="' + service_id + '" /></td>'
@@ -498,6 +512,10 @@
                             ''
                         );
                     }
+
+                    $('#Products_Id').val('').trigger('change');
+                    $('.product-available').html(empty);
+                    $('#Notes_Inventory').val('');
                 }, //end success
                 error: function (result) {
                     bootbox.alert("Error " + result);
@@ -550,6 +568,9 @@
                             $('#Services_Id').val()
                         );
                     }
+
+                    $('#Services_Id').val('');
+                    $('#Notes_Service').val('');
                 }, //end success
                 error: function (result) {
                     bootbox.alert("Error " + result);
@@ -678,16 +699,23 @@
                         password: $('.mdl-password').val()
                     },
                     success: function (data) {
-                        //refresh DDL Customer
-                        $("#Customers_Id").empty();
-                        $("#Customers_Id").append("<option value=''>Select Customer</option");
+                        if (data.status == "200") {
+                            $('.modal-validation').html('The Username ' + $('.mdl-username').val() + ' already exist.').show();
+                        }
+                        else {
+                            $('.modal-validation').html('').hide();
 
-                        $.each(data.ddl, function (index, row) {
-                            $("#Customers_Id").append("<option value='" + row.Value + "'>" + row.Text + "</option>")
-                        });
+                            //refresh DDL Customer
+                            $("#Customers_Id").empty();
+                            $("#Customers_Id").append("<option value=''>Select Customer</option");
 
-                        //close modal
-                        $('#modal_cust').modal('toggle');
+                            $.each(data.ddl, function (index, row) {
+                                $("#Customers_Id").append("<option value='" + row.Value + "'>" + row.Text + "</option>")
+                            });
+
+                            //close modal
+                            $('#modal_cust').modal('toggle');
+                        }
                     }, //end success
                     error: function (result) {
                         bootbox.alert("Error " + result);
@@ -723,6 +751,10 @@
                 else { //tab-service
                     ItemService();
                 }
+
+                $('#Qty').val('1');
+                $('#Disc').val('');
+                $('#Vouchers_Id').val('').trigger('change');
             }
         });
 

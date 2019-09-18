@@ -11,6 +11,7 @@ using Microsoft.Owin.Security;
 using iSpeak.Models;
 using System.Collections.Generic;
 using iSpeak.Common;
+using System.Data.Entity;
 
 namespace iSpeak.Controllers
 {
@@ -286,30 +287,36 @@ namespace iSpeak.Controllers
         //Register New User Using AjaxCall
         public async Task<JsonResult> RegisterAjaxSync(Guid branch_id, string[] roles, DateTime birthday, string first_name, string middle_name, string last_name, string username, string email, string phone1, string phone2, string address, string notes, string password)
         {
-            var user = new ApplicationUser
+            var cek_username = await db.User.Where(x => x.UserName.ToLower() == username.ToLower()).ToListAsync();
+            string status = (cek_username.Count > 0) ? "200" : "404";
+            if (cek_username.Count == 0)
             {
-                UserName = username,
-                Email = email,
-                Firstname = first_name,
-                Middlename = middle_name,
-                Lastname = last_name,
-                Address = address,
-                Phone1 = phone1,
-                Phone2 = phone2,
-                Birthday = birthday,
-                Notes = notes,
-                Active = true,
-                Branches_Id = branch_id
-            };
-            var result = await UserManager.CreateAsync(user, password);
-            if (result.Succeeded)
-            {
-                foreach (var role in roles)
+                #region Save New User
+                var user = new ApplicationUser
                 {
-                    result = await UserManager.AddToRoleAsync(user.Id, role);
+                    UserName = username,
+                    Email = email,
+                    Firstname = first_name,
+                    Middlename = middle_name,
+                    Lastname = last_name,
+                    Address = address,
+                    Phone1 = phone1,
+                    Phone2 = phone2,
+                    Birthday = birthday,
+                    Notes = notes,
+                    Active = true,
+                    Branches_Id = branch_id
+                };
+                var result = await UserManager.CreateAsync(user, password);
+                if (result.Succeeded)
+                {
+                    foreach (var role in roles)
+                    {
+                        result = await UserManager.AddToRoleAsync(user.Id, role);
+                    }
                 }
+                #endregion
             }
-
             #region List Customer
             var customers = (from u in db.User
                              join ur in db.UserRole on u.Id equals ur.UserId
@@ -329,7 +336,7 @@ namespace iSpeak.Controllers
             var listCustomer = new SelectList(customer_list, "Id", "Name");
             #endregion
 
-            return Json(new { status = "200", ddl = listCustomer }, JsonRequestBehavior.AllowGet);
+            return Json(new { status, ddl = listCustomer }, JsonRequestBehavior.AllowGet);
         }
 
         //

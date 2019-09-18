@@ -29,6 +29,7 @@ namespace iSpeak.Models
         [Display(Name = "Tutor Travel Cost")]
         public int TutorTravelCost { get; set; }
         public decimal Adjustment { get; set; }
+        public Guid? PayrollPayments_Id { get; set; }
     }
 
     public class LessonSessionsDetails

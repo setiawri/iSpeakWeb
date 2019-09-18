@@ -93,26 +93,26 @@ namespace iSpeak.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<ActionResult> Delete(string id)
-        {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                var role = await RoleManager.FindByIdAsync(id);
-                return View(new RoleViewModels(role));
-            }
-        }
+        //public async Task<ActionResult> Delete(string id)
+        //{
+        //    Permission p = new Permission();
+        //    bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+        //    if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+        //    else
+        //    {
+        //        var role = await RoleManager.FindByIdAsync(id);
+        //        return View(new RoleViewModels(role));
+        //    }
+        //}
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(string id)
-        {
-            var role = await RoleManager.FindByIdAsync(id);
-            await RoleManager.DeleteAsync(role);
-            return RedirectToAction("Index");
-        }
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> DeleteConfirmed(string id)
+        //{
+        //    var role = await RoleManager.FindByIdAsync(id);
+        //    await RoleManager.DeleteAsync(role);
+        //    return RedirectToAction("Index");
+        //}
 
         public ActionResult Manage(string id)
         {

@@ -157,10 +157,10 @@
     $(document).ready(function () {
         var lastColumn = 0;
         if ('@ViewBag.IsShowHourlyRate' == 'True') {
-            lastColumn = 8;
+            lastColumn = 9;
         }
         else {
-            lastColumn = 7;
+            lastColumn = 8;
         }
 
         // Setting datatable defaults
@@ -168,7 +168,7 @@
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
-                width: 100,
+                width: 200,
                 targets: [lastColumn]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

@@ -161,46 +161,46 @@ namespace iSpeak.Controllers
             return View(inventoryModels);
         }
 
-        public async Task<ActionResult> Delete(Guid? id)
-        {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                var data = (from i in db.Inventory
-                            join pr in db.Products on i.Products_Id equals pr.Id
-                            join u in db.Units on pr.Units_Id equals u.Id
-                            join s in db.Suppliers on i.Suppliers_Id equals s.Id
-                            where i.Id == id
-                            select new InventoryViewModels
-                            {
-                                Id = i.Id,
-                                Product = pr.Description,
-                                Unit = u.Name,
-                                ReceiveDate = i.ReceiveDate,
-                                BuyQty = i.BuyQty,
-                                AvailableQty = i.AvailableQty,
-                                Supplier = s.Name,
-                                BuyPrice = i.BuyPrice
-                            }).FirstOrDefaultAsync();
-                return View(await data);
-            }
-        }
+        //public async Task<ActionResult> Delete(Guid? id)
+        //{
+        //    Permission p = new Permission();
+        //    bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+        //    if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+        //    else
+        //    {
+        //        var data = (from i in db.Inventory
+        //                    join pr in db.Products on i.Products_Id equals pr.Id
+        //                    join u in db.Units on pr.Units_Id equals u.Id
+        //                    join s in db.Suppliers on i.Suppliers_Id equals s.Id
+        //                    where i.Id == id
+        //                    select new InventoryViewModels
+        //                    {
+        //                        Id = i.Id,
+        //                        Product = pr.Description,
+        //                        Unit = u.Name,
+        //                        ReceiveDate = i.ReceiveDate,
+        //                        BuyQty = i.BuyQty,
+        //                        AvailableQty = i.AvailableQty,
+        //                        Supplier = s.Name,
+        //                        BuyPrice = i.BuyPrice
+        //                    }).FirstOrDefaultAsync();
+        //        return View(await data);
+        //    }
+        //}
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(Guid id)
-        {
-            InventoryModels inventoryModels = await db.Inventory.FindAsync(id);
-            db.Inventory.Remove(inventoryModels);
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> DeleteConfirmed(Guid id)
+        //{
+        //    InventoryModels inventoryModels = await db.Inventory.FindAsync(id);
+        //    db.Inventory.Remove(inventoryModels);
 
-            Products_QtyModels products_QtyModels = await db.Products_Qty.Where(x => x.Branches_Id == inventoryModels.Branches_Id && x.Products_Id == inventoryModels.Products_Id).FirstOrDefaultAsync();
-            products_QtyModels.Qty -= inventoryModels.BuyQty;
-            db.Entry(products_QtyModels).State = EntityState.Modified;
+        //    Products_QtyModels products_QtyModels = await db.Products_Qty.Where(x => x.Branches_Id == inventoryModels.Branches_Id && x.Products_Id == inventoryModels.Products_Id).FirstOrDefaultAsync();
+        //    products_QtyModels.Qty -= inventoryModels.BuyQty;
+        //    db.Entry(products_QtyModels).State = EntityState.Modified;
             
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
+        //    await db.SaveChangesAsync();
+        //    return RedirectToAction("Index");
+        //}
     }
 }

@@ -46,7 +46,10 @@
                             {
                                 <tr>
                                     <td>@Html.DisplayFor(modelItem => item.Invoice)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Description) <br />
+                                        @Html.DisplayFor(modelItem => item.Notes)
+                                    </td>
                                     <td>@Html.DisplayFor(modelItem => item.Qty)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Price)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Travel)</td>

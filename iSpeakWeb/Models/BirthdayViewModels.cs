@@ -11,6 +11,7 @@ namespace iSpeak.Models
         public string Fullname { get; set; }
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}")]
         public DateTime Birthday { get; set; }
+        public string Role { get; set; }
         public int CountDay { get; set; }
     }
 

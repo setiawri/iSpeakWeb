@@ -267,10 +267,11 @@ namespace iSpeak.Controllers
                 foreach(var item in details)
                 {
                     var sale_invoice_item = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault();
+                    DateTime dateNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
                     LessonSessionsModels model = new LessonSessionsModels();
                     model.Id = Guid.NewGuid();
-                    model.Timestamp = new DateTime(lessonSessionsModels.Timestamp.Year, lessonSessionsModels.Timestamp.Month, lessonSessionsModels.Timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
+                    model.Timestamp = TimeZoneInfo.ConvertTimeToUtc(new DateTime(lessonSessionsModels.Timestamp.Year, lessonSessionsModels.Timestamp.Month, lessonSessionsModels.Timestamp.Day, dateNow.Hour, dateNow.Minute, dateNow.Second));
                     model.SaleInvoiceItems_Id = item.sale_invoice_item_id;
                     model.SessionHours = lessonSessionsModels.SessionHours;
                     model.Review = lessonSessionsModels.Review;
@@ -286,8 +287,12 @@ namespace iSpeak.Controllers
                     {
                         foreach (var subitem in hourly_rate)
                         {
-                            model.HourlyRates_Rate = subitem.Rate; //use tutor rate with null package
-                            if (subitem.LessonPackages_Id == sale_invoice_item.LessonPackages_Id.Value) { model.HourlyRates_Rate = subitem.Rate; break; } //found tutor with exact package
+                            model.HourlyRates_Rate = subitem.Rate / details.Count; //use tutor rate with null package
+                            if (subitem.LessonPackages_Id == sale_invoice_item.LessonPackages_Id.Value) //found tutor with exact package
+                            {
+                                model.HourlyRates_Rate = subitem.Rate / details.Count;
+                                break;
+                            } 
                         }
                     }
                     model.TravelCost = sale_invoice_item.TravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours);

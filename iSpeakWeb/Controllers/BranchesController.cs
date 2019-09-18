@@ -151,25 +151,25 @@ namespace iSpeak.Controllers
             return View(branchesModels);
         }
 
-        public async Task<ActionResult> Delete(Guid? id)
-        {
-            Permission p = new Permission();
-            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
-            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
-            else
-            {
-                return View(await db.Branches.Where(x => x.Id == id).FirstOrDefaultAsync());
-            }
-        }
+        //public async Task<ActionResult> Delete(Guid? id)
+        //{
+        //    Permission p = new Permission();
+        //    bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+        //    if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+        //    else
+        //    {
+        //        return View(await db.Branches.Where(x => x.Id == id).FirstOrDefaultAsync());
+        //    }
+        //}
 
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(Guid id)
-        {
-            BranchesModels branchesModels = await db.Branches.FindAsync(id);
-            db.Branches.Remove(branchesModels);
-            await db.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> DeleteConfirmed(Guid id)
+        //{
+        //    BranchesModels branchesModels = await db.Branches.FindAsync(id);
+        //    db.Branches.Remove(branchesModels);
+        //    await db.SaveChangesAsync();
+        //    return RedirectToAction("Index");
+        //}
     }
 }
