@@ -323,7 +323,7 @@ namespace iSpeak.Controllers
 
             var result = await db.Database.SqlQuery<PayrollByStudent>(@"
                 SELECT
-                u.Id Student_Id, u.Firstname+' '+u.Middlename+' '+u.Lastname StudentName,y.TotalHours,z.TotalRate --CEILING(z.TotalRate) TotalRate
+                u.Id Student_Id, u.Firstname+' '+ISNULL(u.Middlename,'')+' '+ISNULL(u.Lastname,'') StudentName,y.TotalHours,z.TotalRate --CEILING(z.TotalRate) TotalRate
                 FROM AspNetUsers u
                 INNER JOIN (
 	                SELECT si.Customer_UserAccounts_Id
