@@ -22,7 +22,7 @@ namespace iSpeak.Controllers
             DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
             List<NewStudentViewModels> list = await db.Database.SqlQuery<NewStudentViewModels>(@"
                 SELECT
-                u.Firstname+' '+u.Middlename+' '+u.Lastname Name,inv.qty_lesson Qty
+                u.Firstname+' '+ISNULL(u.Middlename,'')+' '+ISNULL(u.Lastname,'') Name,inv.qty_lesson Qty
                 FROM AspNetUsers u
                 INNER JOIN (
 	                SELECT s.Customer_UserAccounts_Id student_id,COUNT(si.Id) qty_lesson 
