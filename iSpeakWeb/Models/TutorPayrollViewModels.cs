@@ -20,11 +20,11 @@ namespace iSpeak.Models
 
     public class TutorPayrollDetailsViewModels
     {
-        public Guid LessonSessions_Id { get; set; }
         public string Timestamp { get; set; }
         public string Description { get; set; }
         public string SessionHours { get; set; }
         public string HourlyRate { get; set; }
+        public string Amount { get; set; }
         public string Paid { get; set; }
     }
 }

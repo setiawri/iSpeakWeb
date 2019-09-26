@@ -16,26 +16,28 @@ namespace iSpeak.Controllers
     {
         private iSpeakContext db = new iSpeakContext();
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                var data = (from hr in db.HourlyRates
-                            join u in db.User on hr.UserAccounts_Id equals u.Id
-                            select new { hr, u }).ToList();
+                var data = await (from hr in db.HourlyRates
+                                  join u in db.User on hr.UserAccounts_Id equals u.Id
+                                  select new { hr, u }).ToListAsync();
                 List<HourlyRatesViewModels> list = new List<HourlyRatesViewModels>();
                 foreach (var item in data)
                 {
-                    HourlyRatesViewModels model = new HourlyRatesViewModels();
-                    model.Id = item.hr.Id;
-                    model.LessonPackages = (item.hr.LessonPackages_Id.HasValue) ? db.LessonPackages.Where(x => x.Id == item.hr.LessonPackages_Id).FirstOrDefault().Name : string.Empty;
-                    model.UserAccounts = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname;
-                    model.Rate = item.hr.Rate;
-                    model.Notes = item.hr.Notes;
-                    list.Add(model);
+                    list.Add(new HourlyRatesViewModels
+                    {
+                        Id = item.hr.Id,
+                        Branch = (item.hr.Branches_Id.HasValue) ? db.Branches.Where(x => x.Id == item.hr.Branches_Id).FirstOrDefault().Name : string.Empty,
+                        LessonPackages = (item.hr.LessonPackages_Id.HasValue) ? db.LessonPackages.Where(x => x.Id == item.hr.LessonPackages_Id).FirstOrDefault().Name : string.Empty,
+                        UserAccounts = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
+                        Rate = item.hr.Rate,
+                        Notes = item.hr.Notes
+                    });
                 }
                 return View(list);
             }
@@ -59,11 +61,13 @@ namespace iSpeak.Controllers
                 {
                     user_list.Add(new
                     {
-                        Id = item.u.Id,
+                        item.u.Id,
                         Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
                     });
                 }
                 ViewBag.listUser = new SelectList(user_list, "Id", "Name");
+
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
 
                 var lessons = (from lp in db.LessonPackages
                                join l in db.Languages on lp.Languages_Id equals l.Id
@@ -85,7 +89,7 @@ namespace iSpeak.Controllers
                 {
                     lesson_list.Add(new
                     {
-                        Id = item.Id,
+                        item.Id,
                         Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.ExpirationDay + " days, " + item.Price.ToString("#,##0") + ")"
                     });
                 }
@@ -97,7 +101,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,LessonPackages_Id,UserAccounts_Id,Rate,Notes")] HourlyRatesModels hourlyRatesModels)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Branches_Id,LessonPackages_Id,UserAccounts_Id,Rate,Notes")] HourlyRatesModels hourlyRatesModels)
         {
             if (ModelState.IsValid)
             {
@@ -119,11 +123,13 @@ namespace iSpeak.Controllers
             {
                 user_list.Add(new
                 {
-                    Id = item.u.Id,
+                    item.u.Id,
                     Name = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname
                 });
             }
             ViewBag.listUser = new SelectList(user_list, "Id", "Name");
+
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
 
             var lessons = (from lp in db.LessonPackages
                            join l in db.Languages on lp.Languages_Id equals l.Id
@@ -145,7 +151,7 @@ namespace iSpeak.Controllers
             {
                 lesson_list.Add(new
                 {
-                    Id = item.Id,
+                    item.Id,
                     Name = "[" + item.LessonTypes + ", " + item.Languages + "] " + item.Name + " (" + item.SessionHours + " hrs, " + item.ExpirationDay + " days, " + item.Price.ToString("#,##0") + ")"
                 });
             }
@@ -188,6 +194,8 @@ namespace iSpeak.Controllers
                 }
                 ViewBag.listUser = new SelectList(user_list, "Id", "Name");
 
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+
                 var lessons = (from lp in db.LessonPackages
                                join l in db.Languages on lp.Languages_Id equals l.Id
                                join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
@@ -220,7 +228,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,LessonPackages_Id,UserAccounts_Id,Rate,Notes")] HourlyRatesModels hourlyRatesModels)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Branches_Id,LessonPackages_Id,UserAccounts_Id,Rate,Notes")] HourlyRatesModels hourlyRatesModels)
         {
             if (ModelState.IsValid)
             {
@@ -245,6 +253,8 @@ namespace iSpeak.Controllers
                 });
             }
             ViewBag.listUser = new SelectList(user_list, "Id", "Name");
+
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
 
             var lessons = (from lp in db.LessonPackages
                            join l in db.Languages on lp.Languages_Id equals l.Id
@@ -282,19 +292,35 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                var data = (from hr in db.HourlyRates
-                            join lp in db.LessonPackages on hr.LessonPackages_Id equals lp.Id
-                            join u in db.User on hr.UserAccounts_Id equals u.Id
-                            where hr.Id == id
-                            select new HourlyRatesViewModels
-                            {
-                                Id = hr.Id,
-                                LessonPackages = lp.Name,
-                                UserAccounts = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                                Rate = hr.Rate,
-                                Notes = hr.Notes
-                            }).FirstOrDefaultAsync();
-                return View(await data);
+                //var data = (from hr in db.HourlyRates
+                //            join b in db.Branches on hr.Branches_Id equals b.Id
+                //            join lp in db.LessonPackages on hr.LessonPackages_Id equals lp.Id
+                //            join u in db.User on hr.UserAccounts_Id equals u.Id
+                //            where hr.Id == id
+                //            select new HourlyRatesViewModels
+                //            {
+                //                Id = hr.Id,
+                //                Branch = hr.Branches_Id.HasValue ? b.Name : "",
+                //                LessonPackages = lp.Name,
+                //                UserAccounts = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                //                Rate = hr.Rate,
+                //                Notes = hr.Notes
+                //            }).FirstOrDefaultAsync();
+                var item = await (from hr in db.HourlyRates
+                                  join u in db.User on hr.UserAccounts_Id equals u.Id
+                                  where hr.Id == id
+                                  select new { hr, u }).FirstOrDefaultAsync();
+                HourlyRatesViewModels model = new HourlyRatesViewModels
+                {
+                    Id = item.hr.Id,
+                    Branch = (item.hr.Branches_Id.HasValue) ? db.Branches.Where(x => x.Id == item.hr.Branches_Id).FirstOrDefault().Name : string.Empty,
+                    LessonPackages = (item.hr.LessonPackages_Id.HasValue) ? db.LessonPackages.Where(x => x.Id == item.hr.LessonPackages_Id).FirstOrDefault().Name : string.Empty,
+                    UserAccounts = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
+                    Rate = item.hr.Rate,
+                    Notes = item.hr.Notes
+                };
+
+                return View(model);
             }
         }
 

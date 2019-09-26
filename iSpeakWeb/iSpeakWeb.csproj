@@ -254,6 +254,7 @@
     <Compile Include="Models\NewStudentViewModels.cs" />
     <Compile Include="Models\PaymentItemsModels.cs" />
     <Compile Include="Models\PaymentsModels.cs" />
+    <Compile Include="Models\PayrollPaymentItemsModels.cs" />
     <Compile Include="Models\PayrollPaymentsModels.cs" />
     <Compile Include="Models\PayrollPaymentsViewModels.cs" />
     <Compile Include="Models\PettyCashRecordsCategoriesModels.cs" />

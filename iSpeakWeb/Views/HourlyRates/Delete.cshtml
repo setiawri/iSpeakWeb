@@ -27,6 +27,14 @@
                     <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
                     <dl class="dl-horizontal">
                         <dt>
+                            @Html.DisplayNameFor(model => model.Branch)
+                        </dt>
+
+                        <dd>
+                            @Html.DisplayFor(model => model.Branch)
+                        </dd>
+
+                        <dt>
                             @Html.DisplayNameFor(model => model.LessonPackages)
                         </dt>
 

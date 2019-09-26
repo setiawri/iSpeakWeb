@@ -259,26 +259,62 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Timestamp,Tutor_UserAccounts_Id,SessionHours,Review,InternalNotes")] LessonSessionsModels lessonSessionsModels, string Items)
+        public ActionResult Create([Bind(Include = "Branches_Id,Timestamp,Tutor_UserAccounts_Id,SessionHours,Review,InternalNotes")] LessonSessionsModels lessonSessionsModels, string Items, string Description)
         {
             if (ModelState.IsValid)
             {
+                var hourly_rate = db.HourlyRates.Where(x => x.UserAccounts_Id == lessonSessionsModels.Tutor_UserAccounts_Id).ToList();
+                
+                #region Payroll Payment Items Add
+                PayrollPaymentItemsModels payrollPaymentItemsModels = new PayrollPaymentItemsModels
+                {
+                    Id = Guid.NewGuid(),
+                    Description = Description,
+                    Hour = lessonSessionsModels.SessionHours
+                };
+
+                if (hourly_rate.Count == 0)
+                {
+                    payrollPaymentItemsModels.HourlyRate = 0; //this tutor not found in hourly rate
+                }
+                else
+                {
+                    foreach (var rate in hourly_rate)
+                    {
+                        payrollPaymentItemsModels.HourlyRate = rate.Rate; //use tutor rate with null branch
+                        if (lessonSessionsModels.Branches_Id.HasValue && rate.Branches_Id == lessonSessionsModels.Branches_Id.Value) //found tutor with exact branch
+                        {
+                            payrollPaymentItemsModels.HourlyRate = rate.Rate;
+                            break;
+                        }
+                    }
+                }
+                payrollPaymentItemsModels.Amount = payrollPaymentItemsModels.Hour * payrollPaymentItemsModels.HourlyRate;
+                db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
+                #endregion
+                #region Lesson Sessions Add
                 List<LessonSessionsDetails> details = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
-                foreach(var item in details)
+                foreach (var item in details)
                 {
                     var sale_invoice_item = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault();
-                    DateTime dateNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
 
-                    LessonSessionsModels model = new LessonSessionsModels();
-                    model.Id = Guid.NewGuid();
-                    model.Timestamp = TimeZoneInfo.ConvertTimeToUtc(new DateTime(lessonSessionsModels.Timestamp.Year, lessonSessionsModels.Timestamp.Month, lessonSessionsModels.Timestamp.Day, dateNow.Hour, dateNow.Minute, dateNow.Second));
-                    model.SaleInvoiceItems_Id = item.sale_invoice_item_id;
-                    model.SessionHours = lessonSessionsModels.SessionHours;
-                    model.Review = lessonSessionsModels.Review;
-                    model.InternalNotes = lessonSessionsModels.InternalNotes;
-                    model.Deleted = false;
-                    model.Tutor_UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id;
-                    var hourly_rate = db.HourlyRates.Where(x => x.UserAccounts_Id == lessonSessionsModels.Tutor_UserAccounts_Id).ToList();
+                    LessonSessionsModels model = new LessonSessionsModels
+                    {
+                        Id = Guid.NewGuid(),
+                        Branches_Id = lessonSessionsModels.Branches_Id,
+                        Timestamp = TimeZoneInfo.ConvertTimeToUtc(lessonSessionsModels.Timestamp),
+                        SaleInvoiceItems_Id = item.sale_invoice_item_id,
+                        SessionHours = lessonSessionsModels.SessionHours,
+                        Review = item.review, //lessonSessionsModels.Review;
+                        InternalNotes = item.internal_notes, //lessonSessionsModels.InternalNotes;
+                        Deleted = false,
+                        Tutor_UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id,
+                        TravelCost = sale_invoice_item.TravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
+                        TutorTravelCost = sale_invoice_item.TutorTravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
+                        Adjustment = 0,
+                        PayrollPaymentItems_Id = payrollPaymentItemsModels.Id
+                    };
+
                     if (hourly_rate.Count == 0)
                     {
                         model.HourlyRates_Rate = 0; //this tutor not found in hourly rate
@@ -292,19 +328,17 @@ namespace iSpeak.Controllers
                             {
                                 model.HourlyRates_Rate = subitem.Rate / details.Count;
                                 break;
-                            } 
+                            }
                         }
                     }
-                    model.TravelCost = sale_invoice_item.TravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours);
-                    model.TutorTravelCost = sale_invoice_item.TutorTravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours);
-                    model.Adjustment = 0;
                     db.LessonSessions.Add(model);
 
                     sale_invoice_item.SessionHours_Remaining = sale_invoice_item.SessionHours_Remaining.Value - lessonSessionsModels.SessionHours;
                     db.Entry(sale_invoice_item).State = EntityState.Modified;
                 }
-                db.SaveChanges();
+                #endregion
 
+                db.SaveChanges();
                 return RedirectToAction("Index");
             }
 

@@ -36,5 +36,6 @@ namespace iSpeak.Models
         public DbSet<ServicesModels> Services { get; set; }
         public DbSet<SettingsModels> Settings { get; set; }
         public DbSet<PayrollPaymentsModels> PayrollPayments { get; set; }
+        public DbSet<PayrollPaymentItemsModels> PayrollPaymentItems { get; set; }
     }
 }

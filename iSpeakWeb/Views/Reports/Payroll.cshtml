@@ -136,6 +136,7 @@
                                 <th>Description</th>
                                 <th>Session Hours</th>
                                 <th>Hourly Rate</th>
+                                <th>Amount</th>
                                 <th>Paid</th>
                             </tr>
                         </thead>
@@ -202,6 +203,34 @@
 
 <script type="text/javascript">
 
+    function ShowData() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetTutorPayroll", "Reports")',
+            data: {
+                branch_id: $('#Branch').val(),
+                month: $('.period-month').val(),
+                year: $('.period-year').val()
+            },
+            success: function (data) {
+                //console.log(data.obj);
+                var datatable = $('.datatable').DataTable();
+                datatable.clear().draw();
+                $.each(data.obj, function (index, row) {
+                    datatable.row.add([
+                        row.Name,
+                        row.TotalHours,
+                        row.TotalPayable,
+                        row.Details
+                    ]).draw();
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     function Previous() {
         $('.payroll-index').show();
         $('.payroll-details').hide();
@@ -221,12 +250,6 @@
             },
             success: function (data) {
                 //console.log(data.obj);
-                //var dialog = bootbox.alert({
-                //    title: 'Payroll Details ' + data.tutor_name,
-                //    size: 'large',
-                //    message: data.obj,
-                //    backdrop: true
-                //});
                 var datatable = $('.datatable2').DataTable();
                 datatable.clear().draw();
                 $.each(data.obj, function (index, row) {
@@ -235,6 +258,7 @@
                         row.Description,
                         row.SessionHours,
                         row.HourlyRate,
+                        row.Amount,
                         row.Paid
                     ]).draw();
                 });
@@ -300,33 +324,10 @@
             $('.chk-not-approved').hide();
         }
 
+        ShowData();
+
         $('#btnGo').click(function () {
-            //alert($('.period-month').val() + ' ' + $('.period-year').val());
-            $.ajax({
-                type: "POST",
-                url: '@Url.Action("GetTutorPayroll", "Reports")',
-                data: {
-                    branch_id: $('#Branch').val(),
-                    month: $('.period-month').val(),
-                    year: $('.period-year').val()
-                },
-                success: function (data) {
-                    //console.log(data.obj);
-                    var datatable = $('.datatable').DataTable();
-                    datatable.clear().draw();
-                    $.each(data.obj, function (index, row) {
-                        datatable.row.add([
-                            row.Name,
-                            row.TotalHours,
-                            row.TotalPayable,
-                            row.Details
-                        ]).draw();
-                    });
-                }, //end success
-                error: function (result) {
-                    bootbox.alert("Error " + result);
-                } //end error
-            }); //end ajax
+            ShowData();
         });
 
         $('.mdl-btn-submit').click(function () {

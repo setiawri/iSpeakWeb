@@ -12,6 +12,7 @@
         @using (Html.BeginForm("Create", "LessonSessions", FormMethod.Post, new { id = "target" }))
         {
             @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.Branches_Id)
             <input type="hidden" id="Items" name="Items" />
             <!-- Form inputs -->
             <div class="card">
@@ -77,6 +78,21 @@
                                     @Html.ValidationMessageFor(model => model.SaleInvoiceItems_Id, "", new { @class = "text-danger" })
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Review, htmlAttributes: new { @class = "" })
+                                    @Html.TextAreaFor(model => model.Review, new { @class = "form-control", @rows = 3, @placeholder = "For Student" })
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.InternalNotes, htmlAttributes: new { @class = "" })
+                                    @Html.TextAreaFor(model => model.InternalNotes, new { @class = "form-control", @rows = 3, @placeholder = "Only For iSpeak Staff" })
+                                </div>
+                            </div>
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label>&nbsp;</label>
@@ -86,31 +102,31 @@
                         </div>
                         <br />
                         <div class="row">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered table-striped">
-                                    <thead>
-                                        <tr class="bg-blue-800">
-                                            <th style="width: 5% !important"></th>
-                                            <th style="width: 35% !important">Student</th>
-                                            <th style="width: 60% !important">Package</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="data-body"></tbody>
-                                </table>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered table-striped">
+                                            <thead>
+                                                <tr class="bg-blue-800">
+                                                    <th style="width: 5% !important"></th>
+                                                    <th style="width: 20% !important">Student</th>
+                                                    <th style="width: 25% !important">Package</th>
+                                                    <th style="width: 25% !important">Review</th>
+                                                    <th style="width: 25% !important">Internal Notes</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="data-body"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <br />
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <div class="form-group">
-                                    @Html.LabelFor(model => model.Review, htmlAttributes: new { @class = "" })
-                                    @Html.TextAreaFor(model => model.Review, new { @class = "form-control", @rows = 3, @placeholder = "For Student" })
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    @Html.LabelFor(model => model.InternalNotes, htmlAttributes: new { @class = "" })
-                                    @Html.TextAreaFor(model => model.InternalNotes, new { @class = "form-control", @rows = 3, @placeholder = "Only For iSpeak Staff" })
+                                    @Html.Label("Description", htmlAttributes: new { @class = "" })
+                                    @Html.TextArea("Description", new { @class = "form-control", @rows = 3 })
                                 </div>
                             </div>
                         </div>
@@ -131,13 +147,15 @@
 <script type="text/javascript">
     var item_no = 100;
 
-    function AddItem(student, package_info, sale_inv_id) {
+    function AddItem(student, package_info, review, internal, sale_inv_id) {
         item_no += 1;
 
         var rowItem = '<tr id="item_' + item_no + '">'
             + '<td align="center" style="vertical-align:middle"><a href="#" onclick="RemoveItem(' + item_no + ')" class="text-danger"><i class="icon-cross icon-2x"></i></a></td>'
             + '<td><input type="text" readonly class="form-control input-xs student" value="' + student + '" /></td>'
             + '<td><input type="text" readonly class="form-control input-xs package" value="' + package_info + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs review" value="' + review + '" /></td>'
+            + '<td><input type="text" readonly class="form-control input-xs internal" value="' + internal + '" /></td>'
             + '<td style="display: none"><input type="text" readonly class="form-control input-xs sii_id" value="' + sale_inv_id + '" /></td>'
             + '</tr>';
         $('#data-body').append(rowItem);
@@ -150,13 +168,18 @@
     $(document).ready(function () {
         $('.select2').select2();
 
+        $('#Branches_Id').val($('#Branch').val());
+
         $('.tanggal').daterangepicker({
             singleDatePicker: true,
+            timePicker: true,
+            timePicker24Hour: true,
+            timePickerIncrement: 5,
             locale: {
-                format: 'YYYY/MM/DD'
+                format: 'YYYY/MM/DD H:mm'
             }
         });
-
+        
         $('#Student_Id').change(function () {
             $("#SaleInvoiceItems_Id").empty();
             $("#SaleInvoiceItems_Id").append("<option value=''>Select Lesson</option");
@@ -192,7 +215,7 @@
             }
             else {
                 $('.session-validation').html('').hide();
-                AddItem($('#Student_Id option:selected').text(), $('#SaleInvoiceItems_Id option:selected').text(), $('#SaleInvoiceItems_Id').val());
+                AddItem($('#Student_Id option:selected').text(), $('#SaleInvoiceItems_Id option:selected').text(), $('#Review').val(), $('#InternalNotes').val(), $('#SaleInvoiceItems_Id').val());
                 $('#Student_Id').val('').trigger('change');
             }
         });
@@ -203,9 +226,11 @@
             $('#data-body tr').each(function () {
                 var student = $(this).find('input.student').val();
                 var package = $(this).find('input.package').val();
+                var review = $(this).find('input.review').val();
+                var internal_notes = $(this).find('input.internal').val();
                 var sale_invoice_item_id = $(this).find('input.sii_id').val();
 
-                var obj = { student: student, package: package, sale_invoice_item_id: sale_invoice_item_id };
+                var obj = { student: student, package: package, review: review, internal_notes: internal_notes, sale_invoice_item_id: sale_invoice_item_id };
                 arrItem.push(obj);
             });
             $('#Items').val(JSON.stringify(arrItem));

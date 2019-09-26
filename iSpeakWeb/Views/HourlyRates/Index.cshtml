@@ -28,6 +28,7 @@
                         <thead>
                             <tr>
                                 <th>@Html.DisplayNameFor(model => model.UserAccounts)</th>
+                                <th>@Html.DisplayNameFor(model => model.Branch)</th>
                                 <th>@Html.DisplayNameFor(model => model.LessonPackages)</th>
                                 <th>@Html.DisplayNameFor(model => model.Rate)</th>
                                 <th>@Html.DisplayNameFor(model => model.Notes)</th>
@@ -39,6 +40,7 @@
                             {
                                 <tr>
                                     <td>@Html.DisplayFor(modelItem => item.UserAccounts)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Branch)</td>
                                     <td>@Html.DisplayFor(modelItem => item.LessonPackages)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Rate)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Notes)</td>
@@ -67,7 +69,7 @@
             columnDefs: [{
                 orderable: false,
                 width: 120,
-                targets: [4]
+                targets: [5]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {

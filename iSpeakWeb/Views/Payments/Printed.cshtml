@@ -56,7 +56,7 @@
                                     @*<img src="../../../../global_assets/images/logo_demo.png" class="mb-3 mt-2" alt="" style="width: 120px;">*@
                                     <h4 class="text-primary mb-2 mt-md-2">RECEIPT #@Model.Payment.No</h4>
                                     <ul class="list list-unstyled mb-0">
-                                        <li>DATE: <span class="font-weight-semibold">@string.Format("{0:yyyy/MM/dd}", TimeZoneInfo.ConvertTimeFromUtc(Model.Payment.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")))</span></li>
+                                        <li>DATE: <span class="font-weight-semibold">@string.Format("{0:dd/MM/yyyy}", TimeZoneInfo.ConvertTimeFromUtc(Model.Payment.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")))</span></li>
                                     </ul>
                                 </div>
                             </div>

@@ -12,6 +12,8 @@ namespace iSpeak.Models
     {
         [Key]
         public Guid Id { get; set; }
+        [Display(Name = "Branch")]
+        public Guid? Branches_Id { get; set; }
         [Display(Name = "Lesson Package")]
         public Guid? LessonPackages_Id { get; set; }
         [Required]
@@ -24,6 +26,7 @@ namespace iSpeak.Models
     public class HourlyRatesViewModels
     {
         public Guid Id { get; set; }
+        public string Branch { get; set; }
         [Display(Name = "Lesson Package")]
         public string LessonPackages { get; set; }
         [Display(Name = "Tutor")]

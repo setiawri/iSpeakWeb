@@ -12,6 +12,7 @@ namespace iSpeak.Models
     {
         [Key]
         public Guid Id { get; set; }
+        public Guid? Branches_Id { get; set; }
         public DateTime Timestamp { get; set; }
         public Guid SaleInvoiceItems_Id { get; set; }
         public decimal SessionHours { get; set; }
@@ -29,13 +30,15 @@ namespace iSpeak.Models
         [Display(Name = "Tutor Travel Cost")]
         public int TutorTravelCost { get; set; }
         public decimal Adjustment { get; set; }
-        public Guid? PayrollPayments_Id { get; set; }
+        public Guid? PayrollPaymentItems_Id { get; set; }
     }
 
     public class LessonSessionsDetails
     {
         public string student { get; set; }
         public string package { get; set; }
+        public string review { get; set; }
+        public string internal_notes { get; set; }
         public Guid sale_invoice_item_id { get; set; }
     }
 }
