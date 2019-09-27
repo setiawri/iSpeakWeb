@@ -193,26 +193,29 @@ namespace iSpeak.Controllers
                                           Deleted = ls.Deleted
                                       }).ToListAsync();
 
-                List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
-                foreach (var session in sessions)
-                {
-                    list.Add(new LessonSessionsViewModels
-                    {
-                        Id = session.Id,
-                        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(session.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
-                        Lesson = session.Lesson,
-                        Student = session.Student,
-                        Tutor = session.Tutor,
-                        SessionHours = session.SessionHours,
-                        HourlyRates_Rate = session.HourlyRates_Rate,
-                        TravelCost = session.TravelCost,
-                        TutorTravelCost = session.TutorTravelCost,
-                        Deleted = session.Deleted
-                    });
-                }
+                //List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
+                //foreach (var session in sessions)
+                //{
+                //    list.Add(new LessonSessionsViewModels
+                //    {
+                //        Id = session.Id,
+                //        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(session.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                //        Lesson = session.Lesson,
+                //        Student = session.Student,
+                //        Tutor = session.Tutor,
+                //        SessionHours = session.SessionHours,
+                //        HourlyRates_Rate = session.HourlyRates_Rate,
+                //        TravelCost = session.TravelCost,
+                //        TutorTravelCost = session.TutorTravelCost,
+                //        Deleted = session.Deleted
+                //    });
+                //}
+
+                ViewBag.TanggalNow = string.Format("{0:yyyy/MM/dd HH:mm}", DateTime.Now);
+                ViewBag.TanggalUtc = string.Format("{0:yyyy/MM/dd HH:mm}", DateTime.UtcNow);
 
                 ViewBag.IsShowHourlyRate = p.IsGranted(User.Identity.Name, "lessonsessions_showhourlyrate");
-                return View(list);
+                return View(sessions);
             }
         }
 
@@ -252,6 +255,7 @@ namespace iSpeak.Controllers
                 }
                 ViewBag.listTutor = new SelectList(tutor_list, "Id", "Name");
                 ViewBag.listStudent = new SelectList(student_list, "Id", "Name");
+                ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
 
                 return View();
             }
@@ -301,8 +305,8 @@ namespace iSpeak.Controllers
                     LessonSessionsModels model = new LessonSessionsModels
                     {
                         Id = Guid.NewGuid(),
-                        Branches_Id = lessonSessionsModels.Branches_Id,
-                        Timestamp = TimeZoneInfo.ConvertTimeToUtc(lessonSessionsModels.Timestamp),
+                        Branches_Id = lessonSessionsModels.Branches_Id.Value,
+                        Timestamp = lessonSessionsModels.Timestamp, //TimeZoneInfo.ConvertTimeToUtc(lessonSessionsModels.Timestamp),
                         SaleInvoiceItems_Id = item.sale_invoice_item_id,
                         SessionHours = lessonSessionsModels.SessionHours,
                         Review = item.review, //lessonSessionsModels.Review;
@@ -371,6 +375,7 @@ namespace iSpeak.Controllers
             }
             ViewBag.listTutor = new SelectList(tutor_list, "Id", "Name");
             ViewBag.listStudent = new SelectList(student_list, "Id", "Name");
+            ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
 
             return View(lessonSessionsModels);
         }
@@ -389,7 +394,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Timestamp,SaleInvoiceItems_Id,SessionHours,Review,InternalNotes,Deleted,Tutor_UserAccounts_Id,HourlyRates_Rate,TravelCost,TutorTravelCost,Adjustment")] LessonSessionsModels lessonSessionsModels)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Branches_Id,Timestamp,SaleInvoiceItems_Id,SessionHours,Review,InternalNotes,Deleted,Tutor_UserAccounts_Id,HourlyRates_Rate,TravelCost,TutorTravelCost,Adjustment,PayrollPaymentItems_Id")] LessonSessionsModels lessonSessionsModels)
         {
             if (ModelState.IsValid)
             {

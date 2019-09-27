@@ -12,7 +12,6 @@
         @using (Html.BeginForm("Create", "LessonSessions", FormMethod.Post, new { id = "target" }))
         {
             @Html.AntiForgeryToken()
-            @Html.HiddenFor(model => model.Branches_Id)
             <input type="hidden" id="Items" name="Items" />
             <!-- Form inputs -->
             <div class="card">
@@ -31,6 +30,15 @@
                         <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
                         <label class="session-validation text-danger" style="display: none"></label>
                         @Html.ValidationMessage("ErrorHours", "", new { @class = "text-danger" })
+                        <div class="form-group row" style="display: none">
+                            @Html.LabelFor(model => model.Branches_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-6">
+                                @Html.DropDownListFor(model => model.Branches_Id, ViewBag.listBranch as SelectList, "Select Branch", new { @class = "form-control select2" })
+                            </div>
+                            <div class="col-lg-4">
+                                @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-5">
                                 <div class="form-group">
@@ -168,7 +176,7 @@
     $(document).ready(function () {
         $('.select2').select2();
 
-        $('#Branches_Id').val($('#Branch').val());
+        $('#Branches_Id').val($('#Branch').val()).trigger('change');
 
         $('.tanggal').daterangepicker({
             singleDatePicker: true,
