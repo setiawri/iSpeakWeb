@@ -34,6 +34,7 @@ namespace iSpeak.Models
         public bool Cancelled { get; set; }
         public bool Confirmed { get; set; }
         public bool IsTransfer { get; set; }
+        public string Notes_Cancel { get; set; }
     }
 
     public class PaymentsIndexModels
@@ -56,5 +57,6 @@ namespace iSpeak.Models
         public bool Cancelled { get; set; }
         [Display(Name = "Approved")]
         public bool Confirmed { get; set; }
+        public string Notes_Cancel { get; set; }
     }
 }

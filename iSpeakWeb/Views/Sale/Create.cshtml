@@ -134,7 +134,8 @@
                                     @Html.Editor("Disc", new { htmlAttributes = new { @class = "form-control", @placeholder = "Discount" } })
                                 </div>
                                 <div class="col-lg-6">
-                                    @Html.DropDownListFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, "Select Voucher", new { @class = "form-control select2" })
+                                    @*@Html.DropDownListFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, "Select Voucher", new { @class = "form-control select2" })*@
+                                    @Html.ListBoxFor(model => model.Vouchers_Id, ViewBag.listVoucher as SelectList, new { @class = "form-control select2", @multiple = "multiple" })
                                 </div>
                                 <div class="col-lg-2">
                                     <button type="button" class="btn btn-success" id="btnAdd">Add <i class="icon-plus22 ml-2"></i></button>
@@ -212,7 +213,7 @@
             </div>
             <!-- /form inputs -->
         }
-        <!-- Horizontal form modal -->
+        <!-- Add Customer form modal -->
         <div id="modal_cust" class="modal fade" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -342,7 +343,7 @@
                 </div>
             </div>
         </div>
-        <!-- /horizontal form modal -->
+        <!-- /add Customer form modal -->
     </div>
     <!-- /content area -->
 
@@ -386,16 +387,17 @@
 
             $.ajax({
                 type: "POST",
-                url: '@Url.Action("GetItemTotal", "Sale")',
+                url: '@Url.Action("GetLessonTotal", "Sale")',
                 data: {
                     qty: $('#Qty').val(),
                     lesson_package_id: $('#LessonPackages_Id').val(),
                     hours: $('#SessionHours').val(),
                     travel: travel_cost,
                     disc: discount,
-                    voucher_id: $('#Vouchers_Id').val()
+                    vouchers: $('#Vouchers_Id').val()
                 },
                 success: function (data) {
+                    //console.log(data.voucher_selected);
                     AddItemLesson(
                         data.description,
                         $('#Qty').val(),
@@ -406,7 +408,7 @@
                         data.voucher.toLocaleString(),
                         data.subtotal.toLocaleString(),
                         $('#SessionHours').val(),
-                        $('#Vouchers_Id').val(),
+                        data.voucher_selected, //$('#Vouchers_Id').val(),
                         $('#Notes_Lesson').val(),
                         $('#LessonPackages_Id').val(),
                         '',
@@ -487,7 +489,7 @@
                     qty: $('#Qty').val(),
                     product_id: $('#Products_Id').val(),
                     disc: discount,
-                    voucher_id: $('#Vouchers_Id').val()
+                    vouchers: $('#Vouchers_Id').val()
                 },
                 success: function (data) {
                     if (data.error_message != '') {
@@ -505,7 +507,7 @@
                             data.voucher.toLocaleString(),
                             data.subtotal.toLocaleString(),
                             0,
-                            $('#Vouchers_Id').val(),
+                            data.voucher_selected, //$('#Vouchers_Id').val(),
                             $('#Notes_Inventory').val(),
                             '',
                             $('#Products_Id').val(),
@@ -543,7 +545,7 @@
                     qty: $('#Qty').val(),
                     service_id: $('#Services_Id').val(),
                     disc: discount,
-                    voucher_id: $('#Vouchers_Id').val()
+                    vouchers: $('#Vouchers_Id').val()
                 },
                 success: function (data) {
                     if (data.error_message != '') {
@@ -561,7 +563,7 @@
                             data.voucher.toLocaleString(),
                             data.subtotal.toLocaleString(),
                             0,
-                            $('#Vouchers_Id').val(),
+                            data.voucher_selected, //$('#Vouchers_Id').val(),
                             $('#Notes_Service').val(),
                             '',
                             '',

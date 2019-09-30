@@ -28,5 +28,6 @@ namespace iSpeak.Models
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int TutorTravelCost { get; set; }
         public bool Deleted { get; set; }
+        public string Notes_Cancel { get; set; }
     }
 }

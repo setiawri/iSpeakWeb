@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<iSpeak.Models.PaymentsIndexModels>
 
 @{
-    ViewBag.Root = "Print Invoices";
+    ViewBag.Root = "Payments";
     ViewBag.Title = "Index";
 }
 
@@ -51,7 +51,12 @@
                                     <td>
                                         @if (item.Cancelled == false)
                                         {
-                                            <a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel</span></a>
+                                            @*<a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel</span></a>*@
+                                            <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No')">Cancel</span></a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes_Cancel</span>
                                         }
                                     </td>
                                     <td>
@@ -65,10 +70,7 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (item.Cancelled == false)
-                                        {
-                                            <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a>
-                                        }
+                                        <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a>
                                     </td>
                                 </tr>
                             }
@@ -78,6 +80,44 @@
             </div>
         </div>
         <!-- /Invoices -->
+        <!-- Cancel form modal -->
+        <div id="modal_cancel" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h6 class="modal-title">Cancel Payment</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div style="display: none">
+                                <input class="form-control mdl-id-inv" />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">No Invoice</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-no-inv" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control mdl-notes" rows="2" placeholder="Reason Cancel"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /cancel form modal -->
     </div>
     <!-- /content area -->
 
@@ -104,37 +144,26 @@
         }); //end ajax
     }
 
-    function Cancelled(id, no) {
-        bootbox.confirm({
-            message: "Are you sure want to cancel Payment No: " + no + " ?",
-            buttons: {
-                confirm: {
-                    label: 'Yes',
-                    className: 'btn-success'
-                },
-                cancel: {
-                    label: 'No',
-                    className: 'btn-danger'
-                }
+    function Cancel_Modal(id, no) {
+        $('.mdl-id-inv').val(id);
+        $('.mdl-no-inv').val(no);
+    }
+
+    function Cancelled(id, notes) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Cancelled", "Payments")',
+            data: {
+                id: id,
+                notes: notes
             },
-            callback: function (result) {
-                if (result == true) {
-                    $.ajax({
-                        type: "POST",
-                        url: '@Url.Action("Cancelled", "Payments")',
-                        data: {
-                            id: id
-                        },
-                        success: function (data) {
-                            location.reload();
-                        }, //end success
-                        error: function (result) {
-                            bootbox.alert("Error " + result);
-                        } //end error
-                    }); //end ajax
-                }
-            }
-        });
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     function Approve(id, no) {
@@ -204,6 +233,16 @@
         }
 
         $('.check-styled').uniform();
+
+        $('.mdl-btn-submit').click(function () {
+            if ($('.mdl-notes').val() == '') {
+                $('.modal-validation').html('The field Notes is required.').show();
+            }
+            else {
+                $('.modal-validation').html('').hide();
+                Cancelled($('.mdl-id-inv').val(), $('.mdl-notes').val());
+            }
+        });
         
     });
 </script>

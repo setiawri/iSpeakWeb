@@ -150,10 +150,11 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region Cancel Sessions
-        public async Task<JsonResult> Cancelled(Guid id)
+        public async Task<JsonResult> Cancelled(Guid id, string notes)
         {
             var lesson_session = await db.LessonSessions.FindAsync(id);
             lesson_session.Deleted = true;
+            lesson_session.Notes_Cancel = notes;
             db.Entry(lesson_session).State = EntityState.Modified;
 
             var sale_inv_item = await db.SaleInvoiceItems.Where(x => x.Id == lesson_session.SaleInvoiceItems_Id).FirstOrDefaultAsync();
@@ -173,12 +174,14 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
                 var sessions = await (from ls in db.LessonSessions
                                       join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
                                       join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                                       join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
                                       join s in db.User on si.Customer_UserAccounts_Id equals s.Id
                                       join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                                      where ls.Branches_Id == user_branch
                                       select new LessonSessionsViewModels
                                       {
                                           Id = ls.Id,
@@ -190,7 +193,8 @@ namespace iSpeak.Controllers
                                           HourlyRates_Rate = ls.HourlyRates_Rate,
                                           TravelCost = ls.TravelCost,
                                           TutorTravelCost = ls.TutorTravelCost,
-                                          Deleted = ls.Deleted
+                                          Deleted = ls.Deleted,
+                                          Notes_Cancel = ls.Notes_Cancel
                                       }).ToListAsync();
 
                 //List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();

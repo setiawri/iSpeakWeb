@@ -37,7 +37,7 @@ namespace iSpeak.Controllers
                                         <tbody>";
             foreach (var item in list)
             {
-                decimal voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
+                decimal voucher = (item.Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
                 decimal subtotal = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - voucher;
                 message += @"<tr>
                                 <td>" + item.Description + "<br/>" + item.Notes + @"</td>
@@ -63,7 +63,7 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region Get Lesson Total
-        public async Task<JsonResult> GetItemTotal(int qty, Guid lesson_package_id, string hours, int travel, decimal disc, string voucher_id)
+        public async Task<JsonResult> GetLessonTotal(int qty, Guid lesson_package_id, string hours, int travel, decimal disc, List<string> vouchers)
         {
             //var lessonPackage = db.LessonPackages.Where(x => x.Id == lesson_package_id).FirstOrDefault();
             var lesson = await (from lp in db.LessonPackages
@@ -73,16 +73,25 @@ namespace iSpeak.Controllers
                                  select new { lp, l, lt }).FirstOrDefaultAsync();
             string description = "[" + lesson.lt.Name + ", " + lesson.l.Name + "] " + lesson.lp.Name + " (" + hours + " hours)";
             int price = lesson.lp.Price;
-            decimal voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            //decimal voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            decimal voucher = 0; string voucher_selected = "";
+            if (vouchers != null)
+            {
+                foreach (var v in vouchers)
+                {
+                    voucher += db.Vouchers.Where(x => x.Id.ToString() == v).FirstOrDefault().Amount;
+                }
+                voucher_selected = string.Join(",", vouchers);
+            }
             decimal subtotal = (qty * price) + travel - disc - voucher;
 
-            return Json(new { description, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+            return Json(new { description, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Get Inventory Total
-        public async Task<JsonResult> GetInventoryTotal(int qty, Guid product_id, decimal disc, string voucher_id)
+        public async Task<JsonResult> GetInventoryTotal(int qty, Guid product_id, decimal disc, List<string> vouchers)
         {
-            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
+            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0; string voucher_selected = "";
             var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
             var product_qty = await db.Products_Qty.Where(x => x.Branches_Id == user_login.Branches_Id && x.Products_Id == product_id).FirstOrDefaultAsync();
 
@@ -93,31 +102,48 @@ namespace iSpeak.Controllers
             else
             {
                 price = db.Products.Where(x => x.Id == product_id).FirstOrDefault().SellPrice;
-                voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+                //voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+                if (vouchers != null)
+                {
+                    foreach (var v in vouchers)
+                    {
+                        voucher += db.Vouchers.Where(x => x.Id.ToString() == v).FirstOrDefault().Amount;
+                    }
+                    voucher_selected = string.Join(",", vouchers);
+                }
                 subtotal = (qty * price) - disc - voucher;
             }
 
-            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+            return Json(new { error_message, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Get Service Total
-        public async Task<JsonResult> GetServiceTotal(int qty, Guid service_id, decimal disc, string voucher_id)
+        public async Task<JsonResult> GetServiceTotal(int qty, Guid service_id, decimal disc, List<string> vouchers)
         {
-            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0;
+            string error_message = ""; int price = 0; decimal voucher = 0; decimal subtotal = 0; string voucher_selected = "";
             var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
 
             price = db.Services.Where(x => x.Id == service_id).FirstOrDefault().SellPrice;
-            voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            //voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
+            if (vouchers != null)
+            {
+                foreach (var v in vouchers)
+                {
+                    voucher += db.Vouchers.Where(x => x.Id.ToString() == v).FirstOrDefault().Amount;
+                }
+                voucher_selected = string.Join(",", vouchers);
+            }
             subtotal = (qty * price) - disc - voucher;
 
-            return Json(new { error_message, price, voucher, subtotal }, JsonRequestBehavior.AllowGet);
+            return Json(new { error_message, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Cancel Sale Invoice
-        public async Task<JsonResult> Cancelled(Guid id)
+        public async Task<JsonResult> Cancelled(Guid id, string notes)
         {
             var sale_invoice = await db.SaleInvoices.FindAsync(id);
             sale_invoice.Cancelled = true;
+            sale_invoice.Notes = notes;
             db.Entry(sale_invoice).State = EntityState.Modified;
 
             await db.SaveChangesAsync();
@@ -175,7 +201,8 @@ namespace iSpeak.Controllers
                         Amount = item.si.Amount,
                         Due = item.si.Due,
                         Cancelled = item.si.Cancelled,
-                        IsChecked = item.si.IsChecked
+                        IsChecked = item.si.IsChecked,
+                        Notes = item.si.Notes
                     });
                 }
 
@@ -332,6 +359,19 @@ namespace iSpeak.Controllers
                 List<SaleInvoiceItemDetails> details = JsonConvert.DeserializeObject<List<SaleInvoiceItemDetails>>(Items);
                 foreach (var item in details)
                 {
+                    Guid? saleinvoiceitems_vouchers = null;
+                    if (!string.IsNullOrEmpty(item.voucher_id))
+                    {
+                        SaleInvoiceItems_VouchersModels saleInvoiceItems_VouchersModels = new SaleInvoiceItems_VouchersModels
+                        {
+                            Id = Guid.NewGuid(),
+                            Voucher_Ids = item.voucher_id,
+                            Amount = item.voucher
+                        };
+                        db.SaleInvoiceItems_Vouchers.Add(saleInvoiceItems_VouchersModels);
+                        saleinvoiceitems_vouchers = saleInvoiceItems_VouchersModels.Id;
+                    }
+
                     SaleInvoiceItemsModels sii = new SaleInvoiceItemsModels
                     {
                         Id = Guid.NewGuid(),
@@ -341,7 +381,7 @@ namespace iSpeak.Controllers
                         Qty = item.qty,
                         Price = item.price,
                         DiscountAmount = item.disc,
-                        Vouchers_Id = item.voucher_id,
+                        Vouchers_Id = saleinvoiceitems_vouchers, //item.voucher_id,
                         Notes = item.note,
                         Products_Id = item.inventory_id,
                         Services_Id = item.service_id,

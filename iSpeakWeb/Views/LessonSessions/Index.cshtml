@@ -33,13 +33,14 @@
                                 <th>@Html.DisplayNameFor(model => model.Student)</th>
                                 <th>@Html.DisplayNameFor(model => model.Tutor)</th>
                                 <th>@Html.DisplayNameFor(model => model.SessionHours)</th>
-                                @if (ViewBag.IsShowHourlyRate == true)
+                                @*@if (ViewBag.IsShowHourlyRate == true)
                                 {
                                     <th>@Html.DisplayNameFor(model => model.HourlyRates_Rate)</th>
-                                }
-                                <th>@Html.DisplayNameFor(model => model.TravelCost)</th>
+                                }*@
+                                @*<th>@Html.DisplayNameFor(model => model.TravelCost)</th>
                                 <th>@Html.DisplayNameFor(model => model.TutorTravelCost)</th>
-                                <th>@Html.DisplayNameFor(model => model.Deleted)</th>
+                                <th>@Html.DisplayNameFor(model => model.Deleted)</th>*@
+                                <th>Cancelled</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -52,11 +53,11 @@
                                     <td>@Html.DisplayFor(modelItem => item.Student)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
                                     <td>@Html.DisplayFor(modelItem => item.SessionHours)</td>
-                                    @if (ViewBag.IsShowHourlyRate)
+                                    @*@if (ViewBag.IsShowHourlyRate)
                                     {
                                         <td>@Html.DisplayFor(modelItem => item.HourlyRates_Rate)</td>
-                                    }
-                                    <td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
+                                    }*@
+                                    @*<td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
                                     <td>@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
                                     <td>
                                         @if (item.Deleted == false)
@@ -67,19 +68,20 @@
                                         {
                                             <span class="badge badge-danger d-block">YES</span>
                                         }
-                                    </td>
+                                    </td>*@
                                     <td>
                                         @if (item.Deleted == false)
                                         {
-                                            <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> @:|
-                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) @:|
-                                            <a href="#" onclick="Cancelled('@item.Id')">Cancel</a>
+                                            <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.Timestamp.ToString("yyyy/MM/dd HH:mm")', '@item.Lesson', '@item.Student', '@item.Tutor', '@item.SessionHours')">Cancel</span></a>
                                         }
                                         else
                                         {
-                                            <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> @:|
-                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                            <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes_Cancel</span>
                                         }
+                                    </td>
+                                    <td>
+                                        <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
                                     </td>
                                 </tr>
                             }
@@ -89,7 +91,65 @@
             </div>
         </div>
         <!-- /form inputs -->
+        <!-- Cancel form modal -->
+        <div id="modal_cancel" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h6 class="modal-title">Cancel Lesson Session</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
 
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div style="display: none">
+                                <input class="form-control mdl-id-inv" />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Date</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-timestamp" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Lesson</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-lesson" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Student / Hour</label>
+                                <div class="col-sm-6">
+                                    <input class="form-control mdl-student" readonly />
+                                </div>
+                                <div class="col-sm-2">
+                                    <input class="form-control mdl-hour" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Tutor</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-tutor" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control mdl-notes" rows="2" placeholder="Reason Cancel"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /cancel form modal -->
     </div>
     <!-- /content area -->
 
@@ -121,55 +181,48 @@
         }); //end ajax
     }
 
-    function Cancelled(id) {
-        bootbox.confirm({
-            message: "Are you sure want to cancel this Session ?",
-            buttons: {
-                confirm: {
-                    label: 'Yes',
-                    className: 'btn-success'
-                },
-                cancel: {
-                    label: 'No',
-                    className: 'btn-danger'
-                }
+    function Cancel_Modal(id, timestamp, lesson, student, tutor, session_hour) {
+        $('.mdl-id-inv').val(id);
+        $('.mdl-timestamp').val(timestamp);
+        $('.mdl-lesson').val(lesson);
+        $('.mdl-student').val(student);
+        $('.mdl-tutor').val(tutor);
+        $('.mdl-hour').val(session_hour);
+    }
+
+    function Cancelled(id, notes) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Cancelled", "LessonSessions")',
+            data: {
+                id: id,
+                notes: notes
             },
-            callback: function (result) {
-                if (result == true) {
-                    $.ajax({
-                        type: "POST",
-                        url: '@Url.Action("Cancelled", "LessonSessions")',
-                        data: {
-                            id: id
-                        },
-                        success: function (data) {
-                            location.reload();
-                        }, //end success
-                        error: function (result) {
-                            bootbox.alert("Error " + result);
-                        } //end error
-                    }); //end ajax
-                }
-            }
-        });
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     $(document).ready(function () {
-        var lastColumn = 0;
+        @*var lastColumn = 0;
         if ('@ViewBag.IsShowHourlyRate' == 'True') {
             lastColumn = 9;
         }
         else {
             lastColumn = 8;
-        }
+        }*@
 
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
-                width: 200,
-                targets: [lastColumn]
+                width: 120,
+                targets: 5 //[lastColumn]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {
@@ -183,6 +236,16 @@
         $('.datatable').DataTable({
             pagingType: 'full_numbers',
             order: [[0, 'desc']]
+        });
+
+        $('.mdl-btn-submit').click(function () {
+            if ($('.mdl-notes').val() == '') {
+                $('.modal-validation').html('The field Notes is required.').show();
+            }
+            else {
+                $('.modal-validation').html('').hide();
+                Cancelled($('.mdl-id-inv').val(), $('.mdl-notes').val());
+            }
         });
 
         console.log('DateTimeNow: ' + '@ViewBag.TanggalNow' + ', DateTimeUtcNow: ' + '@ViewBag.TanggalUtc');

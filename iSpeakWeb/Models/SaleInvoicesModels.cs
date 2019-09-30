@@ -41,6 +41,7 @@ namespace iSpeak.Models
         public bool Cancelled { get; set; }
         [Display(Name = "Approved")]
         public bool IsChecked { get; set; }
+        public string Notes { get; set; }
     }
 
     public class SaleInvoiceItemDetails
@@ -54,7 +55,7 @@ namespace iSpeak.Models
         public decimal voucher { get; set; }
         public int subtotal { get; set; }
         public decimal hours { get; set; }
-        public Guid? voucher_id { get; set; }
+        public string voucher_id { get; set; }
         public string note { get; set; }
         public Guid? lesson_id { get; set; }
         public Guid? inventory_id { get; set; }

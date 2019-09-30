@@ -65,7 +65,7 @@ namespace iSpeak.Controllers
             foreach (var item in list)
             {
                 message += @"<tr>
-                                <td><a href='" + Url.Content("~") + "Payments/Print' target='_blank'>" + item.p.No + @"</a></td>
+                                <td><a href='" + Url.Content("~") + "Payments/Print/"+ item.p.Id +"' target='_blank'>" + item.p.No + @"</a></td>
                                 <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
                                 <td>" + item.pi.DueBefore.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.Amount.ToString("#,##0") + @"</td>
@@ -78,10 +78,11 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region Cancel Payment
-        public async Task<JsonResult> Cancelled(Guid id)
+        public async Task<JsonResult> Cancelled(Guid id, string notes)
         {
             var payment = await db.Payments.FindAsync(id);
             payment.Cancelled = true;
+            payment.Notes_Cancel = notes;
             db.Entry(payment).State = EntityState.Modified;
 
             var payment_item = await db.PaymentItems.Where(x => x.Payments_Id == id).FirstOrDefaultAsync();
@@ -261,7 +262,8 @@ namespace iSpeak.Controllers
                             DebitAmount = item.DebitAmount,
                             ConsignmentAmount = item.ConsignmentAmount,
                             Cancelled = item.Cancelled,
-                            Confirmed = item.Confirmed
+                            Confirmed = item.Confirmed,
+                            Notes_Cancel = item.Notes_Cancel
                         };
                         Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;

@@ -319,11 +319,6 @@
             order: [[0, 'asc']]
         });
 
-        if ('@ViewBag.Approve' == 'False') {
-            table.column(6).visible(false);
-            $('.chk-not-approved').hide();
-        }
-
         ShowData();
 
         $('#btnGo').click(function () {
