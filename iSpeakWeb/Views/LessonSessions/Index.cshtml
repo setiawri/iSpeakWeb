@@ -208,13 +208,13 @@
     }
 
     $(document).ready(function () {
-        @*var lastColumn = 0;
-        if ('@ViewBag.IsShowHourlyRate' == 'True') {
-            lastColumn = 9;
+        var lastColumn = 0;
+        if ('@ViewBag.Cancel' == 'True') {
+            lastColumn = 6;
         }
         else {
-            lastColumn = 8;
-        }*@
+            lastColumn = 5;
+        }
 
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
@@ -222,7 +222,7 @@
             columnDefs: [{
                 orderable: false,
                 width: 120,
-                targets: 5 //[lastColumn]
+                targets: [lastColumn]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {
@@ -233,10 +233,14 @@
             }
         });
 
-        $('.datatable').DataTable({
+        var table = $('.datatable').DataTable({
             pagingType: 'full_numbers',
             order: [[0, 'desc']]
         });
+
+        if ('@ViewBag.Cancel' == 'False') {
+            table.column(5).visible(false);
+        }
 
         $('.mdl-btn-submit').click(function () {
             if ($('.mdl-notes').val() == '') {

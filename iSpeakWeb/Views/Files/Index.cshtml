@@ -1,0 +1,103 @@
+﻿@model IEnumerable<iSpeak.Models.UploadFilesModels>
+
+@{
+    ViewBag.Root = "Upload Files";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Create", "Files")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.Description)</th>
+                                <th>@Html.DisplayNameFor(model => model.Filename)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                    <td><a href="@Url.Action("Download", "Files", new { id = item.Id })">@item.Filename</a></td>
+                                    <td>
+                                        @Html.ActionLink("Update", "Update", new { id = item.Id }) |
+                                        <a href="#" onclick="View_Olders('@item.Description')">Olders</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            width: 150,
+            targets: [3]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var datatable = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+
+    function View_Olders(desc) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetOlders", "Files")',
+            data: {
+                description: desc
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Olders',
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+</script>

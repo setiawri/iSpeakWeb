@@ -219,6 +219,7 @@ namespace iSpeak.Controllers
                 ViewBag.TanggalUtc = string.Format("{0:yyyy/MM/dd HH:mm}", DateTime.UtcNow);
 
                 ViewBag.IsShowHourlyRate = p.IsGranted(User.Identity.Name, "lessonsessions_showhourlyrate");
+                ViewBag.Cancel = p.IsGranted(User.Identity.Name, "lessonsessions_cancel");
                 return View(sessions);
             }
         }

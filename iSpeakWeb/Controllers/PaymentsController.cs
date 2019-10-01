@@ -131,7 +131,7 @@ namespace iSpeak.Controllers
                             Price = item.Price,
                             Travel = item.TravelCost,
                             Tutor = item.TutorTravelCost,
-                            Voucher = (item.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0,
+                            Voucher = (item.Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0,
                             Discount = item.DiscountAmount
                         };
                         saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
@@ -323,7 +323,7 @@ namespace iSpeak.Controllers
                             saleInvoiceItemsDetails.Price = subitem.Price;
                             saleInvoiceItemsDetails.Travel = subitem.TravelCost;
                             saleInvoiceItemsDetails.Tutor = subitem.TutorTravelCost;
-                            saleInvoiceItemsDetails.Voucher = (subitem.Vouchers_Id.HasValue) ? db.Vouchers.Where(x => x.Id == subitem.Vouchers_Id).FirstOrDefault().Amount : 0;
+                            saleInvoiceItemsDetails.Voucher = (subitem.Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == subitem.Vouchers_Id).FirstOrDefault().Amount : 0;
                             saleInvoiceItemsDetails.Discount = subitem.DiscountAmount;
                             saleInvoiceItemsDetails.Amount = (subitem.Qty * subitem.Price) + subitem.TravelCost - subitem.DiscountAmount - saleInvoiceItemsDetails.Voucher;
                             listDetails.Add(saleInvoiceItemsDetails);

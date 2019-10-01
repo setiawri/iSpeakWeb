@@ -135,9 +135,20 @@ namespace iSpeak.Controllers
                 if (!ppi.PayrollPayments_Id.HasValue)
                     payroll_total += ppi.Amount;
 
+                string students = "";
+                foreach (var s in payroll.LessonSession)
+                {
+                    Guid sale_inv_id = db.SaleInvoiceItems.Where(x => x.Id == s.SaleInvoiceItems_Id).FirstOrDefault().SaleInvoices_Id;
+                    string student_id = db.SaleInvoices.Where(x => x.Id == sale_inv_id).FirstOrDefault().Customer_UserAccounts_Id;
+                    string student_first_name = db.User.Where(x => x.Id == student_id).FirstOrDefault().Firstname;
+                    students += string.IsNullOrEmpty(students) ? student_first_name : ", " + student_first_name;
+                }
+
                 list.Add(new TutorPayrollDetailsViewModels
                 {
+                    Id = payroll.PayrollPaymentItems_Id.Value,
                     Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(payroll.LessonSession.Select(x => x.Timestamp).FirstOrDefault(), TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+                    Students = students,
                     Description = ppi.Description,
                     SessionHours = string.Format("{0:N2}", ppi.Hour),
                     HourlyRate = string.Format("{0:N2}", ppi.HourlyRate),

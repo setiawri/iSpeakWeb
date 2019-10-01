@@ -42,6 +42,9 @@ namespace iSpeak.Common
 
                 bool isAccounts = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_accounts");
                 filterContext.Controller.ViewBag.AccountsMenu = (isAccounts) ? "" : "style='display: none'";
+
+                bool isFiles = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_files");
+                filterContext.Controller.ViewBag.FilesMenu = (isFiles) ? "" : "style='display: none'";
             }
         }
     }

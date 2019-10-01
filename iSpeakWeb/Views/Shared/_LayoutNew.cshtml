@@ -176,16 +176,22 @@
                         Accounts
                     </a>
                 </li>
-                @*<li class="nav-item dropdown" @(ViewBag.AccountsMenu == "" ? "" : Html.Raw(ViewBag.AccountsMenu))>
-                    <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
-                        <i class="icon-user-tie mr-2"></i>
-                        Accounts
+                <li class="nav-item dropdown" @(ViewBag.FilesMenu == "" ? "" : Html.Raw(ViewBag.FilesMenu))>
+                    <a href="@Url.Action("Index", "Files")" class="navbar-nav-link">
+                        <i class="icon-file-upload2 mr-2"></i>
+                        Files
                     </a>
-                    <div class="dropdown-menu">
-                        <div class="dropdown-header">Admin</div>
-                        <a href="@Url.Action("Index", "User")" class="dropdown-item"><i class="icon-users2"></i> User</a>
-                    </div>
-                </li>*@
+                </li>
+                @*<li class="nav-item dropdown" @(ViewBag.AccountsMenu == "" ? "" : Html.Raw(ViewBag.AccountsMenu))>
+            <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-user-tie mr-2"></i>
+                Accounts
+            </a>
+            <div class="dropdown-menu">
+                <div class="dropdown-header">Admin</div>
+                <a href="@Url.Action("Index", "User")" class="dropdown-item"><i class="icon-users2"></i> User</a>
+            </div>
+        </li>*@
             </ul>
         </div>
     </div>

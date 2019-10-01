@@ -12,5 +12,7 @@ namespace iSpeak.Models
         public Guid AutoEntryForCashPayments { get; set; }
         [Display(Name = "User Set Roles Access when Disabled shows only this role")]
         public Guid UserSetRoleAllowed { get; set; }
+        [Display(Name = "Role Access for Reminders")]
+        public List<string> RoleAccessForReminders { get; set; }
     }
 }

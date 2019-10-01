@@ -21,5 +21,6 @@ namespace iSpeak.Models
     {
         public static Guid GUID_AutoEntryForCashPayments = new Guid("5c62ee59-03a9-453a-95c9-a234f537adf1");
         public static Guid GUID_UserSetRoleAllowed = new Guid("25f53554-3b9d-4d3b-a8e5-58d921950987");
+        public static Guid GUID_RoleAccessForReminders = new Guid("2f8d8208-4464-4a01-b9e1-30e54292b708");
     }
 }

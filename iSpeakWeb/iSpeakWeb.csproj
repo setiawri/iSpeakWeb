@@ -193,6 +193,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BranchesController.cs" />
     <Compile Include="Controllers\ConsignmentsController.cs" />
+    <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HourlyRatesController.cs" />
     <Compile Include="Controllers\InventoryController.cs" />
@@ -264,6 +265,8 @@
     <Compile Include="Models\Products_QtyModels.cs" />
     <Compile Include="Models\ReceiptPayrollViewModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
+    <Compile Include="Models\RemindersModels.cs" />
+    <Compile Include="Models\RemindersStatusEnum.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
     <Compile Include="Models\SaleInvoiceItemsModels.cs" />
     <Compile Include="Models\SaleInvoiceItems_InventoryModels.cs" />
@@ -277,6 +280,7 @@
     <Compile Include="Models\TokenIdentity.cs" />
     <Compile Include="Models\TutorPayrollViewModels.cs" />
     <Compile Include="Models\UnitsModels.cs" />
+    <Compile Include="Models\UploadFilesModels.cs" />
     <Compile Include="Models\UserModels.cs" />
     <Compile Include="Models\UserViewModels.cs" />
     <Compile Include="Models\VouchersModels.cs" />
@@ -508,6 +512,9 @@
     <Content Include="Views\Reports\NewStudent.cshtml" />
     <Content Include="Views\Reports\PayrollPayments.cshtml" />
     <Content Include="Views\Reports\Print.cshtml" />
+    <Content Include="Views\Files\Index.cshtml" />
+    <Content Include="Views\Files\Create.cshtml" />
+    <Content Include="Views\Files\Update.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

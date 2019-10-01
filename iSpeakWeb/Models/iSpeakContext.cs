@@ -38,5 +38,7 @@ namespace iSpeak.Models
         public DbSet<PayrollPaymentsModels> PayrollPayments { get; set; }
         public DbSet<PayrollPaymentItemsModels> PayrollPaymentItems { get; set; }
         public DbSet<SaleInvoiceItems_VouchersModels> SaleInvoiceItems_Vouchers { get; set; }
+        public DbSet<RemindersModels> Reminders { get; set; }
+        public DbSet<UploadFilesModels> UploadFiles { get; set; }
     }
 }

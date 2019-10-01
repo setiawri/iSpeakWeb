@@ -1,0 +1,72 @@
+﻿@model iSpeak.Models.UploadFilesModels
+
+@{
+    ViewBag.Root = "Upload Files";
+    ViewBag.Title = "Update";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        @using (Html.BeginForm("Update", "Files", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.Id)
+            @Html.HiddenFor(model => model.Branches_Id)
+            @Html.HiddenFor(model => model.Timestamp, new { Value = DateTime.UtcNow })
+            @Html.HiddenFor(model => model.Description)
+            <!-- Form inputs -->
+            <div class="card">
+                <div class="card-header header-elements-inline">
+                    <h5 class="card-title">@Model.Description</h5>
+                    <div class="header-elements">
+                        <div class="list-icons">
+                            <a class="list-icons-item" data-action="collapse"></a>
+                            <a class="list-icons-item" data-action="reload"></a>
+                            <a class="list-icons-item" data-action="remove"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <fieldset class="mb-3">
+                        <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                        <div class="form-group row">
+                            <label class="col-form-label col-lg-2">File(s)</label>
+                            <div class="col-lg-5">
+                                <div class="custom-file">
+                                    <input class="form-control custom-file-input" type="file" id="files" name="files" />
+                                    <label class="custom-file-label">Choose File...</label>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessage("Document", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div>
+                        <a href="@Url.Action("Index", "Files")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
+                    </div>
+                </div>
+            </div>
+            <!-- /form inputs -->
+        }
+    </div>
+    <!-- /content area -->
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.custom-file-input').on('change', function () {
+            var fileLabel = $(this).next('.custom-file-label');
+            var files = $(this)[0].files;
+            if (files.length > 1) {
+                fileLabel.html(files.length + ' files selected');
+            }
+            else if (files.length == 1) {
+                fileLabel.html(files[0].name);
+            }
+        });
+    });
+</script>

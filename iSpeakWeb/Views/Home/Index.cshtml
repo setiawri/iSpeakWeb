@@ -6,6 +6,12 @@
 }
 
 <style>
+    .animated {
+        -webkit-animation-duration: 1s;
+        -moz-animation-duration: 1s;
+        animation-duration: 1s;
+    }
+
     .wrapper {
         position: relative;
         overflow: hidden;
@@ -32,106 +38,6 @@
 
     <!-- Content area -->
     <div class="content">
-        <!-- Form Birthday Student -->
-        <div class="form-group row birthday-list">
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header header-elements-inline">
-                        <h5 class="card-title">Birthday This Month</h5>
-                        <div class="header-elements">
-                            <div style="float: right">
-                                @Html.DropDownList("listRole_this", ViewBag.listRole as SelectList, new { @class = "form-control select2" })
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover datatable1">
-                                <thead>
-                                    <tr>
-                                        <th>CountDay</th>
-                                        <th>Fullname</th>
-                                        <th>Birthday</th>
-                                        <th>Role</th>
-                                        <th>Information</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model.ThisMonth)
-                                    {
-                                        <tr>
-                                            <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Role)</td>
-                                            <td>
-                                                @if (item.CountDay > 0)
-                                                {
-                                                    <span class="badge badge-warning">@string.Format("In next {0} days", item.CountDay)</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge badge-primary">Today</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header header-elements-inline">
-                        <h5 class="card-title">Birthday Next Month</h5>
-                        <div class="header-elements">
-                            <div style="float: right">
-                                @Html.DropDownList("listRole_next", ViewBag.listRole as SelectList, new { @class = "form-control select2" })
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover datatable2">
-                                <thead>
-                                    <tr>
-                                        <th>CountDay</th>
-                                        <th>Fullname</th>
-                                        <th>Birthday</th>
-                                        <th>Role</th>
-                                        <th>Information</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model.NextMonth)
-                                    {
-                                        <tr>
-                                            <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
-                                            <td>@Html.DisplayFor(modelItem => item.Role)</td>
-                                            <td>
-                                                @if (item.CountDay > 0)
-                                                {
-                                                    <span class="badge badge-warning">@string.Format("In next {0} days", item.CountDay)</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge badge-primary">Today</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- /form Birthday Student -->
         <!-- Birthday Notif -->
         <div class="form-group row birthday-notif">
             <div class="col-lg-12">
@@ -157,6 +63,272 @@
             </div>
         </div>
         <!-- /birthday Notif -->
+        <!-- Collapsible -->
+        <div class="form-group row" id="accordion-styled">
+            <div class="col-lg-12">
+                <!-- Reminders -->
+                <div class="card reminder">
+                    <div class="card-header bg-warning">
+                        <h7>
+                            <a data-toggle="collapse" class="text-white" href="#accordion-reminder">REMINDERS</a>
+                        </h7>
+                    </div>
+                    <div id="accordion-reminder" class="collapse show" data-parent="#accordion-styled">
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <!-- Reminder List -->
+                                <div class="col-lg-12 reminder-list animated bounceInLeft">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <a href="#" onclick="Next()" class="btn btn-sm btn-success mb-1">Create Reminder<i class="icon-plus22 ml-2"></i></a>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover dt-reminders">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Description</th>
+                                                            <th>Status</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.Reminders)
+                                                        {
+                                                            <tr>
+                                                                <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                                                <td>
+                                                                    @if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.New)
+                                                                    {
+                                                                        <span class="badge badge-dark d-block">New</span>
+                                                                    }
+                                                                    else if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.InProgress)
+                                                                    {
+                                                                        <span class="badge badge-info d-block">In Progress</span>
+                                                                    }
+                                                                    else if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.OnHold)
+                                                                    {
+                                                                        <span class="badge bg-brown d-block">On Hold</span>
+                                                                    }
+                                                                    else if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.Waiting)
+                                                                    {
+                                                                        <span class="badge badge-warning d-block">Waiting</span>
+                                                                    }
+                                                                    else if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.Completed)
+                                                                    {
+                                                                        <span class="badge badge-primary d-block">Completed</span>
+                                                                    }
+                                                                </td>
+                                                                <td>
+                                                                    <a href="#" onclick="Edit('@item.Id')">Edit</a>
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /Reminder List -->
+                                <!-- Reminder Create -->
+                                <div class="col-lg-12 reminder-add animated bounceInLeft" style="display: none">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <fieldset class="mb-3">
+                                                <legend class="text-uppercase font-size-sm font-weight-bold">Create</legend>
+                                                <span class="text-danger reminder-add-validation" style="display: none"></span>
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-2">Date</label>
+                                                    <div class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <input type="datetime" class="form-control tanggal reminder-add-date" />
+                                                            <span class="input-group-append">
+                                                                <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-2">Description</label>
+                                                    <div class="col-lg-5">
+                                                        <textarea class="form-control reminder-add-desc" rows="3"></textarea>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <div>
+                                                <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
+                                                <button type="button" class="btn btn-sm btn-primary btn-reminder-add">Submit <i class="icon-paperplane ml-2"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /Reminder Create -->
+                                <!-- Reminder Edit -->
+                                <div class="col-lg-12 reminder-edit animated bounceInLeft" style="display: none">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <fieldset class="mb-3">
+                                                <legend class="text-uppercase font-size-sm font-weight-bold">Edit</legend>
+                                                <input type="hidden" class="form-control reminder-edit-id" />
+                                                <span class="text-danger reminder-edit-validation" style="display: none"></span>
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-2">Date</label>
+                                                    <div class="col-lg-5">
+                                                        <div class="input-group">
+                                                            <input type="datetime" class="form-control tanggal reminder-edit-date" />
+                                                            <span class="input-group-append">
+                                                                <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-2">Description</label>
+                                                    <div class="col-lg-5">
+                                                        <textarea class="form-control reminder-edit-desc" rows="3"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-2">Status</label>
+                                                    <div class="col-lg-5">
+                                                        <select class="form-control select2 reminder-edit-status">
+                                                            <option value="0">New</option>
+                                                            <option value="1">In Progress</option>
+                                                            <option value="2">On Hold</option>
+                                                            <option value="3">Waiting</option>
+                                                            <option value="4">Completed</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <div>
+                                                <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
+                                                <button type="button" class="btn btn-sm btn-primary btn-reminder-edit">Save <i class="icon-checkmark4 ml-2"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /Reminder Edit -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /reminders -->
+                <!-- Form Birthday Student -->
+                <div class="card birthday-list">
+                    <div class="card-header bg-teal">
+                        <h7>
+                            <a data-toggle="collapse" class="text-white" href="#accordion-bday-list">BIRTHDAY LIST</a>
+                        </h7>
+                    </div>
+                    <div id="accordion-bday-list" class="collapse" data-parent="#accordion-styled">
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-header header-elements-inline">
+                                            <h5 class="card-title">Birthday This Month</h5>
+                                            <div class="header-elements">
+                                                <div style="float: right">
+                                                    @Html.DropDownList("listRole_this", ViewBag.listRole as SelectList, new { @class = "form-control select2" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable1">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>CountDay</th>
+                                                            <th>Fullname</th>
+                                                            <th>Birthday</th>
+                                                            <th>Role</th>
+                                                            <th>Information</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.ThisMonth)
+                                                        {
+                                                            <tr>
+                                                                <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Role)</td>
+                                                                <td>
+                                                                    @if (item.CountDay > 0)
+                                                                    {
+                                                                        <span class="badge badge-warning">@string.Format("In next {0} days", item.CountDay)</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge badge-primary">Today</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-header header-elements-inline">
+                                            <h5 class="card-title">Birthday Next Month</h5>
+                                            <div class="header-elements">
+                                                <div style="float: right">
+                                                    @Html.DropDownList("listRole_next", ViewBag.listRole as SelectList, new { @class = "form-control select2" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable2">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>CountDay</th>
+                                                            <th>Fullname</th>
+                                                            <th>Birthday</th>
+                                                            <th>Role</th>
+                                                            <th>Information</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.NextMonth)
+                                                        {
+                                                            <tr>
+                                                                <td>@Html.DisplayFor(modelItem => item.CountDay)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Birthday)</td>
+                                                                <td>@Html.DisplayFor(modelItem => item.Role)</td>
+                                                                <td>
+                                                                    @if (item.CountDay > 0)
+                                                                    {
+                                                                        <span class="badge badge-warning">@string.Format("In next {0} days", item.CountDay)</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge badge-primary">Today</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /form Birthday Student -->
+            </div>
+        </div>
+        <!-- /collapsible -->
     </div>
     <!-- /content area -->
 
@@ -180,6 +352,16 @@
         }
     });
 
+    var dt_reminders = $('.dt-reminders').DataTable({
+        pagingType: 'full_numbers',
+        columnDefs: [{
+            orderable: false,
+            width: 100,
+            targets: [3]
+        }],
+        order: [[0, 'desc']]
+    });
+
     var datatable1 = $('.datatable1').DataTable({
         pagingType: 'full_numbers',
         search: {
@@ -196,7 +378,54 @@
         order: [[0, 'asc']]
     });
 
+    function Next() {
+        $('.reminder-list').hide();
+        $('.reminder-add').show();
+    }
+
+    function Previous() {
+        $('.reminder-list').show();
+        $('.reminder-add').hide();
+        $('.reminder-edit').hide();
+    }
+
+    function Edit(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ReminderGet", "Home")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $('.reminder-edit-id').val(data.id);
+                $('.reminder-edit-date').data('daterangepicker').setStartDate(data.timestamp);
+                $('.reminder-edit-date').data('daterangepicker').setEndDate(data.timestamp);
+                $('.reminder-edit-desc').val(data.description);
+                $('.reminder-edit-status').val(data.status).trigger('change');
+
+                $('.reminder-list').hide();
+                $('.reminder-edit').show();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function ReminderAddClear() {
+        $('.reminder-add-date').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", DateTime.UtcNow)');
+        $('.reminder-add-date').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", DateTime.UtcNow)');
+        $('.reminder-add-desc').val('');
+    }
+
     $(document).ready(function () {
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
+        });
+
         $('.select2').select2({
             minimumResultsForSearch: -1
         });
@@ -212,13 +441,19 @@
             $('.birthday-list').hide();
         }
 
+        if ('@Model.IsRemindersAllowed' == 'False') {
+            $('.reminder').hide();
+        }
+
         $('#listRole_this').val('Student').trigger('change');
         $('#listRole_this').change(function () {
             if ($('#listRole_this').val() == '') {
                 $('input[aria-controls=DataTables_Table_0]').val('').keyup();
+                //$('input[type=search]').val('').keyup();
             }
             else {
                 $('input[aria-controls=DataTables_Table_0]').val($('#listRole_this').val()).keyup();
+                //$('input[type=search]').val($('#listRole_this').val()).keyup();
             }
         });
 
@@ -226,9 +461,71 @@
         $('#listRole_next').change(function () {
             if ($('#listRole_next').val() == '') {
                 $('input[aria-controls=DataTables_Table_1]').val('').keyup();
+                //$('input[type=search]').val('').keyup();
             }
             else {
                 $('input[aria-controls=DataTables_Table_1]').val($('#listRole_next').val()).keyup();
+                //$('input[type=search]').val($('#listRole_next').val()).keyup();
+            }
+        });
+
+        $('.btn-reminder-add').click(function () {
+            if ($('.reminder-add-date').val() == '') {
+                $('.reminder-add-validation').html('The Field Date is required.').show();
+            }
+            else if ($('.reminder-add-desc').val() == '') {
+                $('.reminder-add-validation').html('The Field Description is required.').show();
+            }
+            else {
+                $('.reminder-add-validation').html('').hide();
+                
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ReminderAdd", "Home")',
+                    data: {
+                        timestamp: $('.reminder-add-date').val(),
+                        description: $('.reminder-add-desc').val()
+                    },
+                    success: function (data) {
+                        //Previous();
+                        //ReminderAddClear();
+                        location.reload();
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
+        });
+
+        $('.btn-reminder-edit').click(function () {
+            if ($('.reminder-edit-date').val() == '') {
+                $('.reminder-edit-validation').html('The Field Date is required.').show();
+            }
+            else if ($('.reminder-edit-desc').val() == '') {
+                $('.reminder-edit-validation').html('The Field Description is required.').show();
+            }
+            else {
+                $('.reminder-edit-validation').html('').hide();
+                
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ReminderEdit", "Home")',
+                    data: {
+                        id: $('.reminder-edit-id').val(),
+                        timestamp: $('.reminder-edit-date').val(),
+                        description: $('.reminder-edit-desc').val(),
+                        status: $('.reminder-edit-status').val()
+                    },
+                    success: function (data) {
+                        //Previous();
+                        //ReminderAddClear();
+                        location.reload();
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
             }
         });
     });
