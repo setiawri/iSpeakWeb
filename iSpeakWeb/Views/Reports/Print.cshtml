@@ -70,25 +70,40 @@
                                     <table class="table table-lg table-bordered">
                                         <thead>
                                             <tr class="bg-grey-300">
-                                                <th>STUDENT</th>
+                                                <th>DESCRIPTION</th>
                                                 <th>HOURS</th>
                                                 <th>AMOUNT</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach (var item in Model.ListPayroll)
+                                            @if (Model.ListPayroll != null)
                                             {
-                                                <tr>
-                                                    <td>@Html.DisplayFor(modelItem => item.StudentName)</td>
-                                                    <td>@Html.DisplayFor(modelItem => item.TotalHours)</td>
-                                                    <td>@Html.DisplayFor(modelItem => item.TotalRate)</td>
-                                                </tr>
+                                                foreach (var item in Model.ListPayroll)
+                                                {
+                                                    <tr>
+                                                        <td>@Html.DisplayFor(modelItem => item.StudentName)</td>
+                                                        <td>@Html.DisplayFor(modelItem => item.TotalHours)</td>
+                                                        <td>@Html.DisplayFor(modelItem => item.TotalRate)</td>
+                                                    </tr>
+                                                }
+                                            }
+
+                                            @if (Model.ListPayrollManual != null)
+                                            {
+                                                foreach (var item in Model.ListPayrollManual)
+                                                {
+                                                    <tr>
+                                                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                                        <td></td>
+                                                        <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                                    </tr>
+                                                }
                                             }
                                         </tbody>
                                         <tfoot>
                                             <tr>
                                                 <th colspan="2" class="text-right">TOTAL</th>
-                                                <th>@string.Format("{0:N2}", Math.Ceiling(Model.ListPayroll.Sum(x => x.TotalRate)))</th>
+                                                <th>@string.Format("{0:N2}", Model.ListPayroll.Sum(x => x.TotalRate) + Model.ListPayrollManual.Sum(x => x.Amount))</th>
                                             </tr>
                                         </tfoot>
                                     </table>

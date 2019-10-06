@@ -112,6 +112,7 @@
                     <div class="col-lg-9">
                         <div class="form-group">
                             <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to Payroll List <i class="icon-circle-left2 ml-2"></i></a>
+                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal_manual">Manual Payroll<i class="icon-plus22 ml-2"></i></button>
                             <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal_pay">Pay<i class="icon-checkmark3 ml-2"></i></button>
                         </div>
                     </div>
@@ -133,7 +134,7 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Students</th>
+                                <th>Description</th>
                                 <th>Session Hours</th>
                                 <th>Hourly Rate</th>
                                 <th>Amount</th>
@@ -147,6 +148,49 @@
             </div>
         </div>
         <!-- /form Details -->
+        <!-- Manual Payroll form modal -->
+        <div id="modal_manual" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h6 class="modal-title">Manual Payroll</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-manual-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Date / Amount</label>
+                                <div class="col-sm-4">
+                                    <div class="input-group">
+                                        <input type="datetime" class="form-control tanggal mdl-manual-timestamp" />
+                                        <span class="input-group-append">
+                                            <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control text-right mdl-manual-amount">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Description</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control mdl-manual-desc">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-manual-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /manual payroll form modal -->
         <!-- Pay form modal -->
         <div id="modal_pay" class="modal fade" tabindex="-1">
             <div class="modal-dialog">
@@ -256,7 +300,7 @@
                 $.each(data.obj, function (index, row) {
                     datatable.row.add([
                         row.Timestamp,
-                        row.Students,
+                        row.Description,
                         row.SessionHours,
                         row.HourlyRate,
                         row.Amount,
@@ -324,6 +368,48 @@
 
         $('#btnGo').click(function () {
             ShowData();
+        });
+
+        $('.mdl-manual-btn-submit').click(function () {
+            if ($('.mdl-manual-amount').val() == '' || $('.mdl-manual-amount').val() == '0') {
+                $('.modal-manual-validation').html('The field Amount is required.').show();
+            }
+            else if ($('.mdl-manual-desc').val() == '') {
+                $('.modal-manual-validation').html('The field Description is required.').show();
+            }
+            else {
+                $('.modal-manual-validation').html('').hide();
+                
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("SaveManualPayroll", "Reports")',
+                    data: {
+                        tutor_id: $('.mdl-tutor-id').val(),
+                        timestamp: $('.mdl-manual-timestamp').val(),
+                        amount: parseFloat($('.mdl-manual-amount').val().replace(/,/g, '')),
+                        description: $('.mdl-manual-desc').val(),
+                        payroll_total: parseFloat($('.payroll-total').val().replace(/,/g, ''))
+                    },
+                    success: function (data) {
+                        var datatable = $('.datatable2').DataTable();
+                        datatable.row.add([
+                            data.timestamp,
+                            data.description,
+                            '',
+                            '',
+                            data.amount,
+                            data.paid
+                        ]).draw();
+
+                        $('.payroll-total').val(data.total);
+                        $('.mdl-paid').val(data.total);
+                        $('#modal_manual').modal('toggle');
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
         });
 
         $('.mdl-btn-submit').click(function () {

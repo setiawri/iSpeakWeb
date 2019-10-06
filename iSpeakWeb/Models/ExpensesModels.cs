@@ -7,20 +7,18 @@ using System.Web;
 
 namespace iSpeak.Models
 {
-    [Table("PayrollPayments")]
-    public class PayrollPaymentsModels
+    [Table("Expenses")]
+    public class ExpensesModels
     {
         [Key]
         public Guid Id { get; set; }
+        public Guid Branches_Id { get; set; }
         public DateTime Timestamp { get; set; }
+        [Display(Name = "Expense Category")]
+        public Guid ExpenseCategories_Id { get; set; }
         [Required]
-        public string No { get; set; }
+        public string Description { get; set; }
         public decimal Amount { get; set; }
         public string Notes { get; set; }
-        [Required]
-        public string UserAccounts_Id { get; set; }
-        public bool IsChecked { get; set; }
-        public bool Cancelled { get; set; }
-        public string Notes_Cancel { get; set; }
     }
 }

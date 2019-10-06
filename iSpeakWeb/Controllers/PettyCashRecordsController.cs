@@ -39,6 +39,9 @@ namespace iSpeak.Controllers
             {
                 var data_user = db.User.Where(x => x.Id == item.pcr.UserAccounts_Id).FirstOrDefault();
                 string user_input = data_user == null ? "" : data_user.Firstname + " " + data_user.Middlename + " " + data_user.Lastname;
+                string expense_name = item.pcr.ExpenseCategories_Id.HasValue ? db.ExpenseCategories.Where(x => x.Id == item.pcr.ExpenseCategories_Id.Value).FirstOrDefault().Name : "None";
+                string expense_id = item.pcr.ExpenseCategories_Id.HasValue ? item.pcr.ExpenseCategories_Id.Value.ToString() : string.Empty;
+                string link_set_expense_category = "<a href='#'><span class='badge badge-warning d-block' data-toggle='modal' data-target='#modal_expense' onclick='Set_Expense(\"" + item.pcr.Id + "\",\"" + item.pcc.Name + "\",\"" + item.pcr.Notes + "\",\"" + string.Format("{0:N0}", item.pcr.Amount) + "\",\"" + expense_id + "\")'>" + expense_name + "</span></a>";
                 list.Add(new PettyCashViewModels
                 {
                     Id = item.pcr.Id,
@@ -48,6 +51,7 @@ namespace iSpeak.Controllers
                     Notes = item.pcr.Notes,
                     Amount = item.pcr.Amount,
                     Balance = balance += item.pcr.Amount,
+                    Expense = link_set_expense_category,
                     IsChecked = item.pcr.IsChecked,
                     Status_render = (item.pcr.IsChecked) ? "<a href='#'><span onclick='CancelApprove(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-success d-block'>Approved</span></a>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark d-block'>None</span></a>",
                     UserInput = user_input
@@ -82,6 +86,25 @@ namespace iSpeak.Controllers
             return Json(new { status }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region SaveExpense
+        public async Task<JsonResult> SaveExpense(Guid id, string expense_id)
+        {
+            string status = "OK";
+            PettyCashRecordsModels pettyCashRecordsModels = await db.PettyCashRecords.Where(x => x.Id == id).FirstOrDefaultAsync();
+            if (string.IsNullOrEmpty(expense_id))
+            {
+                pettyCashRecordsModels.ExpenseCategories_Id = null;
+            }
+            else
+            {
+                pettyCashRecordsModels.ExpenseCategories_Id = new Guid(expense_id);
+            }
+            db.Entry(pettyCashRecordsModels).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
+            return Json(new { status }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         public ActionResult Index()
         {
@@ -92,6 +115,7 @@ namespace iSpeak.Controllers
             {
                 ViewBag.Approve = p.IsGranted(User.Identity.Name, "pettycashrecords_approve");
                 ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
+                ViewBag.listExpenseCategory = new SelectList(db.ExpenseCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.initDateStart = DateTime.UtcNow.AddMonths(-1);
                 return View();
             }
@@ -108,13 +132,14 @@ namespace iSpeak.Controllers
                 ViewBag.categories = db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList();
                 var selected = db.PettyCashRecordsCategories.Where(x => x.Active == true && x.Default_row == true).FirstOrDefault();
                 ViewBag.categorySelectedId = (selected != null) ? selected.Id.ToString() : "";
+                ViewBag.listCategory = new SelectList(db.ExpenseCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 return View();
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Branches_Id,No,Timestamp,PettyCashRecordsCategories_Id,Amount,Notes")] PettyCashRecordsModels pettyCashRecordsModels)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Branches_Id,No,Timestamp,PettyCashRecordsCategories_Id,Amount,Notes,ExpenseCategories_Id")] PettyCashRecordsModels pettyCashRecordsModels)
         {
             if (ModelState.IsValid)
             {
@@ -138,6 +163,7 @@ namespace iSpeak.Controllers
             ViewBag.categories = db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList();
             var selected = db.PettyCashRecordsCategories.Where(x => x.Active == true && x.Default_row == true).FirstOrDefault();
             ViewBag.categorySelectedId = (selected != null) ? selected.Id.ToString() : "";
+            ViewBag.listCategory = new SelectList(db.ExpenseCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(pettyCashRecordsModels);
         }
     }

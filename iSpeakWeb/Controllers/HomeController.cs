@@ -144,9 +144,50 @@ namespace iSpeak.Controllers
             remindersModels.Timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
             remindersModels.Description = description;
             remindersModels.Status_enumid = (RemindersStatusEnum)status;
+            db.Entry(remindersModels).State = EntityState.Modified;
 
             await db.SaveChangesAsync();
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Reminder Log
+        public JsonResult ReminderLog(Guid id)
+        {
+            var list = (from al in db.ActivityLogs
+                        join r in db.Reminders on al.RefId equals r.Id
+                        join u in db.User on al.UserAccounts_Id equals u.Id
+                        where al.ColumnName != "Timestamp" //not show timestamp changed
+                        orderby al.Timestamp descending
+                        select new { al, r, u }).ToList();
+            string message = @"<div class='table-responsive'>
+                                    <table class='table table-striped table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Description</th>
+                                                <th>Column</th>
+                                                <th>Original Value</th>
+                                                <th>New Value</th>
+                                                <th>Created By</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>";
+            foreach (var item in list)
+            {
+                string ori_value = item.al.Description == "Added" ? string.Empty : item.al.OriginalValue;
+                string new_value = item.al.Description == "Added" ? string.Empty : item.al.NewValue;
+                message += @"<tr>
+                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.al.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
+                                <td>" + item.al.Description + @"</td>
+                                <td>" + item.al.ColumnName + @"</td>
+                                <td>" + ori_value + @"</td>
+                                <td>" + new_value + @"</td>
+                                <td>" + item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname + @"</td>
+                            </tr>";
+            }
+            message += "</tbody></table></div>";
+
+            return Json(new { content = message }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

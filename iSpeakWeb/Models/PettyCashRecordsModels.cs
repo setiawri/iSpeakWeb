@@ -23,5 +23,7 @@ namespace iSpeak.Models
         public int Amount { get; set; }
         public bool IsChecked { get; set; }
         public string UserAccounts_Id { get; set; }
+        [Display(Name = "Expense Category")]
+        public Guid? ExpenseCategories_Id { get; set; }
     }
 }

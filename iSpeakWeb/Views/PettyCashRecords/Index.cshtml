@@ -90,6 +90,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Notes)</th>
                                 <th>@Html.DisplayNameFor(model => model.Amount)</th>
                                 <th>@Html.DisplayNameFor(model => model.Balance)</th>
+                                <th>@Html.DisplayNameFor(model => model.Expense)</th>
                                 <th>@Html.DisplayNameFor(model => model.IsChecked)</th>
                                 <th>@Html.DisplayNameFor(model => model.UserInput)</th>
                             </tr>
@@ -106,6 +107,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.Notes)</td>
                                         <td>@Html.DisplayFor(modelItem => item.Amount)</td>
                                         <td>@Html.DisplayFor(modelItem => item.Balance)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Expense)</td>
                                         <td>
                                             @if (item.IsChecked == true)
                                             {
@@ -141,7 +143,7 @@
                             <div class="form-group row">
                                 <label class="col-form-label col-sm-8 text-right">Total Input</label>
                                 <div class="col-sm-4">
-                                    <input type="text" tabindex="112" class="form-control text-right mdl-total" value="0" readonly/>
+                                    <input type="text" tabindex="112" class="form-control text-right mdl-total" value="0" readonly />
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -198,11 +200,11 @@
                             <div class="form-group row">
                                 <label class="col-form-label col-sm-2 text-right">Balance</label>
                                 <div class="col-sm-4">
-                                    <input type="text" tabindex="113" class="form-control text-right mdl-balance" value="0" readonly/>
+                                    <input type="text" tabindex="113" class="form-control text-right mdl-balance" value="0" readonly />
                                 </div>
                                 <label class="col-form-label col-sm-2 text-right">&nbsp;</label>
                                 <div class="col-sm-4">
-                                    <input type="text" tabindex="114" class="form-control text-right mdl-remaining" value="0" readonly/>
+                                    <input type="text" tabindex="114" class="form-control text-right mdl-remaining" value="0" readonly />
                                 </div>
                             </div>
                         </div>
@@ -216,6 +218,56 @@
             </div>
         </div>
         <!-- /horizontal form modal -->
+        <!-- Set Expense form modal -->
+        <div id="modal_expense" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h6 class="modal-title">Set Expense Category</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div style="display: none">
+                                <input class="form-control mdl-id" />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Category</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-category" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-notes" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Amount</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-amount" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Expense Category</label>
+                                <div class="col-sm-8">
+                                    @Html.DropDownList("ExpenseCategory", ViewBag.listExpenseCategory as SelectList, "Select Category", new { @class = "form-control select2" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /set Expense form modal -->
     </div>
     <!-- /content area -->
 
@@ -227,6 +279,32 @@
         var results = pattern.exec(value);
         var dt = new Date(parseFloat(results[1]));
         return dt.getFullYear() + "/" + ('0' + (dt.getMonth() + 1)).slice(-2) + "/" + ('0' + dt.getDate()).slice(-2) + " " + ('0' + dt.getHours()).slice(-2) + ":" + ('0' + dt.getMinutes()).slice(-2);
+    }
+
+    function Set_Expense(id, category, notes, amount, expense) {
+        $('.mdl-id').val(id);
+        $('.mdl-category').val(category);
+        $('.mdl-notes').val(notes);
+        $('.mdl-amount').val(amount);
+        $('#ExpenseCategory').val(expense).trigger('change');
+    }
+
+    function SaveExpense(id, expense_id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SaveExpense", "PettyCashRecords")',
+            data: {
+                id: id,
+                expense_id: expense_id
+            },
+            success: function (data) {
+                $('#modal_expense').modal('toggle');
+                FilterClick();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     function Approve(Id, Notes, Amount) {
@@ -317,6 +395,7 @@
                         row.Notes,
                         parseFloat(row.Amount).toLocaleString(),
                         parseFloat(row.Balance).toLocaleString(),
+                        row.Expense,
                         row.Status_render,
                         row.UserInput
                     ]).draw();
@@ -391,9 +470,13 @@
         });
 
         if ('@ViewBag.Approve' == 'False') {
-            table.column(6).visible(false);
+            table.column(7).visible(false);
             $('.chk-not-approved').hide();
         }
+
+        $('.mdl-btn-submit').click(function () {
+            SaveExpense($('.mdl-id').val(), $('#ExpenseCategory').val());
+        });
 
         FilterClick();
 

@@ -49,14 +49,16 @@
                                     <td>@Html.DisplayFor(modelItem => item.DebitAmount)</td>
                                     <td>@Html.DisplayFor(modelItem => item.ConsignmentAmount)</td>
                                     <td>
-                                        @if (item.Cancelled == false)
+                                        @if (!item.HasSession)
                                         {
-                                            @*<a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel</span></a>*@
-                                            <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No')">Cancel</span></a>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes_Cancel</span>
+                                            if (item.Cancelled == false)
+                                            {
+                                                <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No')">Cancel</span></a>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes_Cancel</span>
+                                            }
                                         }
                                     </td>
                                     <td>

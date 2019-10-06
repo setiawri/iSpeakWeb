@@ -146,6 +146,7 @@
                         <a href="@Url.Action("NewStudent", "Reports")" class="dropdown-item">New Student</a>
                         <a href="@Url.Action("Payroll", "Reports")" class="dropdown-item">Tutor Payroll</a>
                         <a href="@Url.Action("PayrollPayments", "Reports")" class="dropdown-item">Payroll Payments</a>
+                        <a href="@Url.Action("ProfitLoss", "Reports")" class="dropdown-item">Profit &amp; Loss</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown" @(ViewBag.MasterDataMenu == "" ? "" : Html.Raw(ViewBag.MasterDataMenu))>
@@ -167,6 +168,8 @@
                         <a href="@Url.Action("Index", "Units")" class="dropdown-item">Units</a>
                         <a href="@Url.Action("Index", "Services")" class="dropdown-item">Services</a>
                         <a href="@Url.Action("Index", "PettyCashRecordsCategories")" class="dropdown-item">Petty Cash Categories</a>
+                        <a href="@Url.Action("Index", "ExpenseCategories")" class="dropdown-item">Expense Categories</a>
+                        <a href="@Url.Action("Index", "Expenses")" class="dropdown-item">Expenses</a>
                         <a href="@Url.Action("Index", "Settings")" class="dropdown-item">Settings</a>
                     </div>
                 </li>

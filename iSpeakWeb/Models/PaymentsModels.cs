@@ -58,5 +58,6 @@ namespace iSpeak.Models
         [Display(Name = "Approved")]
         public bool Confirmed { get; set; }
         public string Notes_Cancel { get; set; }
+        public bool HasSession { get; set; }
     }
 }

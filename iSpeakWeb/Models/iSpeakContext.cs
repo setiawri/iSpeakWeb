@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace iSpeak.Models
 {
     public class iSpeakContext : DbContext
     {
+        public DbSet<ActivityLogsModels> ActivityLogs { get; set; }
         public DbSet<MasterMenuModels> MasterMenu { get; set; }
         public DbSet<AccessModels> Access { get; set; }
         public DbSet<UserModels> User { get; set; }
@@ -40,5 +45,123 @@ namespace iSpeak.Models
         public DbSet<SaleInvoiceItems_VouchersModels> SaleInvoiceItems_Vouchers { get; set; }
         public DbSet<RemindersModels> Reminders { get; set; }
         public DbSet<UploadFilesModels> UploadFiles { get; set; }
+        public DbSet<ExpenseCategoriesModels> ExpenseCategories { get; set; }
+        public DbSet<ExpensesModels> Expenses { get; set; }
+
+
+        public override int SaveChanges()
+        {
+            iSpeakContext db = new iSpeakContext();
+            var user_model = db.User.Where(x => x.UserName == HttpContext.Current.User.Identity.Name).FirstOrDefault();
+            string userId = user_model == null ? "" : user_model.Id;
+            // Get all Added/Deleted/Modified entities (not Unmodified or Detached)
+            foreach (var ent in this.ChangeTracker.Entries().Where(p => p.State == EntityState.Added || p.State == EntityState.Deleted || p.State == EntityState.Modified))
+            {
+                // For each changed record, get the audit record entries and add them
+                foreach (ActivityLogsModels x in GetAuditRecordsForChange(ent, userId))
+                {
+                    this.ActivityLogs.Add(x);
+                }
+            }
+
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync()
+        {
+            iSpeakContext db = new iSpeakContext();
+            var user_model = db.User.Where(x => x.UserName == HttpContext.Current.User.Identity.Name).FirstOrDefault();
+            string userId = user_model == null ? "" : user_model.Id;
+            // Get all Added/Deleted/Modified entities (not Unmodified or Detached)
+            foreach (var ent in this.ChangeTracker.Entries().Where(p => p.State == EntityState.Added || p.State == EntityState.Deleted || p.State == EntityState.Modified))
+            {
+                // For each changed record, get the audit record entries and add them
+                foreach (ActivityLogsModels x in GetAuditRecordsForChange(ent, userId))
+                {
+                    this.ActivityLogs.Add(x);
+                }
+            }
+
+            return await base.SaveChangesAsync();
+        }
+
+        private List<ActivityLogsModels> GetAuditRecordsForChange(DbEntityEntry dbEntry, string userId)
+        {
+            List<ActivityLogsModels> result = new List<ActivityLogsModels>();
+
+            DateTime changeTime = DateTime.UtcNow;
+
+            // Get the Table() attribute, if one exists
+            TableAttribute tableAttr = dbEntry.Entity.GetType().GetCustomAttributes(typeof(TableAttribute), false).SingleOrDefault() as TableAttribute;
+
+            // Get table name (if it has a Table attribute, use that, otherwise get the pluralized name)
+            string tableName = tableAttr != null ? tableAttr.Name : dbEntry.Entity.GetType().Name;
+
+            // Get primary key value (If you have more than one key column, this will need to be adjusted)
+            string keyName = dbEntry.Entity.GetType().GetProperties().Single(p => p.GetCustomAttributes(typeof(KeyAttribute), false).Count() > 0).Name;
+
+            if (dbEntry.State == EntityState.Added)
+            {
+                result.Add(new ActivityLogsModels()
+                {
+                    Id = Guid.NewGuid(),
+                    Description = "Added", // Added
+                    TableName = tableName,
+                    RefId = new Guid(dbEntry.CurrentValues.GetValue<object>(keyName).ToString()),
+                    ColumnName = "*ALL",
+                    //NewValue = dbEntry.CurrentValues.ToObject().ToString(), //(dbEntry.OriginalValues.ToObject() is IDescribableEntity) ? (dbEntry.OriginalValues.ToObject() as IDescribableEntity).Describe() : dbEntry.OriginalValues.ToObject().ToString(),
+                    UserAccounts_Id = userId,
+                    Timestamp = changeTime
+                });
+            }
+            else if (dbEntry.State == EntityState.Deleted)
+            {
+                result.Add(new ActivityLogsModels()
+                {
+                    Id = Guid.NewGuid(),
+                    Description = "Deleted", // Deleted
+                    TableName = tableName,
+                    RefId = new Guid(dbEntry.OriginalValues.GetValue<object>(keyName).ToString()),
+                    ColumnName = "*ALL",
+                    UserAccounts_Id = userId,
+                    Timestamp = changeTime
+                });
+            }
+            else if (dbEntry.State == EntityState.Modified)
+            {
+                foreach (string propertyName in dbEntry.OriginalValues.PropertyNames)
+                {
+                    // For updates, we only want to capture the columns that actually changed
+                    if (!object.Equals(dbEntry.OriginalValues.GetValue<object>(propertyName), dbEntry.CurrentValues.GetValue<object>(propertyName)))
+                    {
+                        result.Add(new ActivityLogsModels()
+                        {
+                            Id = Guid.NewGuid(),
+                            Description = "Modified", // Modified
+                            TableName = tableName,
+                            RefId = new Guid(dbEntry.OriginalValues.GetValue<object>(keyName).ToString()),
+                            ColumnName = propertyName,
+                            OriginalValue = dbEntry.OriginalValues.GetValue<object>(propertyName)?.ToString(),
+                            NewValue = dbEntry.CurrentValues.GetValue<object>(propertyName)?.ToString(),
+                            UserAccounts_Id = userId,
+                            Timestamp = changeTime
+                        });
+                    }
+                }
+
+                //result.Add(new ActivityLogsModels()
+                //{
+                //    Id = Guid.NewGuid(),
+                //    Description = "Modified", // Modified
+                //    TableName = tableName,
+                //    RefId = new Guid(dbEntry.OriginalValues.GetValue<object>(keyName).ToString()),
+                //    UserAccounts_Id = userId,
+                //    Timestamp = changeTime
+                //});
+            }
+            // Otherwise, don't do anything, we don't care about Unchanged or Detached entities
+
+            return result;
+        }
     }
 }

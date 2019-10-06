@@ -1,7 +1,7 @@
-﻿@model iSpeak.Models.PettyCashRecordsModels
+﻿@model iSpeak.Models.ExpensesModels
 
 @{
-    ViewBag.Root = "Petty Cash Records";
+    ViewBag.Root = "Expenses";
     ViewBag.Title = "Create";
 }
 
@@ -12,8 +12,6 @@
         @using (Html.BeginForm())
         {
             @Html.AntiForgeryToken()
-            @Html.HiddenFor(model => model.No, new { @Value = "123" })
-            @Html.HiddenFor(model => model.Timestamp, new { @Value = DateTime.UtcNow })
             <!-- Form inputs -->
             <div class="card">
                 <div class="card-header header-elements-inline">
@@ -39,13 +37,35 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            @Html.LabelFor(model => model.PettyCashRecordsCategories_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            @Html.LabelFor(model => model.Timestamp, htmlAttributes: new { @class = "col-form-label col-lg-2" })
                             <div class="col-lg-5">
-                                @*@Html.DropDownListFor(model => model.PettyCashRecordsCategories_Id, ViewBag.listCategory as SelectList, "Select Category", new { @class = "form-control select2" })*@
-                                @Html.DropDownListFor(model => model.PettyCashRecordsCategories_Id, new SelectList(ViewBag.categories, "Id", "Name", ViewBag.categorySelectedId), "Select Category", new { @class = "form-control select2" })
+                                <div class="input-group">
+                                    @Html.EditorFor(model => model.Timestamp, new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                    <span class="input-group-append">
+                                        <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                    </span>
+                                </div>
                             </div>
                             <div class="col-lg-5">
-                                @Html.ValidationMessageFor(model => model.PettyCashRecordsCategories_Id, "", new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(model => model.Timestamp, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.ExpenseCategories_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                @Html.DropDownListFor(model => model.ExpenseCategories_Id, ViewBag.listCategory as SelectList, "Select Category", new { @class = "form-control select2" })
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.ExpenseCategories_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
                             </div>
                         </div>
                         <div class="form-group row">
@@ -66,18 +86,9 @@
                                 @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
                             </div>
                         </div>
-                        <div class="form-group row">
-                            @Html.LabelFor(model => model.ExpenseCategories_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
-                            <div class="col-lg-5">
-                                @Html.DropDownListFor(model => model.ExpenseCategories_Id, ViewBag.listCategory as SelectList, "Select Category", new { @class = "form-control select2" })
-                            </div>
-                            <div class="col-lg-5">
-                                @Html.ValidationMessageFor(model => model.ExpenseCategories_Id, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
                     </fieldset>
                     <div>
-                        <a href="@Url.Action("Index", "PettyCashRecords")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <a href="@Url.Action("Index", "Expenses")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
                         <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
                     </div>
                 </div>
@@ -92,6 +103,14 @@
 <script type="text/javascript">
     $(document).ready(function () {
         $('.select2').select2();
+
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
+        });
+
         $('#Branches_Id').val($('#Branch').val()).trigger('change');
-    })
+    });
 </script>

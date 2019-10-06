@@ -153,8 +153,17 @@ namespace iSpeak.Controllers
         public async Task<JsonResult> Cancelled(Guid id, string notes)
         {
             var lesson_session = await db.LessonSessions.FindAsync(id);
+            int total_session_before_cancel = db.LessonSessions.Where(x => x.PayrollPaymentItems_Id == lesson_session.PayrollPaymentItems_Id).ToList().Count;
+
+            if (total_session_before_cancel == 1)
+            {
+                var payroll_pay_items = await db.PayrollPaymentItems.FindAsync(lesson_session.PayrollPaymentItems_Id);
+                db.PayrollPaymentItems.Remove(payroll_pay_items);
+            }
+
             lesson_session.Deleted = true;
             lesson_session.Notes_Cancel = notes;
+            lesson_session.PayrollPaymentItems_Id = null;
             db.Entry(lesson_session).State = EntityState.Modified;
 
             var sale_inv_item = await db.SaleInvoiceItems.Where(x => x.Id == lesson_session.SaleInvoiceItems_Id).FirstOrDefaultAsync();
@@ -273,13 +282,15 @@ namespace iSpeak.Controllers
             if (ModelState.IsValid)
             {
                 var hourly_rate = db.HourlyRates.Where(x => x.UserAccounts_Id == lessonSessionsModels.Tutor_UserAccounts_Id).ToList();
-                
+
                 #region Payroll Payment Items Add
                 PayrollPaymentItemsModels payrollPaymentItemsModels = new PayrollPaymentItemsModels
                 {
                     Id = Guid.NewGuid(),
+                    Timestamp = lessonSessionsModels.Timestamp,
                     Description = Description,
-                    Hour = lessonSessionsModels.SessionHours
+                    Hour = lessonSessionsModels.SessionHours,
+                    UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id
                 };
 
                 if (hourly_rate.Count == 0)

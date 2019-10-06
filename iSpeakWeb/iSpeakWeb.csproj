@@ -193,6 +193,8 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\BranchesController.cs" />
     <Compile Include="Controllers\ConsignmentsController.cs" />
+    <Compile Include="Controllers\ExpenseCategoriesController.cs" />
+    <Compile Include="Controllers\ExpensesController.cs" />
     <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\HourlyRatesController.cs" />
@@ -238,9 +240,13 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccessModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\ActivityLogsModels.cs" />
     <Compile Include="Models\BirthdayViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\ConsignmentsModels.cs" />
+    <Compile Include="Models\ExpenseCategoriesModels.cs" />
+    <Compile Include="Models\ExpensesModels.cs" />
+    <Compile Include="Models\ExpensesViewModels.cs" />
     <Compile Include="Models\HourlyRatesModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\InventoryModels.cs" />
@@ -515,6 +521,12 @@
     <Content Include="Views\Files\Index.cshtml" />
     <Content Include="Views\Files\Create.cshtml" />
     <Content Include="Views\Files\Update.cshtml" />
+    <Content Include="Views\ExpenseCategories\Index.cshtml" />
+    <Content Include="Views\ExpenseCategories\Create.cshtml" />
+    <Content Include="Views\ExpenseCategories\Edit.cshtml" />
+    <Content Include="Views\Expenses\Index.cshtml" />
+    <Content Include="Views\Expenses\Create.cshtml" />
+    <Content Include="Views\Expenses\Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -18,6 +18,7 @@ namespace iSpeak.Models
         public int Amount { get; set; }
         [DisplayFormat(DataFormatString = "{0:N0}")]
         public int Balance { get; set; }
+        public string Expense { get; set; }
         [Display(Name = "Status")]
         public bool IsChecked { get; set; }
         [Display(Name = "Created By")]

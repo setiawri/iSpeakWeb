@@ -85,7 +85,7 @@ namespace iSpeak.Controllers
             }
             decimal subtotal = (qty * price) + travel - disc - voucher;
 
-            return Json(new { description, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
+            return Json(new { qty, description, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Get Inventory Total
@@ -114,7 +114,7 @@ namespace iSpeak.Controllers
                 subtotal = (qty * price) - disc - voucher;
             }
 
-            return Json(new { error_message, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
+            return Json(new { error_message, qty, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Get Service Total
@@ -135,7 +135,7 @@ namespace iSpeak.Controllers
             }
             subtotal = (qty * price) - disc - voucher;
 
-            return Json(new { error_message, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
+            return Json(new { error_message, qty, price, voucher, subtotal, voucher_selected }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Cancel Sale Invoice
@@ -237,9 +237,10 @@ namespace iSpeak.Controllers
                 #endregion
                 #region List Customer
                 var customers = (from u in db.User
-                                 join ur in db.UserRole on u.Id equals ur.UserId
-                                 join r in db.Role on ur.RoleId equals r.Id
-                                 where r.Name == "Student"
+                                 where u.Active == true
+                                 //join ur in db.UserRole on u.Id equals ur.UserId
+                                 //join r in db.Role on ur.RoleId equals r.Id
+                                 //r.Name == "Student"
                                  orderby u.Firstname
                                  select new { u }).ToList();
                 List<object> customer_list = new List<object>();
@@ -386,8 +387,8 @@ namespace iSpeak.Controllers
                         Products_Id = item.inventory_id,
                         Services_Id = item.service_id,
                         LessonPackages_Id = item.lesson_id,
-                        SessionHours = item.hours, //item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
-                        SessionHours_Remaining = item.hours, //item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
+                        SessionHours = item.qty * item.hours, //item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
+                        SessionHours_Remaining = item.qty * item.hours, //item.lesson_id.HasValue ? db.LessonPackages.Where(x => x.Id == item.lesson_id).FirstOrDefault().SessionHours : 0,
                         TravelCost = item.travel,
                         TutorTravelCost = item.tutor
                     };
@@ -426,9 +427,10 @@ namespace iSpeak.Controllers
             #endregion
             #region List Customer
             var customers = (from u in db.User
-                             join ur in db.UserRole on u.Id equals ur.UserId
-                             join r in db.Role on ur.RoleId equals r.Id
-                             where r.Name == "Student"
+                             where u.Active == true
+                             //join ur in db.UserRole on u.Id equals ur.UserId
+                             //join r in db.Role on ur.RoleId equals r.Id
+                             //where r.Name == "Student"
                              orderby u.Firstname
                              select new { u }).ToList();
             List<object> customer_list = new List<object>();

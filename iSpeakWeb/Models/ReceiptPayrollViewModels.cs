@@ -11,6 +11,7 @@ namespace iSpeak.Models
         public DateTime PayrollDate { get; set; }
         public string TutorName { get; set; }
         public List<PayrollByStudent> ListPayroll { get; set; }
+        public List<PayrollManualReceipt> ListPayrollManual { get; set; }
     }
 
     public class PayrollByStudent
@@ -21,5 +22,12 @@ namespace iSpeak.Models
         public decimal TotalHours { get; set; }
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public decimal TotalRate { get; set; }
+    }
+
+    public class PayrollManualReceipt
+    {
+        public string Description { get; set; }
+        [DisplayFormat(DataFormatString = "{0:N2}")]
+        public decimal Amount { get; set; }
     }
 }

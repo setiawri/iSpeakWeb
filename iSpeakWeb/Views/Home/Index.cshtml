@@ -120,7 +120,8 @@
                                                                     }
                                                                 </td>
                                                                 <td>
-                                                                    <a href="#" onclick="Edit('@item.Id')">Edit</a>
+                                                                    <a href="#" onclick="Edit('@item.Id')">Edit</a> |
+                                                                    <a href="#" onclick="View_Log('@item.Id')">Log</a>
                                                                 </td>
                                                             </tr>
                                                         }
@@ -405,6 +406,27 @@
 
                 $('.reminder-list').hide();
                 $('.reminder-edit').show();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function View_Log(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ReminderLog", "Home")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Reminder Log',
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);

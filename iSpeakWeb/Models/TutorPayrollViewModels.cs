@@ -22,7 +22,6 @@ namespace iSpeak.Models
     {
         public Guid Id { get; set; }
         public string Timestamp { get; set; }
-        public string Students { get; set; }
         public string Description { get; set; }
         public string SessionHours { get; set; }
         public string HourlyRate { get; set; }

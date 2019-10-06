@@ -239,7 +239,7 @@ namespace iSpeak.Controllers
             return Json(new { status = "200", payment_id = paymentsModels.Id }, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Print(Guid? id)
+        public async Task<ActionResult> Print(Guid? id)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
@@ -253,6 +253,12 @@ namespace iSpeak.Controllers
                     List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
                     foreach (var item in db.Payments.ToList())
                     {
+                        var check_session = await (from pi in db.PaymentItems
+                                                   join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                                   join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                                   where pi.Payments_Id == item.Id && sii.SessionHours > sii.SessionHours_Remaining
+                                                   select new { pi, si, sii }).ToListAsync();
+
                         PaymentsIndexModels pim = new PaymentsIndexModels
                         {
                             Id = item.Id,
@@ -263,7 +269,8 @@ namespace iSpeak.Controllers
                             ConsignmentAmount = item.ConsignmentAmount,
                             Cancelled = item.Cancelled,
                             Confirmed = item.Confirmed,
-                            Notes_Cancel = item.Notes_Cancel
+                            Notes_Cancel = item.Notes_Cancel,
+                            HasSession = check_session.Count > 0 ? true : false
                         };
                         Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
