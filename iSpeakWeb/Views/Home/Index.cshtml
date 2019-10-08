@@ -120,7 +120,7 @@
                                                                     }
                                                                 </td>
                                                                 <td>
-                                                                    <a href="#" onclick="Edit('@item.Id')">Edit</a> |
+                                                                    <a href="#" onclick="Update_Reminder('@item.Id')">Update</a> |
                                                                     <a href="#" onclick="View_Log('@item.Id')">Log</a>
                                                                 </td>
                                                             </tr>
@@ -165,12 +165,12 @@
                                     </div>
                                 </div>
                                 <!-- /Reminder Create -->
-                                <!-- Reminder Edit -->
+                                <!-- Reminder Update -->
                                 <div class="col-lg-12 reminder-edit animated bounceInLeft" style="display: none">
                                     <div class="card">
                                         <div class="card-body">
                                             <fieldset class="mb-3">
-                                                <legend class="text-uppercase font-size-sm font-weight-bold">Edit</legend>
+                                                <legend class="text-uppercase font-size-sm font-weight-bold">Update</legend>
                                                 <input type="hidden" class="form-control reminder-edit-id" />
                                                 <span class="text-danger reminder-edit-validation" style="display: none"></span>
                                                 <div class="form-group row">
@@ -205,12 +205,12 @@
                                             </fieldset>
                                             <div>
                                                 <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
-                                                <button type="button" class="btn btn-sm btn-primary btn-reminder-edit">Save <i class="icon-checkmark4 ml-2"></i></button>
+                                                <button type="button" class="btn btn-sm btn-primary btn-reminder-update">Save <i class="icon-checkmark4 ml-2"></i></button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <!-- /Reminder Edit -->
+                                <!-- /Reminder Update -->
                             </div>
                         </div>
                     </div>
@@ -357,7 +357,7 @@
         pagingType: 'full_numbers',
         columnDefs: [{
             orderable: false,
-            width: 100,
+            width: 120,
             targets: [3]
         }],
         order: [[0, 'desc']]
@@ -390,7 +390,7 @@
         $('.reminder-edit').hide();
     }
 
-    function Edit(id) {
+    function Update_Reminder(id) {
         $.ajax({
             type: "POST",
             url: '@Url.Action("ReminderGet", "Home")',
@@ -401,7 +401,7 @@
                 $('.reminder-edit-id').val(data.id);
                 $('.reminder-edit-date').data('daterangepicker').setStartDate(data.timestamp);
                 $('.reminder-edit-date').data('daterangepicker').setEndDate(data.timestamp);
-                $('.reminder-edit-desc').val(data.description);
+                //$('.reminder-edit-desc').val(data.description);
                 $('.reminder-edit-status').val(data.status).trigger('change');
 
                 $('.reminder-list').hide();
@@ -520,7 +520,7 @@
             }
         });
 
-        $('.btn-reminder-edit').click(function () {
+        $('.btn-reminder-update').click(function () {
             if ($('.reminder-edit-date').val() == '') {
                 $('.reminder-edit-validation').html('The Field Date is required.').show();
             }
@@ -532,7 +532,7 @@
                 
                 $.ajax({
                     type: "POST",
-                    url: '@Url.Action("ReminderEdit", "Home")',
+                    url: '@Url.Action("ReminderUpdate", "Home")',
                     data: {
                         id: $('.reminder-edit-id').val(),
                         timestamp: $('.reminder-edit-date').val(),

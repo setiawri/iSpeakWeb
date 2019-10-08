@@ -19,7 +19,7 @@ namespace iSpeak.Models
         public int Qty { get; set; }
         public int Price { get; set; }
         public decimal DiscountAmount { get; set; }
-        public Guid? Vouchers_Id { get; set; }
+        public Guid? SaleInvoiceItems_Vouchers_Id { get; set; }
         public string Notes { get; set; }
         public Guid? Products_Id { get; set; }
         public Guid? Services_Id { get; set; }

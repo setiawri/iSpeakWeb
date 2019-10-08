@@ -313,6 +313,22 @@
         });
     }
 
+    function Approve_Payment(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Approved", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {

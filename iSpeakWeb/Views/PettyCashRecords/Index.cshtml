@@ -469,6 +469,10 @@
             order: [[1, 'desc']]
         });
 
+        if ('@ViewBag.SetExpense' == 'False') {
+            table.column(6).visible(false);
+        }
+
         if ('@ViewBag.Approve' == 'False') {
             table.column(7).visible(false);
             $('.chk-not-approved').hide();

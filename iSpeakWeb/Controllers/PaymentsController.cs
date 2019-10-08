@@ -59,17 +59,21 @@ namespace iSpeak.Controllers
                                                 <th>Due Before</th>
                                                 <th>Payment</th>
                                                 <th>Due After</th>
+                                                <th>Approved</th>
                                             </tr>
                                         </thead>
                                         <tbody>";
             foreach (var item in list)
             {
+                string approved_render = item.p.Confirmed ? "<span class='badge badge-success d-block'>Approved</span>"
+                    : "<a href='#'><span class='badge badge-dark d-block' onclick='Approve_Payment(\"" + item.p.Id + "\")'>None</span></a>";
                 message += @"<tr>
                                 <td><a href='" + Url.Content("~") + "Payments/Print/"+ item.p.Id +"' target='_blank'>" + item.p.No + @"</a></td>
                                 <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
                                 <td>" + item.pi.DueBefore.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.Amount.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.DueAfter.ToString("#,##0") + @"</td>
+                                <td>" + approved_render + @"</td>
                             </tr>";
             }
             message += "</tbody></table></div>";
@@ -131,7 +135,7 @@ namespace iSpeak.Controllers
                             Price = item.Price,
                             Travel = item.TravelCost,
                             Tutor = item.TutorTravelCost,
-                            Voucher = (item.Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0,
+                            Voucher = (item.SaleInvoiceItems_Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == item.SaleInvoiceItems_Vouchers_Id).FirstOrDefault().Amount : 0,
                             Discount = item.DiscountAmount
                         };
                         saleInvoiceItemsDetails.Amount = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - saleInvoiceItemsDetails.Voucher;
@@ -330,7 +334,7 @@ namespace iSpeak.Controllers
                             saleInvoiceItemsDetails.Price = subitem.Price;
                             saleInvoiceItemsDetails.Travel = subitem.TravelCost;
                             saleInvoiceItemsDetails.Tutor = subitem.TutorTravelCost;
-                            saleInvoiceItemsDetails.Voucher = (subitem.Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == subitem.Vouchers_Id).FirstOrDefault().Amount : 0;
+                            saleInvoiceItemsDetails.Voucher = (subitem.SaleInvoiceItems_Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == subitem.SaleInvoiceItems_Vouchers_Id).FirstOrDefault().Amount : 0;
                             saleInvoiceItemsDetails.Discount = subitem.DiscountAmount;
                             saleInvoiceItemsDetails.Amount = (subitem.Qty * subitem.Price) + subitem.TravelCost - subitem.DiscountAmount - saleInvoiceItemsDetails.Voucher;
                             listDetails.Add(saleInvoiceItemsDetails);

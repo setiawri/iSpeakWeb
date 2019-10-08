@@ -16,9 +16,9 @@ namespace iSpeak.Models
         public string TableName { get; set; }
         public Guid RefId { get; set; }
         public string Description { get; set; }
-        public string ColumnName { get; set; }
-        public string OriginalValue { get; set; }
-        public string NewValue { get; set; }
+        //public string ColumnName { get; set; }
+        //public string OriginalValue { get; set; }
+        //public string NewValue { get; set; }
         public string UserAccounts_Id { get; set; }
     }
 }

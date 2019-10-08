@@ -114,6 +114,7 @@ namespace iSpeak.Controllers
             else
             {
                 ViewBag.Approve = p.IsGranted(User.Identity.Name, "pettycashrecords_approve");
+                ViewBag.SetExpense = p.IsGranted(User.Identity.Name, "pettycashrecords_setexpense");
                 ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
                 ViewBag.listExpenseCategory = new SelectList(db.ExpenseCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.initDateStart = DateTime.UtcNow.AddMonths(-1);
@@ -128,6 +129,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                ViewBag.SetExpense = p.IsGranted(User.Identity.Name, "pettycashrecords_setexpense");
                 ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.categories = db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList();
                 var selected = db.PettyCashRecordsCategories.Where(x => x.Active == true && x.Default_row == true).FirstOrDefault();

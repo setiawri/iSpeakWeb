@@ -37,7 +37,7 @@ namespace iSpeak.Controllers
                                         <tbody>";
             foreach (var item in list)
             {
-                decimal voucher = (item.Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == item.Vouchers_Id).FirstOrDefault().Amount : 0;
+                decimal voucher = (item.SaleInvoiceItems_Vouchers_Id.HasValue) ? db.SaleInvoiceItems_Vouchers.Where(x => x.Id == item.SaleInvoiceItems_Vouchers_Id).FirstOrDefault().Amount : 0;
                 decimal subtotal = (item.Qty * item.Price) + item.TravelCost - item.DiscountAmount - voucher;
                 message += @"<tr>
                                 <td>" + item.Description + "<br/>" + item.Notes + @"</td>
@@ -382,7 +382,7 @@ namespace iSpeak.Controllers
                         Qty = item.qty,
                         Price = item.price,
                         DiscountAmount = item.disc,
-                        Vouchers_Id = saleinvoiceitems_vouchers, //item.voucher_id,
+                        SaleInvoiceItems_Vouchers_Id = saleinvoiceitems_vouchers, //item.voucher_id,
                         Notes = item.note,
                         Products_Id = item.inventory_id,
                         Services_Id = item.service_id,
