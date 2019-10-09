@@ -102,7 +102,7 @@ namespace iSpeak.Controllers
 
             BirthdayHome birthdayAlert = new BirthdayHome
             {
-                Reminders = await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id).ToListAsync(),
+                Reminders = await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed).ToListAsync(),
                 ThisMonth = this_month,
                 NextMonth = next_month,
                 IsStudentBirthday = student_bday == null ? false : true,
@@ -172,6 +172,10 @@ namespace iSpeak.Controllers
             {
                 desc_log = "[Completed] " + description;
             }
+            else if (remindersModels.Status_enumid == RemindersStatusEnum.Cancel)
+            {
+                desc_log = "[Cancel] " + description;
+            }
 
             ActivityLogsModels activityLogsModels = new ActivityLogsModels
             {
@@ -210,7 +214,7 @@ namespace iSpeak.Controllers
             foreach (var item in list)
             {
                 message += @"<tr>
-                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.al.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
+                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm:ss}", TimeZoneInfo.ConvertTimeFromUtc(item.al.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
                                 <td>" + item.al.Description + @"</td>
                                 <td>" + item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname + @"</td>
                             </tr>";
@@ -218,6 +222,56 @@ namespace iSpeak.Controllers
             message += "</tbody></table></div>";
 
             return Json(new { content = message }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Reminder By Status
+        public async Task<JsonResult> ReminderByStatus(string key)
+        {
+            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+            var reminders = key == "all" 
+                ? await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id).ToListAsync() 
+                : await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed).ToListAsync();
+
+            List<RemindersViewModels> list = new List<RemindersViewModels>();
+            foreach(var reminder in reminders)
+            {
+                string status_render = "";
+                if (reminder.Status_enumid == RemindersStatusEnum.New)
+                {
+                    status_render = "<span class='badge badge-dark d-block'>New</span>";
+                }
+                else if (reminder.Status_enumid == RemindersStatusEnum.InProgress)
+                {
+                    status_render = "<span class='badge badge-info d-block'>In Progress</span>";
+                }
+                else if (reminder.Status_enumid == RemindersStatusEnum.OnHold)
+                {
+                    status_render = "<span class='badge bg-brown d-block'>On Hold</span>";
+                }
+                else if (reminder.Status_enumid == RemindersStatusEnum.Waiting)
+                {
+                    status_render = "<span class='badge badge-warning d-block'>Waiting</span>";
+                }
+                else if (reminder.Status_enumid == RemindersStatusEnum.Completed)
+                {
+                    status_render = "<span class='badge badge-primary d-block'>Completed</span>";
+                }
+                else if (reminder.Status_enumid == RemindersStatusEnum.Cancel)
+                {
+                    status_render = "<span class='badge badge-danger d-block'>Cancel</span>";
+                }
+
+                list.Add(new RemindersViewModels
+                {
+                    Id = reminder.Id,
+                    Timestamp = string.Format("{0:yyyy/MM/dd}", reminder.Timestamp),
+                    Description = reminder.Description,
+                    Status = status_render,
+                    Action_Render = "<a href='#' onclick='Update_Reminder(\"" + reminder.Id + "\")'>Update</a> | <a href='#' onclick='View_Log(\"" + reminder.Id + "\")'>Log</a>"
+                });
+            }
+
+            return Json(new { obj = list }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 

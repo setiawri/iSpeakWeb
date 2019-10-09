@@ -273,6 +273,7 @@
     <Compile Include="Models\ReceiptViewModels.cs" />
     <Compile Include="Models\RemindersModels.cs" />
     <Compile Include="Models\RemindersStatusEnum.cs" />
+    <Compile Include="Models\RemindersViewModels.cs" />
     <Compile Include="Models\RoleViewModels.cs" />
     <Compile Include="Models\SaleInvoiceItemsModels.cs" />
     <Compile Include="Models\SaleInvoiceItems_InventoryModels.cs" />

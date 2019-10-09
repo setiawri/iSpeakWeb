@@ -63,10 +63,16 @@ namespace iSpeak.Controllers
                                             </tr>
                                         </thead>
                                         <tbody>";
+            Permission permission = new Permission();
+            bool canApprove = permission.IsGranted(User.Identity.Name, "payments_approve");
             foreach (var item in list)
             {
-                string approved_render = item.p.Confirmed ? "<span class='badge badge-success d-block'>Approved</span>"
-                    : "<a href='#'><span class='badge badge-dark d-block' onclick='Approve_Payment(\"" + item.p.Id + "\")'>None</span></a>";
+                string approved_render = "";
+                if (canApprove)
+                {
+                    approved_render = item.p.Confirmed ? "<span class='badge badge-success d-block'>Approved</span>"
+                        : "<a href='#'><span class='badge badge-dark d-block' onclick='Approve_Payment(\"" + item.p.Id + "\")'>None</span></a>";
+                }
                 message += @"<tr>
                                 <td><a href='" + Url.Content("~") + "Payments/Print/"+ item.p.Id +"' target='_blank'>" + item.p.No + @"</a></td>
                                 <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>

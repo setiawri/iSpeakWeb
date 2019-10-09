@@ -81,6 +81,12 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <a href="#" onclick="Next()" class="btn btn-sm btn-success mb-1">Create Reminder<i class="icon-plus22 ml-2"></i></a>
+                                            <div style="float: right">
+                                                <select class="form-control select2 reminder-by-status">
+                                                    <option value="not_completed">Not Completed</option>
+                                                    <option value="all">All Status</option>
+                                                </select>
+                                            </div>
                                             <div class="table-responsive">
                                                 <table class="table table-hover dt-reminders">
                                                     <thead>
@@ -91,7 +97,7 @@
                                                             <th>Action</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody>
+                                                    <tbody id="reminder-body">
                                                         @foreach (var item in Model.Reminders)
                                                         {
                                                             <tr>
@@ -117,6 +123,10 @@
                                                                     else if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.Completed)
                                                                     {
                                                                         <span class="badge badge-primary d-block">Completed</span>
+                                                                    }
+                                                                    else if (item.Status_enumid == iSpeak.Models.RemindersStatusEnum.Cancel)
+                                                                    {
+                                                                        <span class="badge badge-danger d-block">Cancel</span>
                                                                     }
                                                                 </td>
                                                                 <td>
@@ -199,6 +209,7 @@
                                                             <option value="2">On Hold</option>
                                                             <option value="3">Waiting</option>
                                                             <option value="4">Completed</option>
+                                                            <option value="5">Cancel</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -380,11 +391,13 @@
     });
 
     function Next() {
+        ReminderClear();
         $('.reminder-list').hide();
         $('.reminder-add').show();
     }
 
     function Previous() {
+        ReminderClear();
         $('.reminder-list').show();
         $('.reminder-add').hide();
         $('.reminder-edit').hide();
@@ -434,10 +447,11 @@
         }); //end ajax
     }
 
-    function ReminderAddClear() {
+    function ReminderClear() {
         $('.reminder-add-date').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", DateTime.UtcNow)');
         $('.reminder-add-date').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", DateTime.UtcNow)');
         $('.reminder-add-desc').val('');
+        $('.reminder-edit-desc').val('');
     }
 
     $(document).ready(function () {
@@ -491,13 +505,37 @@
             }
         });
 
+        $('.reminder-by-status').change(function () {
+            $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("ReminderByStatus", "Home")',
+                    data: {
+                        key: $('.reminder-by-status').val()
+                    },
+                success: function (data) {
+                        dt_reminders.clear().draw();
+                        $.each(data.obj, function (index, row) {
+                            dt_reminders.row.add([
+                                row.Timestamp,
+                                row.Description,
+                                row.Status,
+                                row.Action_Render
+                            ]).draw();
+                        });
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+        })
+
         $('.btn-reminder-add').click(function () {
             if ($('.reminder-add-date').val() == '') {
                 $('.reminder-add-validation').html('The Field Date is required.').show();
             }
-            else if ($('.reminder-add-desc').val() == '') {
-                $('.reminder-add-validation').html('The Field Description is required.').show();
-            }
+            //else if ($('.reminder-add-desc').val() == '') {
+            //    $('.reminder-add-validation').html('The Field Description is required.').show();
+            //}
             else {
                 $('.reminder-add-validation').html('').hide();
                 
@@ -524,9 +562,9 @@
             if ($('.reminder-edit-date').val() == '') {
                 $('.reminder-edit-validation').html('The Field Date is required.').show();
             }
-            else if ($('.reminder-edit-desc').val() == '') {
-                $('.reminder-edit-validation').html('The Field Description is required.').show();
-            }
+            //else if ($('.reminder-edit-desc').val() == '') {
+            //    $('.reminder-edit-validation').html('The Field Description is required.').show();
+            //}
             else {
                 $('.reminder-edit-validation').html('').hide();
                 

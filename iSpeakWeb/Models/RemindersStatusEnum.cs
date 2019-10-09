@@ -11,6 +11,7 @@ namespace iSpeak.Models
         InProgress,
         OnHold,
         Waiting,
-        Completed
+        Completed,
+        Cancel
     }
 }
