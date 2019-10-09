@@ -136,39 +136,6 @@ namespace iSpeak.Controllers
             };
             db.Reminders.Add(remindersModels);
 
-            string desc_log = "";
-            if (remindersModels.Status_enumid == RemindersStatusEnum.New)
-            {
-                desc_log = "[New] " + remindersModels.Description;
-            }
-            else if (remindersModels.Status_enumid == RemindersStatusEnum.InProgress)
-            {
-                desc_log = "[In Progress] " + remindersModels.Description;
-            }
-            else if (remindersModels.Status_enumid == RemindersStatusEnum.OnHold)
-            {
-                desc_log = "[On Hold] " + remindersModels.Description;
-            }
-            else if (remindersModels.Status_enumid == RemindersStatusEnum.Waiting)
-            {
-                desc_log = "[Waiting] " + remindersModels.Description;
-            }
-            else if (remindersModels.Status_enumid == RemindersStatusEnum.Completed)
-            {
-                desc_log = "[Completed] " + remindersModels.Description;
-            }
-
-            ActivityLogsModels activityLogsModels = new ActivityLogsModels
-            {
-                Id = Guid.NewGuid(),
-                Timestamp = remindersModels.Timestamp,
-                TableName = "Reminders",
-                RefId = remindersModels.Id,
-                Description = desc_log,
-                UserAccounts_Id = user_login.Id
-            };
-            db.ActivityLogs.Add(activityLogsModels);
-
             await db.SaveChangesAsync();
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
@@ -187,29 +154,29 @@ namespace iSpeak.Controllers
             string desc_log = "";
             if (remindersModels.Status_enumid == RemindersStatusEnum.New)
             {
-                desc_log = "[New] " + remindersModels.Description;
+                desc_log = "[New] " + description;
             }
             else if (remindersModels.Status_enumid == RemindersStatusEnum.InProgress)
             {
-                desc_log = "[In Progress] " + remindersModels.Description;
+                desc_log = "[In Progress] " + description;
             }
             else if (remindersModels.Status_enumid == RemindersStatusEnum.OnHold)
             {
-                desc_log = "[On Hold] " + remindersModels.Description;
+                desc_log = "[On Hold] " + description;
             }
             else if (remindersModels.Status_enumid == RemindersStatusEnum.Waiting)
             {
-                desc_log = "[Waiting] " + remindersModels.Description;
+                desc_log = "[Waiting] " + description;
             }
             else if (remindersModels.Status_enumid == RemindersStatusEnum.Completed)
             {
-                desc_log = "[Completed] " + remindersModels.Description;
+                desc_log = "[Completed] " + description;
             }
 
             ActivityLogsModels activityLogsModels = new ActivityLogsModels
             {
                 Id = Guid.NewGuid(),
-                Timestamp = remindersModels.Timestamp,
+                Timestamp = DateTime.UtcNow,
                 TableName = "Reminders",
                 RefId = remindersModels.Id,
                 Description = desc_log,
@@ -243,7 +210,7 @@ namespace iSpeak.Controllers
             foreach (var item in list)
             {
                 message += @"<tr>
-                                <td>" + string.Format("{0:yyyy/MM/dd}", item.al.Timestamp) + @"</td>
+                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.al.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))) + @"</td>
                                 <td>" + item.al.Description + @"</td>
                                 <td>" + item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname + @"</td>
                             </tr>";
