@@ -187,7 +187,7 @@
                                                 <div class="form-group row">
                                                     <label class="col-form-label col-lg-2">Description</label>
                                                     <div class="col-lg-5">
-                                                        <textarea class="form-control reminder-edit-desc" rows="3"></textarea>
+                                                        <textarea class="form-control reminder-edit-desc" rows="3" readonly></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
@@ -401,7 +401,7 @@
                 $('.reminder-edit-id').val(data.id);
                 $('.reminder-edit-date').data('daterangepicker').setStartDate(data.timestamp);
                 $('.reminder-edit-date').data('daterangepicker').setEndDate(data.timestamp);
-                //$('.reminder-edit-desc').val(data.description);
+                $('.reminder-edit-desc').val(data.description);
                 $('.reminder-edit-status').val(data.status).trigger('change');
 
                 $('.reminder-list').hide();

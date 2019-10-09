@@ -179,8 +179,8 @@ namespace iSpeak.Controllers
             var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
 
             RemindersModels remindersModels = await db.Reminders.FindAsync(id);
-            remindersModels.Timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
-            remindersModels.Description = description;
+            //remindersModels.Timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
+            //remindersModels.Description = description;
             remindersModels.Status_enumid = (RemindersStatusEnum)status;
             db.Entry(remindersModels).State = EntityState.Modified;
 
