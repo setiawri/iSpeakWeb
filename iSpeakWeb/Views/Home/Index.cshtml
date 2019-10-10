@@ -484,11 +484,11 @@
         $('#listRole_this').val('Student').trigger('change');
         $('#listRole_this').change(function () {
             if ($('#listRole_this').val() == '') {
-                $('input[aria-controls=DataTables_Table_0]').val('').keyup();
+                $('input[aria-controls=DataTables_Table_1]').val('').keyup();
                 //$('input[type=search]').val('').keyup();
             }
             else {
-                $('input[aria-controls=DataTables_Table_0]').val($('#listRole_this').val()).keyup();
+                $('input[aria-controls=DataTables_Table_1]').val($('#listRole_this').val()).keyup();
                 //$('input[type=search]').val($('#listRole_this').val()).keyup();
             }
         });
@@ -496,11 +496,11 @@
         $('#listRole_next').val('Student').trigger('change');
         $('#listRole_next').change(function () {
             if ($('#listRole_next').val() == '') {
-                $('input[aria-controls=DataTables_Table_1]').val('').keyup();
+                $('input[aria-controls=DataTables_Table_2]').val('').keyup();
                 //$('input[type=search]').val('').keyup();
             }
             else {
-                $('input[aria-controls=DataTables_Table_1]').val($('#listRole_next').val()).keyup();
+                $('input[aria-controls=DataTables_Table_2]').val($('#listRole_next').val()).keyup();
                 //$('input[type=search]').val($('#listRole_next').val()).keyup();
             }
         });

@@ -380,6 +380,70 @@ namespace iSpeak.Controllers
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region GetProfitLoss
+        public async Task<JsonResult> GetProfitLoss(Guid branch_id, DateTime start, DateTime end)
+        {
+            DateTime fromDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(start.Year, start.Month, start.Day, 0, 0, 0));
+            DateTime toDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(end.Year, end.Month, end.Day, 23, 59, 59));
+            List<ProfitLossViewModels> list = new List<ProfitLossViewModels>();
+            decimal total_profit_loss = 0;
+
+            var payments = await db.Payments.Where(x => x.Cancelled == false && x.Timestamp >= fromDate && x.Timestamp <= toDate).ToListAsync();
+            foreach (var p in payments)
+            {
+                var check_branch = await (from pay in db.Payments
+                                          join pi in db.PaymentItems on pay.Id equals pi.Payments_Id
+                                          join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                          where pay.Id == p.Id && si.Branches_Id == branch_id
+                                          select new { si }).ToListAsync();
+                if (check_branch.Count > 0)
+                {
+                    list.Add(new ProfitLossViewModels
+                    {
+                        Id = p.Id,
+                        Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+                        Status = "<span class='badge badge-success d-block'>Payment</span>",
+                        Description = "#" + p.No + " Payment Invoice",
+                        Amount = string.Format("{0:N2}", p.CashAmount + p.DebitAmount + p.ConsignmentAmount),
+                        Action_Render = ""
+                    });
+                    total_profit_loss += p.CashAmount + p.DebitAmount + p.ConsignmentAmount;
+                }
+            }
+
+            var pettycashs = await db.PettyCashRecords.Where(x => x.ExpenseCategories_Id != null && x.Branches_Id == branch_id).ToListAsync();
+            foreach (var p in pettycashs)
+            {
+                list.Add(new ProfitLossViewModels
+                {
+                    Id = p.Id,
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+                    Status = "<span class='badge badge-warning d-block'>Petty Cash</span>",
+                    Description = "#" + p.No + " " + p.Notes,
+                    Amount = string.Format("{0:N2}", p.Amount),
+                    Action_Render = ""
+                });
+                total_profit_loss += p.Amount;
+            }
+
+            var expenses = await db.Expenses.Where(x => x.Branches_Id == branch_id).ToListAsync();
+            foreach (var e in expenses)
+            {
+                list.Add(new ProfitLossViewModels
+                {
+                    Id = e.Id,
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", e.Timestamp),
+                    Status = "<span class='badge badge-danger d-block'>Expense</span>",
+                    Description = e.Description,
+                    Amount = string.Format("{0:N2}", e.Amount),
+                    Action_Render = ""
+                });
+                total_profit_loss += e.Amount;
+            }
+
+            return Json(new { list, total = string.Format("{0:N2}", total_profit_loss) }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         public ActionResult NewStudent()
         {
@@ -518,6 +582,7 @@ namespace iSpeak.Controllers
 
         public ActionResult ProfitLoss()
         {
+            ViewBag.initDateStart = DateTime.UtcNow.AddMonths(-1);
             return View();
         }
     }

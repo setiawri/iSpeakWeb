@@ -1,0 +1,160 @@
+﻿@model IEnumerable<iSpeak.Models.ProfitLossViewModels>
+
+@{
+    ViewBag.Root = "Profit & Loss";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mt-2">
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">Start</label>
+                            <div class="input-group">
+                                @Html.Editor("Start", new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                <span class="input-group-append">
+                                    <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">End</label>
+                            <div class="input-group">
+                                @Html.Editor("End", new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                <span class="input-group-append">
+                                    <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-sm btn-primary form-control" id="btnLoad">Load Data <i class="icon-search4 ml-2"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.Status)</th>
+                                <th>@Html.DisplayNameFor(model => model.Description)</th>
+                                <th>@Html.DisplayNameFor(model => model.Amount)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-right">Total</th>
+                                <th class="total-pl"></th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            targets: '_all'
+            //width: 120,
+            //targets: [7]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+
+    function LoadData() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetProfitLoss", "Reports")',
+            data: {
+                branch_id: $('#Branch').val(),
+                start: $('#Start').val(),
+                end: $('#End').val()
+            },
+            success: function (data) {
+                table.clear().draw();
+                $.each(data.list, function (index, row) {
+                    table.row.add([
+                        row.Timestamp,
+                        row.Status,
+                        row.Description,
+                        row.Amount,
+                        row.Action_Render
+                    ]).draw();
+                });
+                $('.total-pl').html(data.total);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+    
+    $(document).ready(function () {
+        $('.select2').select2();
+
+        $('.tanggal').daterangepicker({
+            singleDatePicker: true,
+            locale: {
+                format: 'YYYY/MM/DD'
+            }
+        });
+
+        $('#Start').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.initDateStart)');
+        $('#Start').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.initDateStart)');
+
+        $('#btnLoad').click(function () {
+            LoadData();
+        });
+        
+    });
+</script>

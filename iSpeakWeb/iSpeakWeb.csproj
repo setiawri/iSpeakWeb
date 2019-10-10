@@ -269,6 +269,7 @@
     <Compile Include="Models\PettyCashViewModels.cs" />
     <Compile Include="Models\ProductsModels.cs" />
     <Compile Include="Models\Products_QtyModels.cs" />
+    <Compile Include="Models\ProfitLossViewModels.cs" />
     <Compile Include="Models\ReceiptPayrollViewModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
     <Compile Include="Models\RemindersModels.cs" />
@@ -528,6 +529,7 @@
     <Content Include="Views\Expenses\Index.cshtml" />
     <Content Include="Views\Expenses\Create.cshtml" />
     <Content Include="Views\Expenses\Edit.cshtml" />
+    <Content Include="Views\Reports\ProfitLoss.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

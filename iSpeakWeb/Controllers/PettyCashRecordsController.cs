@@ -34,7 +34,8 @@ namespace iSpeak.Controllers
                          orderby pcr.No
                          select new { pcr, pcc }).ToListAsync();
             List<PettyCashViewModels> list = new List<PettyCashViewModels>();
-            int balance = 0;
+            var data_before = await db.PettyCashRecords.Where(x => x.Branches_Id == branch_id && x.Timestamp < fromDate).ToListAsync();
+            int balance = data_before.Count > 0 ? data_before.Sum(x => x.Amount) : 0;
             foreach (var item in items)
             {
                 var data_user = db.User.Where(x => x.Id == item.pcr.UserAccounts_Id).FirstOrDefault();
