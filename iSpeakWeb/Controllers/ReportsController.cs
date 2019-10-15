@@ -383,12 +383,17 @@ namespace iSpeak.Controllers
         #region GetProfitLoss
         public async Task<JsonResult> GetProfitLoss(Guid branch_id, DateTime start, DateTime end)
         {
-            DateTime fromDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(start.Year, start.Month, start.Day, 0, 0, 0));
-            DateTime toDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(end.Year, end.Month, end.Day, 23, 59, 59));
-            List<ProfitLossViewModels> list = new List<ProfitLossViewModels>();
-            decimal total_profit_loss = 0;
+            DateTime fromDate = new DateTime(start.Year, start.Month, start.Day, 0, 0, 0);
+            DateTime toDate = new DateTime(end.Year, end.Month, end.Day, 23, 59, 59);
+            DateTime fromDateUtc = TimeZoneInfo.ConvertTimeToUtc(new DateTime(start.Year, start.Month, start.Day, 0, 0, 0));
+            DateTime toDateUtc = TimeZoneInfo.ConvertTimeToUtc(new DateTime(end.Year, end.Month, end.Day, 23, 59, 59));
 
-            var payments = await db.Payments.Where(x => x.Cancelled == false && x.Timestamp >= fromDate && x.Timestamp <= toDate).ToListAsync();
+            List<ProfitLossViewModels> list = new List<ProfitLossViewModels>();
+            decimal total_payment = 0;
+            decimal total_petty = 0;
+            decimal total_expense = 0;
+
+            var payments = await db.Payments.Where(x => x.Cancelled == false && x.Timestamp >= fromDateUtc && x.Timestamp <= toDateUtc).ToListAsync();
             foreach (var p in payments)
             {
                 var check_branch = await (from pay in db.Payments
@@ -404,14 +409,13 @@ namespace iSpeak.Controllers
                         Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                         Status = "<span class='badge badge-success d-block'>Payment</span>",
                         Description = "#" + p.No + " Payment Invoice",
-                        Amount = string.Format("{0:N2}", p.CashAmount + p.DebitAmount + p.ConsignmentAmount),
-                        Action_Render = ""
+                        Amount = string.Format("{0:N2}", p.CashAmount + p.DebitAmount + p.ConsignmentAmount)
                     });
-                    total_profit_loss += p.CashAmount + p.DebitAmount + p.ConsignmentAmount;
+                    total_payment += p.CashAmount + p.DebitAmount + p.ConsignmentAmount;
                 }
             }
 
-            var pettycashs = await db.PettyCashRecords.Where(x => x.ExpenseCategories_Id != null && x.Branches_Id == branch_id).ToListAsync();
+            var pettycashs = await db.PettyCashRecords.Where(x => x.ExpenseCategories_Id != null && x.Branches_Id == branch_id && x.Timestamp >= fromDateUtc && x.Timestamp <= toDateUtc).ToListAsync();
             foreach (var p in pettycashs)
             {
                 list.Add(new ProfitLossViewModels
@@ -420,13 +424,12 @@ namespace iSpeak.Controllers
                     Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                     Status = "<span class='badge badge-warning d-block'>Petty Cash</span>",
                     Description = "#" + p.No + " " + p.Notes,
-                    Amount = string.Format("{0:N2}", p.Amount),
-                    Action_Render = ""
+                    Amount = string.Format("{0:N2}", p.Amount)
                 });
-                total_profit_loss += p.Amount;
+                total_petty += p.Amount;
             }
 
-            var expenses = await db.Expenses.Where(x => x.Branches_Id == branch_id).ToListAsync();
+            var expenses = await db.Expenses.Where(x => x.Branches_Id == branch_id && x.Timestamp >= fromDate && x.Timestamp <= toDate).ToListAsync();
             foreach (var e in expenses)
             {
                 list.Add(new ProfitLossViewModels
@@ -435,13 +438,19 @@ namespace iSpeak.Controllers
                     Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", e.Timestamp),
                     Status = "<span class='badge badge-danger d-block'>Expense</span>",
                     Description = e.Description,
-                    Amount = string.Format("{0:N2}", e.Amount),
-                    Action_Render = ""
+                    Amount = string.Format("{0:N2}", e.Amount)
                 });
-                total_profit_loss += e.Amount;
+                total_expense += e.Amount;
             }
 
-            return Json(new { list, total = string.Format("{0:N2}", total_profit_loss) }, JsonRequestBehavior.AllowGet);
+            return Json(new
+            {
+                list,
+                payment = string.Format("{0:N2}", total_payment),
+                petty = string.Format("{0:N2}", total_petty),
+                expense = string.Format("{0:N2}", total_expense),
+                total = string.Format("{0:N2}", total_payment + total_petty + total_expense)
+            }, JsonRequestBehavior.AllowGet);
         }
         #endregion
 
@@ -580,10 +589,83 @@ namespace iSpeak.Controllers
             return View(model);
         }
 
-        public ActionResult ProfitLoss()
+        private decimal CalculateProfitLoss(Guid branch_id, DateTime fromDateUtc, DateTime toDateUtc, DateTime fromDate, DateTime toDate)
         {
-            ViewBag.initDateStart = DateTime.UtcNow.AddMonths(-1);
-            return View();
+            decimal total_profit_loss = 0;
+            var payments = db.Payments.Where(x => x.Cancelled == false && x.Timestamp >= fromDateUtc && x.Timestamp <= toDateUtc).ToList();
+            foreach (var p in payments)
+            {
+                var check_branch = (from pay in db.Payments
+                                         join pi in db.PaymentItems on pay.Id equals pi.Payments_Id
+                                         join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                         where pay.Id == p.Id && si.Branches_Id == branch_id
+                                         select new { si }).ToList();
+                if (check_branch.Count > 0)
+                {
+                    total_profit_loss += p.CashAmount + p.DebitAmount + p.ConsignmentAmount;
+                }
+            }
+
+            var pettycashs = db.PettyCashRecords.Where(x => x.ExpenseCategories_Id != null && x.Branches_Id == branch_id && x.Timestamp >= fromDateUtc && x.Timestamp <= toDateUtc).ToList();
+            foreach (var p in pettycashs)
+            {
+                total_profit_loss += p.Amount;
+            }
+
+            var expenses = db.Expenses.Where(x => x.Branches_Id == branch_id && x.Timestamp >= fromDate && x.Timestamp <= toDate).ToList();
+            foreach (var e in expenses)
+            {
+                total_profit_loss += e.Amount;
+            }
+
+            return total_profit_loss;
+        }
+
+        public async Task<ActionResult> ProfitLoss()
+        {
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                #region Chart JS
+                ViewBag.ChartLabel = "'"
+                        + DateTime.UtcNow.AddMonths(-5).ToString("MMM-yy") + "','"
+                        + DateTime.UtcNow.AddMonths(-4).ToString("MMM-yy") + "','"
+                        + DateTime.UtcNow.AddMonths(-3).ToString("MMM-yy") + "','"
+                        + DateTime.UtcNow.AddMonths(-2).ToString("MMM-yy") + "','"
+                        + DateTime.UtcNow.AddMonths(-1).ToString("MMM-yy") + "','"
+                        + DateTime.UtcNow.ToString("MMM-yy") + "'";
+
+                var start5MonthAgo = new DateTime(DateTime.UtcNow.AddMonths(-5).Year, DateTime.UtcNow.AddMonths(-5).Month, 1);
+                var start4MonthAgo = new DateTime(DateTime.UtcNow.AddMonths(-4).Year, DateTime.UtcNow.AddMonths(-4).Month, 1);
+                var start3MonthAgo = new DateTime(DateTime.UtcNow.AddMonths(-3).Year, DateTime.UtcNow.AddMonths(-3).Month, 1);
+                var start2MonthAgo = new DateTime(DateTime.UtcNow.AddMonths(-2).Year, DateTime.UtcNow.AddMonths(-2).Month, 1);
+                var start1MonthAgo = new DateTime(DateTime.UtcNow.AddMonths(-1).Year, DateTime.UtcNow.AddMonths(-1).Month, 1);
+                var startThisMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+
+                var last5MonthAgo = start4MonthAgo.AddDays(-1);
+                var last4MonthAgo = start3MonthAgo.AddDays(-1);
+                var last3MonthAgo = start2MonthAgo.AddDays(-1);
+                var last2MonthAgo = start1MonthAgo.AddDays(-1);
+                var last1MonthAgo = startThisMonth.AddDays(-1);
+                var lastThisMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.DaysInMonth(DateTime.UtcNow.Year, DateTime.UtcNow.Month));
+
+                var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+                var branch_id = user_login.Branches_Id;
+                ViewBag.ChartData =
+                    CalculateProfitLoss(branch_id, start5MonthAgo, last5MonthAgo, start5MonthAgo.AddHours(7), last5MonthAgo.AddHours(7)) + ","
+                    + CalculateProfitLoss(branch_id, start4MonthAgo, last4MonthAgo, start4MonthAgo.AddHours(7), last4MonthAgo.AddHours(7)) + ","
+                    + CalculateProfitLoss(branch_id, start3MonthAgo, last3MonthAgo, start3MonthAgo.AddHours(7), last3MonthAgo.AddHours(7)) + ","
+                    + CalculateProfitLoss(branch_id, start2MonthAgo, last2MonthAgo, start2MonthAgo.AddHours(7), last2MonthAgo.AddHours(7)) + ","
+                    + CalculateProfitLoss(branch_id, start1MonthAgo, last1MonthAgo, start1MonthAgo.AddHours(7), last1MonthAgo.AddHours(7)) + ","
+                    + CalculateProfitLoss(branch_id, startThisMonth, lastThisMonth, startThisMonth.AddHours(7), lastThisMonth.AddHours(7));
+                #endregion
+
+                ViewBag.initDateStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0);
+                ViewBag.initDateEnd = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.DaysInMonth(DateTime.UtcNow.Year, DateTime.UtcNow.Month), 23, 59, 59);
+                return View();
+            }
         }
     }
 }

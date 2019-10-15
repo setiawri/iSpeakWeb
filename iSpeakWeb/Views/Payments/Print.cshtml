@@ -149,6 +149,7 @@
     function Cancel_Modal(id, no) {
         $('.mdl-id-inv').val(id);
         $('.mdl-no-inv').val(no);
+        $('.mdl-notes').val('');
     }
 
     function Cancelled(id, notes) {
@@ -169,7 +170,7 @@
     }
 
     function Approve(id, no) {
-        bootbox.confirm({
+        @*bootbox.confirm({
             message: "Are you sure want to approve Payment No: " + no + " ?",
             buttons: {
                 confirm: {
@@ -198,7 +199,20 @@
                     }); //end ajax
                 }
             }
-        });
+        });*@
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Approved", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     $(document).ready(function () {

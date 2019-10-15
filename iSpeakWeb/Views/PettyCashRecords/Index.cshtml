@@ -308,7 +308,7 @@
     }
 
     function Approve(Id, Notes, Amount) {
-        bootbox.confirm({
+        @*bootbox.confirm({
             message: "Are you sure want to approve transaction " + Notes + ": " + parseFloat(Amount).toLocaleString() + " ?",
             buttons: {
                 confirm: {
@@ -337,11 +337,24 @@
                     }); //end ajax
                 }
             }
-        });
+        });*@
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SetApproved", "PettyCashRecords")',
+            data: {
+                pettycash_id: Id
+            },
+            success: function (data) {
+                FilterClick();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     function CancelApprove(Id, Notes, Amount) {
-        bootbox.confirm({
+        @*bootbox.confirm({
             message: "Are you sure want to cancel Approve transaction " + Notes + ": " + parseFloat(Amount).toLocaleString() + " ?",
             buttons: {
                 confirm: {
@@ -370,7 +383,20 @@
                     }); //end ajax
                 }
             }
-        });
+        });*@
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CancelApproved", "PettyCashRecords")',
+            data: {
+                pettycash_id: Id
+            },
+            success: function (data) {
+                FilterClick();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     function FilterClick() {

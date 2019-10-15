@@ -351,6 +351,7 @@
     <Content Include="assets\js\main\bootstrap.bundle.min.js" />
     <Content Include="assets\js\main\jquery.min.js" />
     <Content Include="assets\js\moment.min.js" />
+    <Content Include="assets\js\plugins\charts\Chart.min.js" />
     <Content Include="assets\js\plugins\forms\selects\select2.min.js" />
     <Content Include="assets\js\plugins\forms\styling\switch.min.js" />
     <Content Include="assets\js\plugins\forms\styling\switchery.min.js" />

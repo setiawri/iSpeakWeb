@@ -25,13 +25,13 @@ namespace iSpeak.Controllers
                 ? await (from pcr in db.PettyCashRecords
                          join pcc in db.PettyCashRecordsCategories on pcr.PettyCashRecordsCategories_Id equals pcc.Id
                          where pcr.Branches_Id == branch_id && pcr.Timestamp > fromDate && pcr.Timestamp < toDate && pcr.PettyCashRecordsCategories_Id.ToString().Contains(category_id) && pcr.IsChecked == false
-                         orderby pcr.No
+                         orderby pcr.Timestamp
                          select new { pcr, pcc }).ToListAsync()
                 //show all
                 : await (from pcr in db.PettyCashRecords
                          join pcc in db.PettyCashRecordsCategories on pcr.PettyCashRecordsCategories_Id equals pcc.Id
                          where pcr.Branches_Id == branch_id && pcr.Timestamp > fromDate && pcr.Timestamp < toDate && pcr.PettyCashRecordsCategories_Id.ToString().Contains(category_id)
-                         orderby pcr.No
+                         orderby pcr.Timestamp
                          select new { pcr, pcc }).ToListAsync();
             List<PettyCashViewModels> list = new List<PettyCashViewModels>();
             var data_before = await db.PettyCashRecords.Where(x => x.Branches_Id == branch_id && x.Timestamp < fromDate).ToListAsync();
@@ -47,7 +47,7 @@ namespace iSpeak.Controllers
                 {
                     Id = item.pcr.Id,
                     No = item.pcr.No,
-                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.pcr.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("yyyy/MM/dd HH:mm"),
+                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.pcr.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("yyyy/MM/dd HH:mm:ss"),
                     Category = item.pcc.Name,
                     Notes = item.pcr.Notes,
                     Amount = item.pcr.Amount,

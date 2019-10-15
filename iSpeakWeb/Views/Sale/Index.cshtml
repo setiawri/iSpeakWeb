@@ -228,6 +228,7 @@
     function Cancel_Modal(id, no) {
         $('.mdl-id-inv').val(id);
         $('.mdl-no-inv').val(no);
+        $('.mdl-notes').val('');
     }
 
     function Cancelled(id, notes) {
@@ -248,7 +249,7 @@
     }
 
     function Approve(id, no) {
-        bootbox.confirm({
+        @*bootbox.confirm({
             message: "Are you sure want to approve Sale Invoice No: " + no + " ?",
             buttons: {
                 confirm: {
@@ -277,11 +278,24 @@
                     }); //end ajax
                 }
             }
-        });
+        });*@
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Approved", "Sale")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     function CancelApprove(id, no) {
-        bootbox.confirm({
+        @*bootbox.confirm({
             message: "Are you sure want to cancel Approve Sale Invoice No: " + no + " ?",
             buttons: {
                 confirm: {
@@ -310,7 +324,20 @@
                     }); //end ajax
                 }
             }
-        });
+        });*@
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CancelApproved", "Sale")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
     }
 
     function Approve_Payment(id) {
