@@ -29,7 +29,7 @@ namespace iSpeak.Controllers.API
             List<SessionApiModels> list = new List<SessionApiModels>();
             if (sessions.Count > 0)
             {
-                foreach (var session in sessions)
+                foreach (var session in sessions.OrderByDescending(x => x.ls.Timestamp))
                 {
                     list.Add(new SessionApiModels
                     {
