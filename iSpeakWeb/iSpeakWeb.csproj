@@ -191,6 +191,9 @@
     <Compile Include="Common\IdentityExtension.cs" />
     <Compile Include="Common\Permission.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\API\InvoiceController.cs" />
+    <Compile Include="Controllers\API\SessionsController.cs" />
+    <Compile Include="Controllers\API\UserLoginController.cs" />
     <Compile Include="Controllers\BranchesController.cs" />
     <Compile Include="Controllers\ConsignmentsController.cs" />
     <Compile Include="Controllers\ExpenseCategoriesController.cs" />
@@ -241,6 +244,11 @@
     <Compile Include="Models\AccessModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\ActivityLogsModels.cs" />
+    <Compile Include="Models\API\InvoiceApiModels.cs" />
+    <Compile Include="Models\API\CommonRequestModels.cs" />
+    <Compile Include="Models\API\PaymentApiModels.cs" />
+    <Compile Include="Models\API\SessionApiModels.cs" />
+    <Compile Include="Models\API\UserApiModels.cs" />
     <Compile Include="Models\BirthdayViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\ConsignmentsModels.cs" />
