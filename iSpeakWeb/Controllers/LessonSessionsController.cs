@@ -31,7 +31,7 @@ namespace iSpeak.Controllers
                 newList.Add(new
                 {
                     Id = item.sii.Id,
-                    Name = item.sii.Description + " [Avail. Hours: " + item.sii.SessionHours_Remaining + " hrs]"
+                    Name = item.sii.Description + " [Qty: " + item.sii.Qty + ", Avail. Hours: " + item.sii.SessionHours_Remaining + " hrs]"
                 });
             }
             var ddl = new SelectList(newList, "Id", "Name");
@@ -243,7 +243,7 @@ namespace iSpeak.Controllers
                 var users = (from u in db.User
                              join ur in db.UserRole on u.Id equals ur.UserId
                              join r in db.Role on ur.RoleId equals r.Id
-                             where r.Name == "Tutor" || r.Name == "Student"
+                             where u.Active == true && r.Name == "Tutor" || r.Name == "Student"
                              orderby u.Firstname
                              select new { u, r }).ToList();
                 List<object> tutor_list = new List<object>();
@@ -365,7 +365,7 @@ namespace iSpeak.Controllers
             var users = (from u in db.User
                          join ur in db.UserRole on u.Id equals ur.UserId
                          join r in db.Role on ur.RoleId equals r.Id
-                         where r.Name == "Tutor" || r.Name == "Student"
+                         where u.Active == true && r.Name == "Tutor" || r.Name == "Student"
                          orderby u.Firstname
                          select new { u, r }).ToList();
             List<object> tutor_list = new List<object>();
