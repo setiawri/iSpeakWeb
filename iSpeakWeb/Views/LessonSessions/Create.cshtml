@@ -55,7 +55,8 @@
                             <div class="col-md-5">
                                 <div class="form-group">
                                     @Html.LabelFor(model => model.Tutor_UserAccounts_Id, htmlAttributes: new { @class = "" })
-                                    @Html.DropDownListFor(model => model.Tutor_UserAccounts_Id, ViewBag.listTutor as SelectList, "Select Tutor", new { @class = "form-control select2" })
+                                    @*@Html.DropDownListFor(model => model.Tutor_UserAccounts_Id, ViewBag.listTutor as SelectList, "Select Tutor", new { @class = "form-control select2" })*@
+                                    <select class="form-control" id="Tutor_UserAccounts_Id" name="Tutor_UserAccounts_Id"></select>
                                     @Html.ValidationMessageFor(model => model.Tutor_UserAccounts_Id, "", new { @class = "text-danger" })
                                 </div>
                             </div>
@@ -75,7 +76,8 @@
                             <div class="col-md-5">
                                 <div class="form-group">
                                     <label>Student</label>
-                                    @Html.DropDownList("Student_Id", ViewBag.listStudent as SelectList, "Select Student", new { @class = "form-control select2" })
+                                    @*@Html.DropDownList("Student_Id", ViewBag.listStudent as SelectList, "Select Student", new { @class = "form-control select2" })*@
+                                    <select class="form-control" id="Student_Id" name="Student_Id"></select>
                                     @Html.ValidationMessage("Student_Id", "", new { @class = "text-danger" })
                                 </div>
                             </div>
@@ -186,6 +188,42 @@
             locale: {
                 format: 'YYYY/MM/DD H:mm'
             }
+        });
+
+        $('#Tutor_UserAccounts_Id').select2({
+            placeholder: 'Select Tutor',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'tutor'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
+
+        $('#Student_Id').select2({
+            placeholder: 'Select Student',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'student'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
         });
         
         $('#Student_Id').change(function () {

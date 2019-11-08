@@ -190,6 +190,7 @@
     <Compile Include="Common\BranchesActionFilter.cs" />
     <Compile Include="Common\IdentityExtension.cs" />
     <Compile Include="Common\Permission.cs" />
+    <Compile Include="Common\Select2Pagination.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\API\InvoiceController.cs" />
     <Compile Include="Controllers\API\SessionsController.cs" />

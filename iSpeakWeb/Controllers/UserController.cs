@@ -2,7 +2,9 @@
 using iSpeak.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -12,6 +14,74 @@ namespace iSpeak.Controllers
     public class UserController : Controller
     {
         private iSpeakContext db = new iSpeakContext();
+
+        #region GET ACTIVE USER
+        public async Task<JsonResult> GetUser(string search, int page, int limit, string role)
+        {
+            int offset = limit * (page - 1);
+            List<UserModels> list = new List<UserModels>();
+            if (string.IsNullOrEmpty(search))
+            {
+                if (role.ToLower() == "all")
+                {
+                    list = await db.User.Where(x => x.Active == true).OrderBy(x => x.Firstname).Skip(offset).Take(limit).ToListAsync();
+                }
+                else
+                {
+                    var items = await (from u in db.User
+                                       join ur in db.UserRole on u.Id equals ur.UserId
+                                       join r in db.Role on ur.RoleId equals r.Id
+                                       where u.Active == true && r.Name.ToLower() == role.ToLower()
+                                       orderby u.Firstname
+                                       select new { u, ur, r }).Skip(offset).Take(limit).ToListAsync();
+                    foreach (var i in items)
+                    {
+                        list.Add(i.u);
+                    }
+                }
+            }
+            else
+            {
+                if (role.ToLower() == "all")
+                {
+                    list = await db.User.Where(x =>
+                        x.Active == true && x.Firstname.Contains(search) || x.Middlename.Contains(search) || x.Lastname.Contains(search)
+                    ).OrderBy(x => x.Firstname).Skip(offset).Take(limit).ToListAsync();
+                }
+                else
+                {
+                    var items = await (from u in db.User
+                                       join ur in db.UserRole on u.Id equals ur.UserId
+                                       join r in db.Role on ur.RoleId equals r.Id
+                                       where u.Active == true && r.Name.ToLower() == role.ToLower() &&
+                                         (u.Firstname.Contains(search) || u.Middlename.Contains(search) || u.Lastname.Contains(search))
+                                       orderby u.Firstname
+                                       select new { u, ur, r }).Skip(offset).Take(limit).ToListAsync();
+                    foreach (var i in items)
+                    {
+                        list.Add(i.u);
+                    }
+                }
+            }
+
+            List<Select2Pagination.Select2Results> results = new List<Select2Pagination.Select2Results>();
+            foreach (var item in list)
+            {
+                results.Add(new Select2Pagination.Select2Results
+                {
+                    id = item.Id,
+                    text = item.Firstname + " " + item.Middlename + " " + item.Lastname
+                });
+            }
+
+            Select2Pagination.Select2Page pagination = new Select2Pagination.Select2Page
+            {
+                more = results.Count() == limit ? true : false
+            };
+
+            return Json(new { results, pagination }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         // GET: User
         public ActionResult Index()

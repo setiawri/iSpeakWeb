@@ -188,7 +188,8 @@
                     <div class="form-group row">
                         @Html.LabelFor(model => model.Customers_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
                         <div class="col-lg-5">
-                            @Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })
+                            @*@Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })*@
+                            <select class="form-control" id="Customers_Id" name="Customers_Id"></select>
                         </div>
                         <div class="col-lg-4">
                             @*<a href="@Url.Action("Register", "Account")" class="btn btn-success">New <i class="icon-plus22 ml-2"></i></a>*@
@@ -641,6 +642,24 @@
 
         $('.mdl-birthday').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
         $('.mdl-birthday').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", ViewBag.DOB)');
+
+        $('#Customers_Id').select2({
+            placeholder: 'Select Customer',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'all'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
 
         $('#LessonPackages_Id').change(function () {
             if ($('#LessonPackages_Id').val() != '') {
