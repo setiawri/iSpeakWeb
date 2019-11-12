@@ -13,7 +13,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class ReportsController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         #region GetNewStudent
         public async Task<JsonResult> GetNewStudent(string branch_id, int month, int year)

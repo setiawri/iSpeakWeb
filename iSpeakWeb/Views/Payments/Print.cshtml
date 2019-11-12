@@ -39,7 +39,7 @@
                             </tr>
                         </thead>
                         <tbody id="data-body">
-                            @foreach (var item in Model)
+                            @*@foreach (var item in Model)
                             {
                                 <tr>
                                     <td>@Html.DisplayFor(modelItem => item.Branch)</td>
@@ -75,7 +75,7 @@
                                         <a href="@Url.Action("Print", "Payments", new { id = item.Id })">Print</a>
                                     </td>
                                 </tr>
-                            }
+                            }*@
                         </tbody>
                     </table>
                 </div>
@@ -126,6 +126,92 @@
 </div>
 
 <script type="text/javascript">
+
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [
+            {
+                orderable: false,
+                width: 100,
+                targets: [8]
+            }
+        ],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        processing: true,
+        columns: [
+            { data: 'Branch' },
+            {
+                data: 'Timestamp', render: function (e) {
+                    var dt = new Date(parseInt(e.substr(6)));
+                    return `${
+                        (dt.getMonth()+1).toString().padStart(2, '0')}/${
+                        dt.getDate().toString().padStart(2, '0')}/${
+                        dt.getFullYear().toString().padStart(4, '0')} ${
+                        dt.getHours().toString().padStart(2, '0')}:${
+                        dt.getMinutes().toString().padStart(2, '0')
+                    }`
+                }
+            },
+            { data: 'No' },
+            {
+                data: 'CashAmount', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            {
+                data: 'DebitAmount', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            {
+                data: 'ConsignmentAmount', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            {
+                data: 'Cancelled', render: function (data, type, row) {
+                    if (row.HasSession == false) {
+                        return data == false
+                            ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
+                            : '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes_Cancel + '</span>'
+                    }
+                    else {
+                        return '';
+                    }
+                }
+            },
+            {
+                data: 'Confirmed', render: function (data, type, row) {
+                    return data == false
+                        ? '<a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">None</span></a>'
+                        : '<span class="badge badge-success d-block">Approved</span>'
+                }
+            },
+            {
+                data: 'Id', render: function (e) {
+                    return '<a href="@Url.Content("~")' + 'Payments/Print/' + e + '">Print</a>'
+                }
+            },
+        ],
+        ajax: {
+            url: '@Url.Action("GetData", "Payments")',
+            type: 'POST',
+            dataType: 'json',
+        },
+        pagingType: 'full_numbers',
+        order: [[1, 'desc']]
+    });
+
     function View_Log(id) {
         $.ajax({
             type: "POST",
@@ -147,6 +233,7 @@
     }
 
     function Cancel_Modal(id, no) {
+        //alert('id: ' + id + ', no: ' + no);
         $('.mdl-id-inv').val(id);
         $('.mdl-no-inv').val(no);
         $('.mdl-notes').val('');
@@ -161,7 +248,12 @@
                 notes: notes
             },
             success: function (data) {
-                location.reload();
+                //location.reload();
+                $('.mdl-id-inv').val('');
+                $('.mdl-no-inv').val('');
+                $('.mdl-notes').val('');
+                $('#modal_cancel').modal('toggle');
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -207,7 +299,8 @@
                 id: id
             },
             success: function (data) {
-                location.reload();
+                //location.reload();
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -216,29 +309,6 @@
     }
 
     $(document).ready(function () {
-        // Setting datatable defaults
-        $.extend($.fn.dataTable.defaults, {
-            autoWidth: false,
-            columnDefs: [
-                {
-                    orderable: false,
-                    width: 100,
-                    targets: [8]
-                }
-            ],
-            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
-            language: {
-                search: '<span>Filter:</span> _INPUT_',
-                searchPlaceholder: 'Type to filter...',
-                lengthMenu: '<span>Show:</span> _MENU_',
-                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
-            }
-        });
-
-        var table = $('.datatable').DataTable({
-            pagingType: 'full_numbers',
-            order: [[1, 'desc']]
-        });
 
         if ('@ViewBag.Cancel' == 'False') {
             table.column(6).visible(false);

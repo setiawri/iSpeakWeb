@@ -13,7 +13,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class UserController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         #region GET ACTIVE USER
         public async Task<JsonResult> GetUser(string search, int page, int limit, string role)
@@ -231,6 +231,31 @@ namespace iSpeak.Controllers
             ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(editUserViewModels);
+        }
+
+        public async Task<ActionResult> Info(string id)
+        {
+            List<StudentPackageViewModels> student_packages = new List<StudentPackageViewModels>();
+            var packages = await(from si in db.SaleInvoices
+                                 join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                                 where si.Customer_UserAccounts_Id == id
+                                 orderby si.Timestamp descending
+                                 select new { si, u }).ToListAsync();
+            foreach (var package in packages)
+            {
+                student_packages.Add(new StudentPackageViewModels
+                {
+                    SaleInvoices_Id = package.si.Id,
+                    No = package.si.No,
+                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(package.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    SaleInvoiceItems = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == package.si.Id).OrderBy(x => x.RowNo).ToList(),
+                    StudentName = package.u.Firstname + " " + package.u.Middlename + " " + package.u.Lastname,
+                    Amount = package.si.Amount,
+                    Due = package.si.Due,
+                    Cancelled = package.si.Cancelled
+                });
+            }
+            return View(student_packages);
         }
     }
 }

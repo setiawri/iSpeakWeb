@@ -13,7 +13,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class PaymentsController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         //public async Task<ActionResult> Index()
         //{
@@ -41,6 +41,42 @@ namespace iSpeak.Controllers
         //    }
         //}
 
+        #region Get Data
+        public async Task<JsonResult> GetData()
+        {
+            Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+            List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
+            foreach (var item in db.Payments.ToList())
+            {
+                var check_session = await(from pi in db.PaymentItems
+                                          join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                          join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                          where pi.Payments_Id == item.Id && sii.SessionHours > sii.SessionHours_Remaining
+                                          select new { pi, si, sii }).ToListAsync();
+
+                PaymentsIndexModels pim = new PaymentsIndexModels
+                {
+                    Id = item.Id,
+                    No = item.No,
+                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    CashAmount = item.CashAmount,
+                    DebitAmount = item.DebitAmount,
+                    ConsignmentAmount = item.ConsignmentAmount,
+                    Cancelled = item.Cancelled,
+                    Confirmed = item.Confirmed,
+                    Notes_Cancel = item.Notes_Cancel,
+                    HasSession = check_session.Count > 0 ? true : false
+                };
+                Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
+                Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
+                pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
+                if (branch_id == user_branch)
+                    list_pim.Add(pim);
+            }
+
+            return Json(new { data = list_pim }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #region Get Payment
         public JsonResult GetPayment(Guid id)
         {
@@ -259,39 +295,39 @@ namespace iSpeak.Controllers
                 if (id == null || id == Guid.Empty) //show payment index
                 {
                     //var login_session = Session["Login"] as LoginViewModel;
-                    Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
-                    List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
-                    foreach (var item in db.Payments.ToList())
-                    {
-                        var check_session = await (from pi in db.PaymentItems
-                                                   join si in db.SaleInvoices on pi.ReferenceId equals si.Id
-                                                   join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                                                   where pi.Payments_Id == item.Id && sii.SessionHours > sii.SessionHours_Remaining
-                                                   select new { pi, si, sii }).ToListAsync();
+                    //Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+                    //List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
+                    //foreach (var item in db.Payments.ToList())
+                    //{
+                    //    var check_session = await (from pi in db.PaymentItems
+                    //                               join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                    //                               join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                    //                               where pi.Payments_Id == item.Id && sii.SessionHours > sii.SessionHours_Remaining
+                    //                               select new { pi, si, sii }).ToListAsync();
 
-                        PaymentsIndexModels pim = new PaymentsIndexModels
-                        {
-                            Id = item.Id,
-                            No = item.No,
-                            Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
-                            CashAmount = item.CashAmount,
-                            DebitAmount = item.DebitAmount,
-                            ConsignmentAmount = item.ConsignmentAmount,
-                            Cancelled = item.Cancelled,
-                            Confirmed = item.Confirmed,
-                            Notes_Cancel = item.Notes_Cancel,
-                            HasSession = check_session.Count > 0 ? true : false
-                        };
-                        Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
-                        Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
-                        pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
-                        if (branch_id == user_branch)
-                            list_pim.Add(pim);
-                    }
+                    //    PaymentsIndexModels pim = new PaymentsIndexModels
+                    //    {
+                    //        Id = item.Id,
+                    //        No = item.No,
+                    //        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    //        CashAmount = item.CashAmount,
+                    //        DebitAmount = item.DebitAmount,
+                    //        ConsignmentAmount = item.ConsignmentAmount,
+                    //        Cancelled = item.Cancelled,
+                    //        Confirmed = item.Confirmed,
+                    //        Notes_Cancel = item.Notes_Cancel,
+                    //        HasSession = check_session.Count > 0 ? true : false
+                    //    };
+                    //    Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
+                    //    Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
+                    //    pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
+                    //    if (branch_id == user_branch)
+                    //        list_pim.Add(pim);
+                    //}
 
                     ViewBag.Cancel = p.IsGranted(User.Identity.Name, "payments_cancel");
                     ViewBag.Approve = p.IsGranted(User.Identity.Name, "payments_approve");
-                    return View(list_pim);
+                    return View(); //return View(list_pim);
                 }
                 else //show payment receipt
                 {

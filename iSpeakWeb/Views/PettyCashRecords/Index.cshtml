@@ -274,12 +274,29 @@
 </div>
 
 <script type="text/javascript">
-    function ToJavaScriptDate(value) {
-        var pattern = /Date\(([^)]+)\)/;
-        var results = pattern.exec(value);
-        var dt = new Date(parseFloat(results[1]));
-        return dt.getFullYear() + "/" + ('0' + (dt.getMonth() + 1)).slice(-2) + "/" + ('0' + dt.getDate()).slice(-2) + " " + ('0' + dt.getHours()).slice(-2) + ":" + ('0' + dt.getMinutes()).slice(-2);
-    }
+
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            targets: '_all'
+            //width: 120,
+            //targets: [7]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[1, 'desc']]
+    });
 
     function Set_Expense(id, category, notes, amount, expense) {
         $('.mdl-id').val(id);
@@ -299,7 +316,8 @@
             },
             success: function (data) {
                 $('#modal_expense').modal('toggle');
-                FilterClick();
+                //FilterClick();
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -345,7 +363,8 @@
                 pettycash_id: Id
             },
             success: function (data) {
-                FilterClick();
+                //FilterClick();
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -391,7 +410,8 @@
                 pettycash_id: Id
             },
             success: function (data) {
-                FilterClick();
+                //FilterClick();
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -399,7 +419,7 @@
         }); //end ajax
     }
 
-    function FilterClick() {
+    function FilterClickOld() {
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetPettyCash", "PettyCashRecords")',
@@ -432,6 +452,51 @@
                 bootbox.alert("Error " + result);
             } //end error
         }); //end ajax
+    }
+
+    function FilterClick() {
+        table.destroy();
+        table = $('.datatable').DataTable({
+            processing: true,
+            columns: [
+                { data: 'No' },
+                { data: 'Timestamp' },
+                { data: 'Category' },
+                { data: 'Notes' },
+                {
+                    data: 'Amount', render: function (e) {
+                        return parseFloat(e).toLocaleString();
+                    }
+                },
+                {
+                    data: 'Balance', render: function (e) {
+                        return parseFloat(e).toLocaleString();
+                    }
+                },
+                { data: 'Expense' },
+                { data: 'Status_render' },
+                { data: 'UserInput' }
+            ],
+            ajax: {
+                url: '@Url.Action("GetPettyCash", "PettyCashRecords")',
+                data: {
+                    branch_id: $('#Branch').val(),
+                    start: $('#Start').val(),
+                    end: $('#End').val(),
+                    category_id: $('#Category').val(),
+                    is_not_approve: $('#chkNotApprove').prop('checked')
+                },
+                type: 'POST',
+                dataType: 'json',
+            },
+            drawCallback: function (settings) {
+                var response = settings.json;
+                console.log(response);
+                //$('.mdl-balance').val(parseFloat(response.balance).toLocaleString());
+            },
+            pagingType: 'full_numbers',
+            order: [[1, 'desc']]
+        });
     }
 
     function math_total() {
@@ -470,29 +535,6 @@
         $('.check-styled').uniform();
         $('.check-styled-danger').uniform({
             wrapperClass: 'border-danger-600 text-danger-800'
-        });
-
-        // Setting datatable defaults
-        $.extend($.fn.dataTable.defaults, {
-            autoWidth: false,
-            columnDefs: [{
-                orderable: false,
-                targets: '_all'
-                //width: 120,
-                //targets: [7]
-            }],
-            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
-            language: {
-                search: '<span>Filter:</span> _INPUT_',
-                searchPlaceholder: 'Type to filter...',
-                lengthMenu: '<span>Show:</span> _MENU_',
-                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
-            }
-        });
-
-        var table = $('.datatable').DataTable({
-            pagingType: 'full_numbers',
-            order: [[1, 'desc']]
         });
 
         if ('@ViewBag.SetExpense' == 'False') {

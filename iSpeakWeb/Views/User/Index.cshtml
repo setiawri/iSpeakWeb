@@ -10,8 +10,8 @@
     <!-- Content area -->
     <div class="content">
 
-        <!-- Form inputs -->
-        <div class="card">
+        <!-- Form User -->
+        <div class="card user-list animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -46,39 +46,110 @@
                                     <td>@Html.DisplayFor(modelItem => item.Fullname)</td>
                                     <td>@Html.DisplayFor(modelItem => item.UserName)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                                    <td>@foreach (var role in item.Roles)
+                                    <td>
+                                        @foreach (var role in item.Roles)
                                         {
                                             <span class="badge badge-flat border-danger text-danger-600">@role</span>
                                         }
-                                    </td>
-                                    <td>
-                                        @if (item.Active == true)
-                                        {
-                                            <span class="badge badge-primary d-block">Enabled</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-dark d-block">Disabled</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
-                                    </td>
-                                </tr>
-                            }
+                                </td>
+                                <td>
+                                    @if (item.Active == true)
+                                    {
+                                        <span class="badge badge-primary d-block">Enabled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-dark d-block">Disabled</span>
+                                    }
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                                    @Html.ActionLink("Info", "Info", new { id = item.Id })
+                                </td>
+                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-        <!-- /form inputs -->
-
+        <!-- /form User -->
+        <!-- Form Package -->
+        <div class="card package-list animated bounceInLeft" style="display: none">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">Student Packages</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="form-group">
+                            <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to User List <i class="icon-circle-left2 ml-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable3">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Date</th>
+                                <th>Packages</th>
+                                <th>Student</th>
+                                <th>Amount</th>
+                                <th>Due</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="body-package">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form Package -->
     </div>
     <!-- /content area -->
 
 </div>
 
 <script type="text/javascript">
+
+    function Previous() {
+        $('.user-list').show();
+        $('.package-list').hide();
+    }
+
+    function Info(id) {
+        $('.user-list').hide();
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPackages", "Home")',
+            data: {
+                user_id: id
+            },
+            success: function (data) {
+                console.log(data.obj);
+                $.each(data.obj, function (index, row) {
+                    $("#body-package").append("<tr><td>"+row.No+"</td><td>"+row.Timestamp+"</td><td>"+package+"</td></tr>")
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+
+        $('.package-list').show();
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {

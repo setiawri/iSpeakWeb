@@ -20,8 +20,10 @@ namespace iSpeak.Models
         public List<RemindersModels> Reminders { get; set; }
         public List<BirthdayViewModels> ThisMonth { get; set; }
         public List<BirthdayViewModels> NextMonth { get; set; }
+        public List<StudentPackageViewModels> StudentPackages { get; set; }
         public bool IsStudentBirthday { get; set; }
         public bool ShowBirthdayList { get; set; }
         public bool IsRemindersAllowed { get; set; }
+        public bool ShowStudentPackage { get; set; }
     }
 }

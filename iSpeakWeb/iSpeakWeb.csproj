@@ -293,6 +293,7 @@
     <Compile Include="Models\ServicesModels.cs" />
     <Compile Include="Models\SettingsModels.cs" />
     <Compile Include="Models\SettingsViewModels.cs" />
+    <Compile Include="Models\StudentPackageViewModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
     <Compile Include="Models\TokenIdentity.cs" />
     <Compile Include="Models\TutorPayrollViewModels.cs" />
@@ -540,6 +541,7 @@
     <Content Include="Views\Expenses\Create.cshtml" />
     <Content Include="Views\Expenses\Edit.cshtml" />
     <Content Include="Views\Reports\ProfitLoss.cshtml" />
+    <Content Include="Views\User\Info.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -13,7 +13,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class PettyCashRecordsController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         #region GetPettyCash
         public async Task<JsonResult> GetPettyCash(Guid branch_id, DateTime start, DateTime end, string category_id, bool is_not_approve)
@@ -42,25 +42,25 @@ namespace iSpeak.Controllers
                 string user_input = data_user == null ? "" : data_user.Firstname + " " + data_user.Middlename + " " + data_user.Lastname;
                 string expense_name = item.pcr.ExpenseCategories_Id.HasValue ? db.ExpenseCategories.Where(x => x.Id == item.pcr.ExpenseCategories_Id.Value).FirstOrDefault().Name : "None";
                 string expense_id = item.pcr.ExpenseCategories_Id.HasValue ? item.pcr.ExpenseCategories_Id.Value.ToString() : string.Empty;
-                string link_set_expense_category = "<a href='#'><span class='badge badge-warning d-block' data-toggle='modal' data-target='#modal_expense' onclick='Set_Expense(\"" + item.pcr.Id + "\",\"" + item.pcc.Name + "\",\"" + item.pcr.Notes + "\",\"" + string.Format("{0:N0}", item.pcr.Amount) + "\",\"" + expense_id + "\")'>" + expense_name + "</span></a>";
+                string link_set_expense_category = "<a href='javascript:void(0)'><span class='badge badge-warning d-block' data-toggle='modal' data-target='#modal_expense' onclick='Set_Expense(\"" + item.pcr.Id + "\",\"" + item.pcc.Name + "\",\"" + item.pcr.Notes + "\",\"" + string.Format("{0:N0}", item.pcr.Amount) + "\",\"" + expense_id + "\")'>" + expense_name + "</span></a>";
                 list.Add(new PettyCashViewModels
                 {
                     Id = item.pcr.Id,
                     No = item.pcr.No,
-                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.pcr.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")).ToString("yyyy/MM/dd HH:mm:ss"),
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm:ss}", TimeZoneInfo.ConvertTimeFromUtc(item.pcr.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                     Category = item.pcc.Name,
                     Notes = item.pcr.Notes,
                     Amount = item.pcr.Amount,
                     Balance = balance += item.pcr.Amount,
                     Expense = link_set_expense_category,
                     IsChecked = item.pcr.IsChecked,
-                    Status_render = (item.pcr.IsChecked) ? "<a href='#'><span onclick='CancelApprove(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-success d-block'>Approved</span></a>" : "<a href='#'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark d-block'>None</span></a>",
+                    Status_render = (item.pcr.IsChecked) ? "<a href='javascript:void(0)'><span onclick='CancelApprove(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-success d-block'>Approved</span></a>" : "<a href='javascript:void(0)'><span onclick='Approve(\"" + item.pcr.Id + "\",\"" + item.pcr.Notes + "\",\"" + item.pcr.Amount + "\")' class='badge badge-dark d-block'>None</span></a>",
                     UserInput = user_input
                     //Action_render = "<a href='" + Url.Content("~") + "PettyCashRecords/Edit/" + item.pcr.Id + "'>Edit</a> | <a href='" + Url.Content("~") + "PettyCashRecords/Delete/" + item.pcr.Id + "'>Delete</a>"
                 });
             }
 
-            return Json(new { list, balance }, JsonRequestBehavior.AllowGet);
+            return Json(new { data = list, balance }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region SetApproved

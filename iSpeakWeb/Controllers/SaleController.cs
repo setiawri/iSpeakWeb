@@ -14,8 +14,39 @@ namespace iSpeak.Controllers
     [Authorize]
     public class SaleController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
+        #region Get Data Index
+        public async Task<JsonResult> GetData()
+        {
+            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+            var data = await(from si in db.SaleInvoices
+                             join b in db.Branches on si.Branches_Id equals b.Id
+                             join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                             where si.Branches_Id == user_login.Branches_Id //login_session.Branches_Id
+                             select new { si, b, u }).ToListAsync();
+
+            List<SaleInvoicesIndexModels> list = new List<SaleInvoicesIndexModels>();
+            foreach (var item in data)
+            {
+                list.Add(new SaleInvoicesIndexModels
+                {
+                    Id = item.si.Id,
+                    Branches = item.b.Name,
+                    No = item.si.No,
+                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    Customer = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
+                    Amount = item.si.Amount,
+                    Due = item.si.Due,
+                    Cancelled = item.si.Cancelled,
+                    IsChecked = item.si.IsChecked,
+                    Notes = item.si.Notes
+                });
+            }
+
+            return Json(new { data = list });
+        }
+        #endregion
         #region Get Item
         public JsonResult GetItem(Guid id)
         {
@@ -173,7 +204,7 @@ namespace iSpeak.Controllers
         }
         #endregion
 
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
@@ -181,34 +212,35 @@ namespace iSpeak.Controllers
             else
             {
                 //var login_session = Session["Login"] as LoginViewModel;
-                var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-                var data = await (from si in db.SaleInvoices
-                                  join b in db.Branches on si.Branches_Id equals b.Id
-                                  join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                                  where si.Branches_Id == user_login.Branches_Id //login_session.Branches_Id
-                                  select new { si, b, u }).ToListAsync();
+                //var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
+                //var data = await (from si in db.SaleInvoices
+                //                  join b in db.Branches on si.Branches_Id equals b.Id
+                //                  join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                //                  where si.Branches_Id == user_login.Branches_Id //login_session.Branches_Id
+                //                  select new { si, b, u }).ToListAsync();
 
-                List<SaleInvoicesIndexModels> list = new List<SaleInvoicesIndexModels>();
-                foreach (var item in data)
-                {
-                    list.Add(new SaleInvoicesIndexModels
-                    {
-                        Id = item.si.Id,
-                        Branches = item.b.Name,
-                        No = item.si.No,
-                        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
-                        Customer = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
-                        Amount = item.si.Amount,
-                        Due = item.si.Due,
-                        Cancelled = item.si.Cancelled,
-                        IsChecked = item.si.IsChecked,
-                        Notes = item.si.Notes
-                    });
-                }
+                //List<SaleInvoicesIndexModels> list = new List<SaleInvoicesIndexModels>();
+                //foreach (var item in data)
+                //{
+                //    list.Add(new SaleInvoicesIndexModels
+                //    {
+                //        Id = item.si.Id,
+                //        Branches = item.b.Name,
+                //        No = item.si.No,
+                //        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                //        Customer = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
+                //        Amount = item.si.Amount,
+                //        Due = item.si.Due,
+                //        Cancelled = item.si.Cancelled,
+                //        IsChecked = item.si.IsChecked,
+                //        Notes = item.si.Notes
+                //    });
+                //}
 
                 ViewBag.Cancel = p.IsGranted(User.Identity.Name, "sale_cancel");
                 ViewBag.Approve = p.IsGranted(User.Identity.Name, "sale_approve");
-                return View(list);
+                return View();
+                //return View(list);
             }
         }
         

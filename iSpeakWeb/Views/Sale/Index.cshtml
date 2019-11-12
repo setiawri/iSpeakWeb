@@ -58,7 +58,7 @@
                             </tr>
                         </thead>
                         <tbody id="data-body">
-                            @foreach (var item in Model)
+                            @*@foreach (var item in Model)
                             {
                                 <tr>
                                     <td>
@@ -132,7 +132,7 @@
                                         <a href="#" onclick="View_Log('@item.Id')">Log</a>
                                     </td>
                                 </tr>
-                            }
+                            }*@
                         </tbody>
                     </table>
                 </div>
@@ -183,6 +183,130 @@
 </div>
 
 <script type="text/javascript">
+
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [
+            {
+                orderable: false,
+                width: 50,
+                targets: [0]
+            },
+            {
+                orderable: false,
+                width: 150,
+                targets: [10]
+            }
+        ],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        processing: true,
+        columns: [
+            {
+                data: 'Id', render: function (data, type, row) {
+                    if (row.Due > 0) {
+                        return row.Cancelled == true
+                            ? '<span class="text-danger"><i class="icon-cancel-square2"></i></span>'
+                            : '<input type="checkbox" class="check-styled" id="' + row.Id + '" />';
+                    }
+                    else {
+                        return '<span class="text-primary"><i class="icon-checkmark"></i></span>';
+                    }
+                }
+            },
+            { data: 'Branches' },
+            { data: 'No' },
+            {
+                data: 'Timestamp', render: function (e) {
+                    var dt = new Date(parseInt(e.substr(6)));
+                    return `${
+                        (dt.getMonth()+1).toString().padStart(2, '0')}/${
+                        dt.getDate().toString().padStart(2, '0')}/${
+                        dt.getFullYear().toString().padStart(4, '0')} ${
+                        dt.getHours().toString().padStart(2, '0')}:${
+                        dt.getMinutes().toString().padStart(2, '0')
+                    }`
+                }
+            },
+            { data: 'Customer' },
+            {
+                data: 'Amount', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            {
+                data: 'Due', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            {
+                data: 'Status', render: function (data, type, row) {
+                    if (row.Due > 0) {
+                        return row.Cancelled == true
+                            ? '<span class="badge badge-dark d-block">Cancelled</span>'
+                            : '<span class="badge badge-warning d-block">Waiting Payment</span>';
+                    }
+                    else {
+                        return '<span class="badge badge-primary d-block">Completed</span>';
+                    }
+                }
+            },
+            {
+                data: 'Cancelled', render: function (data, type, row) {
+                    if (data == false) {
+                        return row.Amount == row.Due
+                            ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
+                            : '';
+                    }
+                    else {
+                        return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes + '</span>';
+                    }
+                }
+            },
+            {
+                data: 'IsChecked', render: function (data, type, row) {
+                    if (data == true) {
+                        return '<a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Approved</span></a>';
+                    }
+                    else {
+                        return row.Due == 0
+                            ? '<a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">None</span></a>'
+                            : '';
+                    }
+                }
+            },
+            {
+                data: 'Action', render: function (data, type, row) {
+                    return '<a href="javascript:void(0)" onclick="View_Item(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">View</a> | <a href="javascript:void(0)" onclick="View_Log(' + "'" + row.Id + "'" + ')">Log</a>';
+                }
+            }
+        ],
+        ajax: {
+            url: '@Url.Action("GetData", "Sale")',
+            type: 'POST',
+            dataType: 'json'
+        },
+        drawCallback: function (settings) {
+            //var response = settings.json;
+            //console.log(response);
+            $('.check-styled').uniform();
+        },
+        pagingType: 'full_numbers',
+        order: [[3, 'desc'], [2, 'desc']],
+        search: {
+            search: 'Waiting Payment'
+        }
+    });
+
     function View_Item(id, no) {
         $.ajax({
             type: "POST",
@@ -286,7 +410,8 @@
                 id: id
             },
             success: function (data) {
-                location.reload();
+                //location.reload();
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -332,7 +457,8 @@
                 id: id
             },
             success: function (data) {
-                location.reload();
+                //location.reload();
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -357,38 +483,7 @@
     }
 
     $(document).ready(function () {
-        // Setting datatable defaults
-        $.extend($.fn.dataTable.defaults, {
-            autoWidth: false,
-            columnDefs: [
-                {
-                    orderable: false,
-                    width: 50,
-                    targets: [0]
-                },
-                {
-                    orderable: false,
-                    width: 150,
-                    targets: [10]
-                }
-            ],
-            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
-            language: {
-                search: '<span>Filter:</span> _INPUT_',
-                searchPlaceholder: 'Type to filter...',
-                lengthMenu: '<span>Show:</span> _MENU_',
-                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
-            }
-        });
-
-        var table = $('.datatable').DataTable({
-            pagingType: 'full_numbers',
-            order: [[3, 'desc'], [2, 'desc']],
-            search: {
-                search: 'Waiting Payment'
-            }
-        });
-
+        
         if ('@ViewBag.Cancel' == 'False') {
             table.column(8).visible(false);
         }
@@ -401,6 +496,11 @@
             minimumResultsForSearch: -1
         });
 
+        //$('.check-styled').uniform();
+        //$('.check-styled-primary').uniform({
+        //    wrapperClass: 'border-primary-600 text-primary-800'
+        //});
+
         $('#listStatus').change(function () {
             if ($('#listStatus').val() == '') {
                 $('input[type=search]').val('').keyup();
@@ -408,11 +508,6 @@
             else {
                 $('input[type=search]').val($('#listStatus').val()).keyup();
             }
-        });
-
-        $('.check-styled').uniform();
-        $('.check-styled-primary').uniform({
-            wrapperClass: 'border-primary-600 text-primary-800'
         });
 
         $('#chkHide').click(function () {

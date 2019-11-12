@@ -338,6 +338,99 @@
                     </div>
                 </div>
                 <!-- /form Birthday Student -->
+                <!-- Student Package -->
+                <div class="card student-package">
+                    <div class="card-header bg-primary">
+                        <h7>
+                            <a data-toggle="collapse" class="text-white" href="#accordion-student-package">STUDENT PACKAGE</a>
+                        </h7>
+                    </div>
+                    <div id="accordion-student-package" class="collapse show" data-parent="#accordion-styled">
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-header header-elements-inline">
+                                            <h5 class="card-title">Package List</h5>
+                                            <div class="header-elements">
+                                                <div style="float: right">
+                                                    @*@Html.DropDownList("listRole_this", ViewBag.listRole as SelectList, new { @class = "form-control select2" })*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover datatable3">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No</th>
+                                                            <th>Date</th>
+                                                            <th>Packages</th>
+                                                            <th>Amount</th>
+                                                            <th>Due</th>
+                                                            <th>Status</th>
+                                                            <th>Payment</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (Model.StudentPackages != null)
+                                                        {
+                                                            foreach (var item in Model.StudentPackages)
+                                                            {
+                                                                int row = 0;
+                                                        <tr>
+                                                            <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                                            <td>
+                                                                @foreach (var subitem in item.SaleInvoiceItems)
+                                                                {
+                                                                    if (row > 0)
+                                                                    {
+                                                                        <hr />
+                                                                    }
+                                                                    <span class="badge badge-primary">@subitem.Description</span><br />
+                                                                    <span class="badge badge-dark">Qty: @subitem.Qty</span>
+                                                                    <span class="badge badge-success">Price: @string.Format("{0:N0}", subitem.Price)</span>
+                                                                    <span class="badge badge-warning">Avail. Hours: @subitem.SessionHours_Remaining</span>
+                                                                    <span style="display: none">@(row++)</span>
+                                                                }
+                                                            </td>
+                                                            <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                                            <td>@Html.DisplayFor(modelItem => item.Due)</td>
+                                                            <td>
+                                                                @if (item.Due > 0)
+                                                                {
+                                                                    if (item.Cancelled == true)
+                                                                    {
+                                                                        <span class="badge badge-dark d-block">Cancelled</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge badge-warning d-block">Waiting Payment</span>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge badge-primary d-block">Completed</span>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <a href="#" onclick="View_Payments('@item.SaleInvoices_Id')">View</a>
+                                                            </td>
+                                                        </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /student Package -->
             </div>
         </div>
         <!-- /collapsible -->
@@ -454,6 +547,27 @@
         $('.reminder-edit-desc').val('');
     }
 
+    function View_Payments(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPayment", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Payment Log',
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
         $('.tanggal').daterangepicker({
             singleDatePicker: true,
@@ -479,6 +593,10 @@
 
         if ('@Model.IsRemindersAllowed' == 'False') {
             $('.reminder').hide();
+        }
+
+        if ('@Model.ShowStudentPackage' == 'False') {
+            $('.student-package').hide();
         }
 
         $('#listRole_this').val('Student').trigger('change');

@@ -12,7 +12,35 @@ namespace iSpeak.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
+
+        #region GetPackages
+        //public async Task<JsonResult> GetPackages(string user_id)
+        //{
+        //    List<StudentPackageViewModels> student_packages = new List<StudentPackageViewModels>();
+        //    var packages = await(from si in db.SaleInvoices
+        //                         join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+        //                         where si.Customer_UserAccounts_Id == user_id
+        //                         orderby si.Timestamp descending
+        //                         select new { si, u }).ToListAsync();
+        //    foreach (var package in packages)
+        //    {
+        //        student_packages.Add(new StudentPackageViewModels
+        //        {
+        //            SaleInvoices_Id = package.si.Id,
+        //            No = package.si.No,
+        //            Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(package.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+        //            SaleInvoiceItems = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == package.si.Id).OrderBy(x => x.RowNo).ToList(),
+        //            StudentName = package.u.Firstname + " " + package.u.Middlename + " " + package.u.Lastname,
+        //            Amount = string.Format("{0:N0}", package.si.Amount),
+        //            Due = string.Format("{0:N0}", package.si.Due),
+        //            Cancelled = package.si.Cancelled
+        //        });
+        //    }
+
+        //    return Json(new { obj = student_packages });
+        //}
+        #endregion
 
         public async Task<ActionResult> Index()
         {
@@ -99,15 +127,45 @@ namespace iSpeak.Controllers
                 }
             }
 
+            var is_student = await (from u in db.User
+                                    join ur in db.UserRole on u.Id equals ur.UserId
+                                    join r in db.Role on ur.RoleId equals r.Id
+                                    where r.Name.ToLower() == "student" && u.UserName == User.Identity.Name
+                                    select new { u }).FirstOrDefaultAsync();
+            List<StudentPackageViewModels> student_packages = new List<StudentPackageViewModels>();
+            if (is_student != null)
+            {
+                var packages = await (from si in db.SaleInvoices
+                                      join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                                      where u.UserName == User.Identity.Name
+                                      orderby si.Timestamp descending
+                                      select new { si, u }).ToListAsync();
+                foreach (var package in packages)
+                {
+                    student_packages.Add(new StudentPackageViewModels
+                    {
+                        SaleInvoices_Id = package.si.Id,
+                        No = package.si.No,
+                        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(package.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                        SaleInvoiceItems = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == package.si.Id).OrderBy(x => x.RowNo).ToList(),
+                        StudentName = package.u.Firstname + " " + package.u.Middlename + " " + package.u.Lastname,
+                        Amount = package.si.Amount,
+                        Due = package.si.Due,
+                        Cancelled = package.si.Cancelled
+                    });
+                }
+            }
 
             BirthdayHome birthdayAlert = new BirthdayHome
             {
                 Reminders = await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed).ToListAsync(),
                 ThisMonth = this_month,
                 NextMonth = next_month,
+                StudentPackages = student_packages,
                 IsStudentBirthday = student_bday == null ? false : true,
                 ShowBirthdayList = is_admin == null ? false : true,
-                IsRemindersAllowed = isAllowReminders
+                IsRemindersAllowed = isAllowReminders,
+                ShowStudentPackage = is_student == null ? false : true
             };
 
             ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Name", "Name");

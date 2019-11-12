@@ -1,0 +1,126 @@
+﻿@model IEnumerable<iSpeak.Models.StudentPackageViewModels>
+
+@{
+    ViewBag.Title = "Student Packages";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+
+        <!-- Form Package -->
+        <div class="card animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Title</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="form-group">
+                            <a href="@Url.Action("Index", "User")" class="btn btn-sm btn-secondary">Back to User List <i class="icon-circle-left2 ml-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Date</th>
+                                <th>Packages</th>
+                                <th>Student</th>
+                                <th>Amount</th>
+                                <th>Due</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    int row = 0;
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                        <td>
+                                            @foreach (var subitem in item.SaleInvoiceItems)
+                                            {
+                                                if (row > 0)
+                                                {
+                                                    <hr />
+                                                }
+                                                <span class="badge badge-primary">@subitem.Description</span><br />
+                                                <span class="badge badge-dark">Qty: @subitem.Qty</span>
+                                                <span class="badge badge-success">Price: @string.Format("{0:N0}", subitem.Price)</span>
+                                                <span class="badge badge-warning">Avail. Hours: @subitem.SessionHours_Remaining</span>
+                                                <span style="display: none">@(row++)</span>
+                                            }
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => item.StudentName)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Due)</td>
+                                        <td>
+                                            @if (item.Due > 0)
+                                            {
+                                                if (item.Cancelled == true)
+                                                {
+                                                    <span class="badge badge-dark d-block">Cancelled</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-warning d-block">Waiting Payment</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-primary d-block">Completed</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="#" onclick="View_Payments('@item.SaleInvoices_Id')">View</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form Package -->
+    </div>
+    <!-- /content area -->
+
+</div>
+<script type="text/javascript">
+    function View_Payments(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetPayment", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Payment Log',
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+</script>
