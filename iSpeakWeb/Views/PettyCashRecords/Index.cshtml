@@ -10,7 +10,7 @@
     <!-- Content area -->
     <div class="content">
         <!-- Form inputs -->
-        <div class="card">
+        <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -28,7 +28,7 @@
                         <div class="form-group">
                             <label class="control-label">Start</label>
                             <div class="input-group">
-                                @Html.Editor("Start", new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                @Html.Editor("Start", new { htmlAttributes = new { @class = "form-control tanggal", @Value = string.Format("{0:yyyy/MM/dd}", DateTime.UtcNow.AddMonths(-1)) } })
                                 <span class="input-group-append">
                                     <span class="input-group-text"><i class="icon-calendar"></i></span>
                                 </span>
@@ -39,7 +39,7 @@
                         <div class="form-group">
                             <label class="control-label">End</label>
                             <div class="input-group">
-                                @Html.Editor("End", new { htmlAttributes = new { @class = "form-control tanggal" } })
+                                @Html.Editor("End", new { htmlAttributes = new { @class = "form-control tanggal", @Value = string.Format("{0:yyyy/MM/dd}", DateTime.UtcNow) } })
                                 <span class="input-group-append">
                                     <span class="input-group-text"><i class="icon-calendar"></i></span>
                                 </span>
@@ -93,6 +93,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Expense)</th>
                                 <th>@Html.DisplayNameFor(model => model.IsChecked)</th>
                                 <th>@Html.DisplayNameFor(model => model.UserInput)</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,6 +120,7 @@
                                             }
                                         </td>
                                         <td>@Html.DisplayFor(modelItem => item.UserInput)</td>
+                                        <td></td>
                                     </tr>
                                 }
                             }
@@ -294,6 +296,50 @@
     });
 
     var table = $('.datatable').DataTable({
+        processing: true,
+        columns: [
+            { data: 'No' },
+            { data: 'Timestamp' },
+            { data: 'Category' },
+            { data: 'Notes' },
+            {
+                data: 'Amount', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            {
+                data: 'Balance', render: function (e) {
+                    return parseFloat(e).toLocaleString();
+                }
+            },
+            { data: 'Expense' },
+            { data: 'Status_render' },
+            { data: 'UserInput' },
+            {
+                data: 'Action', render: function (data, type, row) {
+                    var link_log = '<a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '">Log</a>';
+                    return link_log;
+                }
+            }
+        ],
+        ajax: {
+            url: '@Url.Action("GetPettyCash", "PettyCashRecords")',
+            data: {
+                branch_id: $('#Branch').val(),
+                start: $('#Start').val(),
+                end: $('#End').val(),
+                category_id: $('#Category').val(),
+                is_not_approve: $('#chkNotApprove').prop('checked')
+            },
+            type: 'POST',
+            dataType: 'json',
+        },
+        drawCallback: function (result) {
+            if (result.json != undefined) {
+                //console.log(result.json);
+                $('.mdl-balance').val(parseFloat(result.json.balance).toLocaleString());
+            }
+        },
         pagingType: 'full_numbers',
         order: [[1, 'desc']]
     });
@@ -475,7 +521,13 @@
                 },
                 { data: 'Expense' },
                 { data: 'Status_render' },
-                { data: 'UserInput' }
+                { data: 'UserInput' },
+                {
+                    data: 'Action', render: function (data, type, row) {
+                        var link_log = '<a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '">Log</a>';
+                        return link_log;
+                    }
+                }
             ],
             ajax: {
                 url: '@Url.Action("GetPettyCash", "PettyCashRecords")',
@@ -488,11 +540,16 @@
                 },
                 type: 'POST',
                 dataType: 'json',
+                // success: function (result) {
+                    // console.log(result);
+                    //$('.mdl-balance').val(parseFloat(result.balance).toLocaleString());
+                // }
             },
-            drawCallback: function (settings) {
-                var response = settings.json;
-                console.log(response);
-                //$('.mdl-balance').val(parseFloat(response.balance).toLocaleString());
+            drawCallback: function (result) {
+                if (result.json != undefined) {
+                    //console.log(result.json);
+                    $('.mdl-balance').val(parseFloat(result.json.balance).toLocaleString());
+                }
             },
             pagingType: 'full_numbers',
             order: [[1, 'desc']]
@@ -546,11 +603,15 @@
             $('.chk-not-approved').hide();
         }
 
+        if ('@ViewBag.Log' == 'False') {
+            table.column(9).visible(false);
+        }
+
         $('.mdl-btn-submit').click(function () {
             SaveExpense($('.mdl-id').val(), $('#ExpenseCategory').val());
         });
 
-        FilterClick();
+        //FilterClick();
 
         $('#btnFilter').click(function () {
             FilterClick();

@@ -208,6 +208,7 @@
     <Compile Include="Controllers\LessonPackagesController.cs" />
     <Compile Include="Controllers\LessonSessionsController.cs" />
     <Compile Include="Controllers\LessonTypesController.cs" />
+    <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PaymentsController.cs" />
     <Compile Include="Controllers\PettyCashRecordsCategoriesController.cs" />
@@ -265,6 +266,7 @@
     <Compile Include="Models\LessonSessionsModels.cs" />
     <Compile Include="Models\LessonSessionsViewModels.cs" />
     <Compile Include="Models\LessonTypesModels.cs" />
+    <Compile Include="Models\LogsModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\MasterMenuModels.cs" />
     <Compile Include="Models\NewStudentViewModels.cs" />
@@ -542,6 +544,7 @@
     <Content Include="Views\Expenses\Edit.cshtml" />
     <Content Include="Views\Reports\ProfitLoss.cshtml" />
     <Content Include="Views\User\Info.cshtml" />
+    <Content Include="Views\Logs\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

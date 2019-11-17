@@ -14,7 +14,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class ProductsController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         #region GetProductAvailable
         public async Task<JsonResult> GetProductAvailable(Guid product_id)
@@ -94,6 +94,7 @@ namespace iSpeak.Controllers
                                 SellPrice = pr.SellPrice,
                                 Active = pr.Active
                             }).ToListAsync();
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(await list);
             }
         }
@@ -174,7 +175,15 @@ namespace iSpeak.Controllers
 
             if (ModelState.IsValid)
             {
-                db.Entry(productsModels).State = EntityState.Modified;
+                var current_data = await db.Products.FindAsync(productsModels.Id);
+                current_data.Description = productsModels.Description;
+                current_data.Units_Id = productsModels.Units_Id;
+                current_data.Barcode = productsModels.Barcode;
+                current_data.ForSale = productsModels.ForSale;
+                current_data.SellPrice = productsModels.SellPrice;
+                current_data.Notes = productsModels.Notes;
+                current_data.Active = productsModels.Active;
+                db.Entry(current_data).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

@@ -1,8 +1,10 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -45,6 +47,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 List<RoleViewModels> list = new List<RoleViewModels>();
                 foreach (var role in RoleManager.Roles.OrderBy(x => x.Name))
                 {
@@ -70,6 +73,18 @@ namespace iSpeak.Controllers
         {
             var role = new ApplicationRole() { Name = model.Name };
             await RoleManager.CreateAsync(role);
+            LogsModels logs_add = new LogsModels
+            {
+                Id = Guid.NewGuid(),
+                Timestamp = DateTime.UtcNow,
+                TableName = "AspNetRoles",
+                RefId = new Guid(role.Id),
+                Action = "Added",
+                ColumnName = "*ALL",
+                UserAccounts_Id = User.Identity.GetUserId()
+            };
+            db.Logs.Add(logs_add);
+            await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
@@ -88,8 +103,13 @@ namespace iSpeak.Controllers
         [HttpPost]
         public async Task<ActionResult> Edit(RoleViewModels model)
         {
+            var current_data = await db.Role.Where(x => x.Id == model.Id).FirstOrDefaultAsync();
             var role = new ApplicationRole() { Id = model.Id, Name = model.Name };
             await RoleManager.UpdateAsync(role);
+            
+            current_data.Name = model.Name;
+            db.Entry(current_data).State = EntityState.Modified;
+            await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 

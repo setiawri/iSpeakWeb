@@ -14,7 +14,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class LessonSessionsController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         #region JSON
         #region Get Lesson List
@@ -229,6 +229,7 @@ namespace iSpeak.Controllers
 
                 ViewBag.IsShowHourlyRate = p.IsGranted(User.Identity.Name, "lessonsessions_showhourlyrate");
                 ViewBag.Cancel = p.IsGranted(User.Identity.Name, "lessonsessions_cancel");
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(sessions);
             }
         }
@@ -414,7 +415,13 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(lessonSessionsModels).State = EntityState.Modified;
+                var current_data = await db.LessonSessions.FindAsync(lessonSessionsModels.Id);
+                current_data.HourlyRates_Rate = lessonSessionsModels.HourlyRates_Rate;
+                current_data.TravelCost = lessonSessionsModels.TravelCost;
+                current_data.TutorTravelCost = lessonSessionsModels.TutorTravelCost;
+                current_data.Review = lessonSessionsModels.Review;
+                current_data.InternalNotes = lessonSessionsModels.InternalNotes;
+                db.Entry(current_data).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

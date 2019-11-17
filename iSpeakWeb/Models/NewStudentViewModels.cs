@@ -13,4 +13,11 @@ namespace iSpeak.Models
         [Display(Name = "Lesson Package Qty")]
         public int Qty { get; set; }
     }
+
+    public class NewStudentBeforeViewModels
+    {
+        public string StudentId { get; set; }
+        public string Name { get; set; }
+        public int Qty { get; set; }
+    }
 }

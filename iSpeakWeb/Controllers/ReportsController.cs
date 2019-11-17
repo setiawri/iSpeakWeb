@@ -20,9 +20,9 @@ namespace iSpeak.Controllers
         {
             DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
             DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
-            List<NewStudentViewModels> list = await db.Database.SqlQuery<NewStudentViewModels>(@"
+            List<NewStudentBeforeViewModels> list = await db.Database.SqlQuery<NewStudentBeforeViewModels>(@"
                 SELECT
-                u.Firstname+' '+ISNULL(u.Middlename,'')+' '+ISNULL(u.Lastname,'') Name,inv.qty_lesson Qty
+                u.Id StudentId,u.Firstname+' '+ISNULL(u.Middlename,'')+' '+ISNULL(u.Lastname,'') Name,inv.qty_lesson Qty
                 FROM AspNetUsers u
                 INNER JOIN (
 	                SELECT s.Customer_UserAccounts_Id student_id,COUNT(si.Id) qty_lesson 
@@ -37,7 +37,25 @@ namespace iSpeak.Controllers
                 ) inv ON u.Id=inv.student_id
             ").ToListAsync();
 
-            return Json(new { obj = list }, JsonRequestBehavior.AllowGet);
+            var oldStudent = await (from si in db.SaleInvoices
+                                    where si.Timestamp < dateFrom
+                                    group si by si.Customer_UserAccounts_Id into g
+                                    select new { StudentId = g.Key, Invoices = g.ToList() }).ToListAsync();
+            List<NewStudentViewModels> list_filtered = new List<NewStudentViewModels>();
+            foreach (var s in list)
+            {
+                var check = oldStudent.Where(x => x.StudentId == s.StudentId).ToList();
+                if (check.Count == 0)
+                {
+                    list_filtered.Add(new NewStudentViewModels
+                    {
+                        Name = s.Name,
+                        Qty = s.Qty
+                    });
+                }
+            }
+
+            return Json(new { obj = list_filtered }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region GetTutorPayroll

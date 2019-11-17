@@ -242,6 +242,18 @@ namespace iSpeak.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    LogsModels logs_add = new LogsModels
+                    {
+                        Id = Guid.NewGuid(),
+                        Timestamp = DateTime.UtcNow,
+                        TableName = "AspNetUsers",
+                        RefId = new Guid(user.Id),
+                        Action = "Added",
+                        ColumnName = "*ALL",
+                        UserAccounts_Id = User.Identity.GetUserId()
+                    };
+                    db.Logs.Add(logs_add);
+
                     foreach (var role in model.RoleName)
                     {
                         result = await UserManager.AddToRoleAsync(user.Id, role);
@@ -254,6 +266,7 @@ namespace iSpeak.Controllers
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
+                    await db.SaveChangesAsync();
                     return RedirectToAction("Index", "User");
                 }
                 AddErrors(result);

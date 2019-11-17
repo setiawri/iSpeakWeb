@@ -119,6 +119,7 @@ namespace iSpeak.Controllers
                 ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name), "Id", "Name");
                 ViewBag.listExpenseCategory = new SelectList(db.ExpenseCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.initDateStart = DateTime.UtcNow.AddMonths(-1);
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View();
             }
         }

@@ -10,7 +10,7 @@
     <!-- Content area -->
     <div class="content">
         <!-- Form inputs -->
-        <div class="card">
+        <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -39,6 +39,10 @@
                                     <td>
                                         @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
                                         @Html.ActionLink("Manage", "Manage", new { id = item.Id })
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = "AspNetRoles", header = item.Name }, null)
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -59,7 +63,7 @@
         autoWidth: false,
         columnDefs: [{
             orderable: false,
-            width: 120,
+            width: 150,
             targets: [1]
         }],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

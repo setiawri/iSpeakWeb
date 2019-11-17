@@ -14,7 +14,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class LessonPackagesController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         public async Task<ActionResult> Index()
         {
@@ -36,6 +36,7 @@ namespace iSpeak.Controllers
                                 Price = lp.Price,
                                 Active = lp.Active
                             }).ToListAsync();
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(await data);
             }
         }
@@ -121,7 +122,16 @@ namespace iSpeak.Controllers
 
             if (ModelState.IsValid)
             {
-                db.Entry(lessonPackagesModels).State = EntityState.Modified;
+                var current_data = await db.LessonPackages.FindAsync(lessonPackagesModels.Id);
+                current_data.Name = lessonPackagesModels.Name;
+                current_data.Languages_Id = lessonPackagesModels.Languages_Id;
+                current_data.LessonTypes_Id = lessonPackagesModels.LessonTypes_Id;
+                current_data.SessionHours = lessonPackagesModels.SessionHours;
+                current_data.ExpirationDay = lessonPackagesModels.ExpirationDay;
+                current_data.Price = lessonPackagesModels.Price;
+                current_data.Notes = lessonPackagesModels.Notes;
+                current_data.Active = lessonPackagesModels.Active;
+                db.Entry(current_data).State = EntityState.Modified;
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");

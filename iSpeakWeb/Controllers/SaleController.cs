@@ -239,6 +239,7 @@ namespace iSpeak.Controllers
 
                 ViewBag.Cancel = p.IsGranted(User.Identity.Name, "sale_cancel");
                 ViewBag.Approve = p.IsGranted(User.Identity.Name, "sale_approve");
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View();
                 //return View(list);
             }

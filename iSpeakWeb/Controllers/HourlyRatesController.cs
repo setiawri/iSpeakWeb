@@ -14,7 +14,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class HourlyRatesController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         public async Task<ActionResult> Index()
         {
@@ -39,6 +39,7 @@ namespace iSpeak.Controllers
                         Notes = item.hr.Notes
                     });
                 }
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
             }
         }
@@ -232,7 +233,13 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(hourlyRatesModels).State = EntityState.Modified;
+                var current_data = await db.HourlyRates.FindAsync(hourlyRatesModels.Id);
+                current_data.Branches_Id = hourlyRatesModels.Branches_Id;
+                current_data.LessonPackages_Id = hourlyRatesModels.LessonPackages_Id;
+                current_data.UserAccounts_Id = hourlyRatesModels.UserAccounts_Id;
+                current_data.Rate = hourlyRatesModels.Rate;
+                current_data.Notes = hourlyRatesModels.Notes;
+                db.Entry(current_data).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

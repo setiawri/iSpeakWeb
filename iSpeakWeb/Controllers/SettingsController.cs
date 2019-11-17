@@ -12,7 +12,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class SettingsController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
         
         [HttpGet]
         public async Task<ActionResult> Index()

@@ -14,7 +14,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class InventoryController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         public async Task<ActionResult> Index()
         {
@@ -48,7 +48,7 @@ namespace iSpeak.Controllers
                         BuyPrice = item.i.BuyPrice
                     });
                 }
-
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
             }
         }
@@ -135,9 +135,18 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
-                inventoryModels.ReceiveDate = new DateTime(inventoryModels.ReceiveDate.Year, inventoryModels.ReceiveDate.Month, inventoryModels.ReceiveDate.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
-                inventoryModels.AvailableQty = inventoryModels.BuyQty;
-                db.Entry(inventoryModels).State = EntityState.Modified;
+                //inventoryModels.ReceiveDate = new DateTime(inventoryModels.ReceiveDate.Year, inventoryModels.ReceiveDate.Month, inventoryModels.ReceiveDate.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
+                //inventoryModels.AvailableQty = inventoryModels.BuyQty;
+                //db.Entry(inventoryModels).State = EntityState.Modified;
+
+                var current_data = await db.Inventory.FindAsync(inventoryModels.Id);
+                current_data.ReceiveDate = new DateTime(inventoryModels.ReceiveDate.Year, inventoryModels.ReceiveDate.Month, inventoryModels.ReceiveDate.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
+                current_data.Products_Id = inventoryModels.Products_Id;
+                current_data.Suppliers_Id = inventoryModels.Suppliers_Id;
+                current_data.AvailableQty = inventoryModels.BuyQty;
+                current_data.BuyPrice = inventoryModels.BuyPrice;
+                current_data.Notes = inventoryModels.Notes;
+                db.Entry(current_data).State = EntityState.Modified;
 
                 #region Substract Qty
                 InventoryModels inventoryModels_before = await db.Inventory.AsNoTracking().Where(x => x.Id == inventoryModels.Id).FirstOrDefaultAsync();

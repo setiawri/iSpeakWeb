@@ -15,7 +15,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class BranchesController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -85,6 +85,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(await db.Branches.OrderBy(x => x.Name).ToListAsync());
             }
         }
@@ -143,7 +144,14 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(branchesModels).State = EntityState.Modified;
+                var current_data = await db.Branches.FindAsync(branchesModels.Id);
+                current_data.Name = branchesModels.Name;
+                current_data.Address = branchesModels.Address;
+                current_data.PhoneNumber = branchesModels.PhoneNumber;
+                current_data.Notes = branchesModels.Notes;
+                current_data.InvoiceHeaderText = branchesModels.InvoiceHeaderText;
+                current_data.Active = branchesModels.Active;
+                db.Entry(current_data).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

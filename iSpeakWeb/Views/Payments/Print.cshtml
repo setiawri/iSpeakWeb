@@ -10,7 +10,7 @@
     <!-- Content area -->
     <div class="content">
         <!-- Invoices -->
-        <div class="card">
+        <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -194,12 +194,13 @@
                 data: 'Confirmed', render: function (data, type, row) {
                     return data == false
                         ? '<a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">None</span></a>'
-                        : '<span class="badge badge-success d-block">Approved</span>'
+                        : '<a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Approved</span></a>'
                 }
             },
             {
-                data: 'Id', render: function (e) {
-                    return '<a href="@Url.Content("~")' + 'Payments/Print/' + e + '">Print</a>'
+                data: 'Action', render: function (data, type, row) {
+                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '/Print&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '">Log</a>';
+                    return '<a href="@Url.Content("~")' + 'Payments/Print/' + row.Id + '">Print</a>' + link_log;
                 }
             },
         ],
@@ -295,6 +296,23 @@
         $.ajax({
             type: "POST",
             url: '@Url.Action("Approved", "Payments")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                //location.reload();
+                table.ajax.reload(null, false);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function CancelApprove(id, no) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CancelApproved", "Payments")',
             data: {
                 id: id
             },

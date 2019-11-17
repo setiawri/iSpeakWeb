@@ -10,7 +10,7 @@
     <!-- Content area -->
     <div class="content">
         <!-- Form inputs -->
-        <div class="card">
+        <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -195,7 +195,7 @@
             },
             {
                 orderable: false,
-                width: 150,
+                width: 160,
                 targets: [10]
             }
         ],
@@ -286,7 +286,8 @@
             },
             {
                 data: 'Action', render: function (data, type, row) {
-                    return '<a href="javascript:void(0)" onclick="View_Item(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">View</a> | <a href="javascript:void(0)" onclick="View_Log(' + "'" + row.Id + "'" + ')">Log</a>';
+                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=SaleInvoices&header=' + row.No + '">Log</a>';
+                    return '<a href="javascript:void(0)" onclick="View_Item(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">View</a> | <a href="javascript:void(0)" onclick="View_Log(' + "'" + row.Id + "'" + ')">Payment</a>' + link_log;
                 }
             }
         ],

@@ -11,8 +11,7 @@ namespace iSpeak.Models.API
         public string Package { get; set; }
         public string Price { get; set; }
         public string Due { get; set; }
-        public decimal TotalHours { get; set; }
-        public decimal RemainingHours { get; set; }
+        public string RemainingHours { get; set; }
         public string Status { get; set; }
     }
 }

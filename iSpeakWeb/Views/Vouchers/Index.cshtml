@@ -10,7 +10,7 @@
     <!-- Content area -->
     <div class="content">
         <!-- Form inputs -->
-        <div class="card">
+        <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -55,6 +55,10 @@
                                     </td>
                                     <td>
                                         @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Description }, null)
+                                        }
                                     </td>
                                 </tr>
                             }

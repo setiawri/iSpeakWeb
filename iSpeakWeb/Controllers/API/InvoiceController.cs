@@ -2,42 +2,61 @@
 using iSpeak.Models.API;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace iSpeak.Controllers.API
 {
     public class InvoiceController : ApiController
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         [AllowAnonymous]
         [HttpPost]
         [Route("api/invoice")]
-        public HttpResponseMessage Invoices(CommonRequestModels model)
+        public async Task<HttpResponseMessage> Invoices(CommonRequestModels model)
         {
-            var invoices = (from si in db.SaleInvoices
-                            join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                            join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                            join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                            where si.Cancelled == false && sii.LessonPackages_Id != null && u.UserName == model.Username
-                            select new { si, sii, lp, u }).ToList();
+            var invoices = await (from si in db.SaleInvoices
+                                  join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                  join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                                  where si.Cancelled == false && u.UserName == model.Username
+                                  orderby si.Timestamp descending
+                                  select new { si, sii, u }).ToListAsync();
             List<InvoiceApiModels> list = new List<InvoiceApiModels>();
             if (invoices.Count > 0)
             {
-                foreach (var invoice in invoices.OrderByDescending(x => x.si.Timestamp))
+                foreach (var invoice in invoices)
                 {
+                    string package_name;
+                    if (invoice.sii.LessonPackages_Id.HasValue)
+                    {
+                        var a = await db.LessonPackages.Where(x => x.Id == invoice.sii.LessonPackages_Id).FirstOrDefaultAsync();
+                        package_name = a.Name;
+                    }
+                    else if (invoice.sii.Products_Id.HasValue)
+                    {
+                        var a = await db.Products.Where(x => x.Id == invoice.sii.Products_Id).FirstOrDefaultAsync();
+                        package_name = a.Description;
+                    }
+                    else if (invoice.sii.Services_Id.HasValue)
+                    {
+                        var a = await db.Services.Where(x => x.Id == invoice.sii.Services_Id).FirstOrDefaultAsync();
+                        package_name = a.Description;
+                    }
+                    else { package_name = string.Empty; }
+
                     list.Add(new InvoiceApiModels
                     {
                         No = "Invoice No. " + invoice.si.No,
-                        Package = invoice.lp.Name,
+                        Package = package_name,
                         Price = string.Format("{0} {1:N0}", "Rp", invoice.sii.Price),
                         Due = string.Format("{0} {1:N0}", "Rp", invoice.si.Due),
-                        TotalHours = invoice.sii.SessionHours.Value,
-                        RemainingHours = invoice.sii.SessionHours_Remaining.Value,
-                        Status = invoice.si.Due > 0 ? "Waiting Payment" : "Completed"
+                        RemainingHours = string.Format("{0} of {1} hours", invoice.sii.SessionHours_Remaining.Value, invoice.sii.SessionHours.Value),
+                        Status = invoice.si.Due > 0 ? "Waiting Payment" : "Payment Completed"
                     });
                 }
             }

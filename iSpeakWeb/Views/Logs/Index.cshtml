@@ -1,0 +1,141 @@
+﻿@model IEnumerable<iSpeak.Models.LogsViewModels>
+
+@{
+    ViewBag.Title = "Log: ";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+
+        <!-- Form -->
+        <div class="card animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Title @ViewBag.Header</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <a href="@Url.Action("Index", ViewBag.ControllerName)" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-4"></div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input id="txtDesc" type="text" class="form-control" placeholder="Log Description" />
+                                <span class="input-group-append">
+                                    <button id="btnAdd" class="btn bg-success" type="button">ADD <i class="icon-plus22 ml-2"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.UserInput)</th>
+                                <th>@Html.DisplayNameFor(model => model.Description)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.UserInput)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form -->
+    </div>
+    <!-- /content area -->
+
+</div>
+<script type="text/javascript">
+
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        //columnDefs: [
+        //    {
+        //        orderable: false,
+        //        width: 50,
+        //        targets: [0]
+        //    },
+        //    {
+        //        orderable: false,
+        //        width: 150,
+        //        targets: [10]
+        //    }
+        //],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'desc']]
+    });
+
+    function ManualLogs(id, table, desc) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Manual", "Logs")',
+            data: {
+                id: id,
+                table: table,
+                description: desc
+            },
+            success: function (data) {
+                location.reload();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    $(document).ready(function () {
+        $('#btnAdd').click(function () {
+            if ($('#txtDesc').val() == '') {
+                bootbox.alert({
+                    message: "Please input Description Logs!",
+                    buttons: {
+                        ok: {
+                            className: 'btn-danger'
+                        }
+                    }
+                });
+            }
+            else {
+                ManualLogs('@ViewBag.Id', '@ViewBag.TableName', $('#txtDesc').val());
+            }
+        });
+    });
+
+</script>

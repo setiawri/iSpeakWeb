@@ -82,6 +82,41 @@ namespace iSpeak.Controllers
             return Json(new { results, pagination }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region Get Logs
+        public async Task<JsonResult> GetLogs(string id)
+        {
+            //var list = await db.Logs.Where(x => x.RefId.ToString() == id).OrderByDescending(x => x.Timestamp).ToListAsync();
+            var list = await (from l in db.Logs
+                              join u in db.User on l.UserAccounts_Id equals u.Id
+                              where l.RefId.ToString() == id
+                              orderby l.Timestamp descending
+                              select new { l, u }).ToListAsync();
+            string message = @"<div class='table-responsive'>
+                                    <table class='table table-striped table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Timestamp</th>
+                                                <th>User</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>";
+            foreach (var item in list)
+            {
+                string description = item.l.Action == "Modified"
+                    ? string.Format("Updated {0}: {1} to {2}", item.l.ColumnName, string.IsNullOrEmpty(item.l.OriginalValue) ? "' '" : item.l.OriginalValue, string.IsNullOrEmpty(item.l.NewValue) ? "' '" : item.l.NewValue)
+                    : string.Format("{0} User", item.l.Action);
+                message += @"<tr>
+                                <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", item.l.Timestamp) + @"</td>
+                                <td>" + string.Format("{0} {1} {2}", item.u.Firstname,item.u.Middlename,item.u.Lastname) + @"</td>
+                                <td>" + description + @"</td>
+                            </tr>";
+            }
+            message += "</tbody></table></div>";
+
+            return Json(new { content = message }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         // GET: User
         public ActionResult Index()
@@ -91,6 +126,8 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                ViewBag.Reset = p.IsGranted(User.Identity.Name, "user_resetpassword");
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 List<UserViewModels> userViewModels = new List<UserViewModels>();
                 bool isSetRole = p.IsGranted(User.Identity.Name, "user_setroles");
                 if (isSetRole)
@@ -164,46 +201,62 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new UserModels()
-                {
-                    Id = editUserViewModels.User.Id,
-                    Firstname = editUserViewModels.User.Firstname,
-                    Middlename = editUserViewModels.User.Middlename,
-                    Lastname = editUserViewModels.User.Lastname,
-                    Birthday = editUserViewModels.User.Birthday,
-                    UserName = editUserViewModels.User.UserName,
-                    Email = editUserViewModels.User.Email,
-                    Phone1 = editUserViewModels.User.Phone1,
-                    Phone2 = editUserViewModels.User.Phone2,
-                    Address = editUserViewModels.User.Address,
-                    Notes = editUserViewModels.User.Notes,
-                    Active = editUserViewModels.User.Active,
-                    Branches_Id = editUserViewModels.User.Branches_Id
-                };
+                var current_data = db.User.Find(editUserViewModels.User.Id);
+                current_data.Firstname = editUserViewModels.User.Firstname;
+                current_data.Middlename = editUserViewModels.User.Middlename;
+                current_data.Lastname = editUserViewModels.User.Lastname;
+                current_data.Birthday = editUserViewModels.User.Birthday;
+                current_data.UserName = editUserViewModels.User.UserName;
+                current_data.Email = editUserViewModels.User.Email;
+                current_data.Phone1 = editUserViewModels.User.Phone1;
+                current_data.Phone2 = editUserViewModels.User.Phone2;
+                current_data.Address = editUserViewModels.User.Address;
+                current_data.Notes = editUserViewModels.User.Notes;
+                current_data.Active = editUserViewModels.User.Active;
+                current_data.Branches_Id = editUserViewModels.User.Branches_Id;
+                db.Entry(current_data).State = EntityState.Modified;
+                db.SaveChanges();
+
+                //var user = new UserModels()
+                //{
+                //    Id = editUserViewModels.User.Id,
+                //    Firstname = editUserViewModels.User.Firstname,
+                //    Middlename = editUserViewModels.User.Middlename,
+                //    Lastname = editUserViewModels.User.Lastname,
+                //    Birthday = editUserViewModels.User.Birthday,
+                //    UserName = editUserViewModels.User.UserName,
+                //    Email = editUserViewModels.User.Email,
+                //    Phone1 = editUserViewModels.User.Phone1,
+                //    Phone2 = editUserViewModels.User.Phone2,
+                //    Address = editUserViewModels.User.Address,
+                //    Notes = editUserViewModels.User.Notes,
+                //    Active = editUserViewModels.User.Active,
+                //    Branches_Id = editUserViewModels.User.Branches_Id
+                //};
                 //var userRole = new UserRoleModels() { UserId = userViewModels.Id, RoleId = userViewModels.RoleId };
 
                 using (var database = new iSpeakContext())
                 {
-                    database.User.Attach(user);
-                    database.Entry(user).Property(x => x.Firstname).IsModified = true;
-                    database.Entry(user).Property(x => x.Middlename).IsModified = true;
-                    database.Entry(user).Property(x => x.Lastname).IsModified = true;
-                    database.Entry(user).Property(x => x.Birthday).IsModified = true;
-                    database.Entry(user).Property(x => x.UserName).IsModified = true;
-                    database.Entry(user).Property(x => x.Email).IsModified = true;
-                    database.Entry(user).Property(x => x.Phone1).IsModified = true;
-                    database.Entry(user).Property(x => x.Phone2).IsModified = true;
-                    database.Entry(user).Property(x => x.Address).IsModified = true;
-                    database.Entry(user).Property(x => x.Notes).IsModified = true;
-                    database.Entry(user).Property(x => x.Active).IsModified = true;
-                    database.Entry(user).Property(x => x.Branches_Id).IsModified = true;
+                    //database.User.Attach(user);
+                    //database.Entry(user).Property(x => x.Firstname).IsModified = true;
+                    //database.Entry(user).Property(x => x.Middlename).IsModified = true;
+                    //database.Entry(user).Property(x => x.Lastname).IsModified = true;
+                    //database.Entry(user).Property(x => x.Birthday).IsModified = true;
+                    //database.Entry(user).Property(x => x.UserName).IsModified = true;
+                    //database.Entry(user).Property(x => x.Email).IsModified = true;
+                    //database.Entry(user).Property(x => x.Phone1).IsModified = true;
+                    //database.Entry(user).Property(x => x.Phone2).IsModified = true;
+                    //database.Entry(user).Property(x => x.Address).IsModified = true;
+                    //database.Entry(user).Property(x => x.Notes).IsModified = true;
+                    //database.Entry(user).Property(x => x.Active).IsModified = true;
+                    //database.Entry(user).Property(x => x.Branches_Id).IsModified = true;
 
                     int deleteUserRole = database.Database.ExecuteSqlCommand("DELETE FROM AspNetUserRoles WHERE UserId='" + editUserViewModels.User.Id + "'");
 
                     //database.UserRole.Attach(userRole);
                     //database.Entry(userRole).Property(x => x.RoleId).IsModified = true;
 
-                    database.SaveChanges();
+                    //database.SaveChanges();
                 }
 
                 //var list_role_before = db.UserRole.AsNoTracking().Where(x => x.UserId == editUserViewModels.User.Id).ToList();

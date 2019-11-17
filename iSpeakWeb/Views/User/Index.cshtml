@@ -65,6 +65,14 @@
                                 <td>
                                     @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
                                     @Html.ActionLink("Info", "Info", new { id = item.Id })
+                                    @if (ViewBag.Reset == true)
+                                    {
+                                        @:| <a href="javascript:void(0)" onclick="Reset('@item.Id')">Reset Password</a>
+                                    }
+                                    @if (ViewBag.Log == true)
+                                    {
+                                        @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = "AspNetUsers", header = item.Fullname }, null)
+                                    }
                                 </td>
                             </tr>
                         }
@@ -150,13 +158,50 @@
         $('.package-list').show();
     }
 
+    function Reset(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ResetPassword", "Manage")',
+            data: {
+                user_id: id
+            },
+            success: function (data) {
+                bootbox.alert("Password has been reset successfully.");
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function Log(id, fullname) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetLogs", "User")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Logs: ' + fullname,
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
         // Setting datatable defaults
         $.extend($.fn.dataTable.defaults, {
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
-                width: 100,
+                width: 250,
                 targets: [5]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

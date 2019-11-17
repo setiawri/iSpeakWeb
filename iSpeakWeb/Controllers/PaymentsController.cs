@@ -151,6 +151,17 @@ namespace iSpeak.Controllers
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region Cancel Approve Payment
+        public async Task<JsonResult> CancelApproved(Guid id)
+        {
+            var payment = await db.Payments.FindAsync(id);
+            payment.Confirmed = false;
+            db.Entry(payment).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         [HttpGet]
         public ActionResult Create(string id)
@@ -327,26 +338,27 @@ namespace iSpeak.Controllers
 
                     ViewBag.Cancel = p.IsGranted(User.Identity.Name, "payments_cancel");
                     ViewBag.Approve = p.IsGranted(User.Identity.Name, "payments_approve");
+                    ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                     return View(); //return View(list_pim);
                 }
                 else //show payment receipt
                 {
-                    PaymentsModels paymentsModels = db.Payments.Where(x => x.Id == id).FirstOrDefault();
+                    PaymentsModels paymentsModels = await db.Payments.Where(x => x.Id == id).FirstOrDefaultAsync();
                     BranchesModels branchesModels = new BranchesModels();
                     List<PaymentItemsDetails> listItems = new List<PaymentItemsDetails>();
                     List<SaleInvoiceItemsDetails> listDetails = new List<SaleInvoiceItemsDetails>();
                     decimal total_paid = 0;
 
                     //var list_PaymentItemsModels = db.PaymentItems.Where(x => x.Payments_Id == paymentsModels.Id).ToList();
-                    var list_PaymentItemsModels = (from pi in db.PaymentItems
-                                                   join si in db.SaleInvoices on pi.ReferenceId equals si.Id
-                                                   where pi.Payments_Id == paymentsModels.Id
-                                                   orderby si.Timestamp ascending
-                                                   select new { pi }).ToList();
+                    var list_PaymentItemsModels = await (from pi in db.PaymentItems
+                                                         join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                                         where pi.Payments_Id == paymentsModels.Id
+                                                         orderby si.Timestamp ascending
+                                                         select new { pi }).ToListAsync();
                     foreach (var item in list_PaymentItemsModels)
                     {
                         Guid branch_id = db.SaleInvoices.Where(x => x.Id == item.pi.ReferenceId).FirstOrDefault().Branches_Id;
-                        branchesModels = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault();
+                        branchesModels = await db.Branches.Where(x => x.Id == branch_id).FirstOrDefaultAsync();
                         
                         PaymentItemsDetails paymentItemsDetails = new PaymentItemsDetails
                         {
@@ -360,13 +372,13 @@ namespace iSpeak.Controllers
                         total_paid += paymentItemsDetails.Payment;
 
                         //decimal total = 0;
-                        var list_SaleInvoiceItemsModels = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.pi.ReferenceId).OrderBy(x => x.RowNo).ToList();
+                        var list_SaleInvoiceItemsModels = await db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == item.pi.ReferenceId).OrderBy(x => x.RowNo).ToListAsync();
                         foreach (var subitem in list_SaleInvoiceItemsModels)
                         {
-                            var data_customer = (from si in db.SaleInvoices
-                                                 join c in db.User on si.Customer_UserAccounts_Id equals c.Id
-                                                 where si.Id == item.pi.ReferenceId
-                                                 select new { c }).FirstOrDefault();
+                            var data_customer = await (from si in db.SaleInvoices
+                                                       join c in db.User on si.Customer_UserAccounts_Id equals c.Id
+                                                       where si.Id == item.pi.ReferenceId
+                                                       select new { c }).FirstOrDefaultAsync();
                             SaleInvoiceItemsDetails saleInvoiceItemsDetails = new SaleInvoiceItemsDetails();
                             saleInvoiceItemsDetails.Invoice = paymentItemsDetails.Invoice;
                             saleInvoiceItemsDetails.Description = subitem.Description;

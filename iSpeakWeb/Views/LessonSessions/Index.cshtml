@@ -11,7 +11,7 @@
     <div class="content">
 
         <!-- Form inputs -->
-        <div class="card">
+        <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
                 <div class="header-elements">
@@ -80,8 +80,12 @@
                                         }
                                     </td>
                                     <td>
-                                        <a href="#" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
+                                        <a href="javascript:void(0)" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
                                         @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Student }, null)
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -222,7 +226,7 @@
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
-                width: 120,
+                width: 140,
                 targets: [lastColumn]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

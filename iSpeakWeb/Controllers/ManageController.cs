@@ -50,6 +50,21 @@ namespace iSpeak.Controllers
             }
         }
 
+        public async Task<JsonResult> ResetPassword(string user_id)
+        {
+            var user = await UserManager.FindByIdAsync(user_id);
+            if (user.PasswordHash != null)
+            {
+                await UserManager.RemovePasswordAsync(user_id);
+            }
+            var result = await UserManager.AddPasswordAsync(user_id, "qwerty");
+            if (result.Succeeded)
+            {
+                return Json(new { Error = "" });
+            }
+            return Json(new { Error = "Error" });
+        }
+
         //
         // GET: /Manage/Index
         public async Task<ActionResult> Index(ManageMessageId? message)

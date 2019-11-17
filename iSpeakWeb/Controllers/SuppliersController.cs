@@ -14,7 +14,7 @@ namespace iSpeak.Controllers
     [Authorize]
     public class SuppliersController : Controller
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         public async Task<ActionResult> Index()
         {
@@ -23,6 +23,7 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(await db.Suppliers.OrderBy(x => x.Name).ToListAsync());
             }
         }
@@ -81,7 +82,11 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(suppliersModels).State = EntityState.Modified;
+                var current_data = await db.Suppliers.FindAsync(suppliersModels.Id);
+                current_data.Name = suppliersModels.Name;
+                current_data.Notes = suppliersModels.Notes;
+                current_data.Active = suppliersModels.Active;
+                db.Entry(current_data).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
