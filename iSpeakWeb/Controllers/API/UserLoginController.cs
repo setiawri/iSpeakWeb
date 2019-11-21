@@ -11,7 +11,7 @@ namespace iSpeak.Controllers.API
 {
     public class UserLoginController : ApiController
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         [AllowAnonymous]
         [HttpPost]

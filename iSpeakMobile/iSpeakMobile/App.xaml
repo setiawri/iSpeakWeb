@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="iSpeakMobile.App">
+    <Application.Resources>
+
+        <!-- Color -->
+        <Color x:Key="PrimaryColor">#0078D7</Color>
+        <Color x:Key="SecondaryColor">#FFB900</Color>
+        <Color x:Key="TertiaryColor">#00A4EF</Color>
+        <Color x:Key="QuaternaryColor">#7FBA00</Color>
+        <Color x:Key="QuinaryColor">#F25022</Color>
+        <Color x:Key="TextColor">#1d1d1d</Color>
+        <!-- Color -->
+
+        <!-- Font Family -->
+        <OnPlatform x:Key="Exo2RegularCondensed"
+                    x:TypeArguments="x:String"
+                    Android="Exo2-RegularCondensed.otf#Exo2" iOS="Exo2-RegularCondensed" />
+        <OnPlatform x:Key="Exo2LightCondensed"
+                    x:TypeArguments="x:String"
+                    Android="Exo2-LightCondensed.otf#Exo2" iOS="Exo2-LightCondensed" />
+        <OnPlatform x:Key="MaterialFont"
+                    x:TypeArguments="x:String"
+                    Android="materialdesignicons-webfont.ttf#Material Design Icons" iOS="Material Design Icons" />
+        <!-- Font Family -->
+
+        <!-- Invoice Template -->
+        <DataTemplate x:Key="InvoiceTemplate">
+            <StackLayout Padding="0" BackgroundColor="White">
+                <Frame Padding="0" CornerRadius="0" BorderColor="DarkGray" HasShadow="False">
+                    <StackLayout Spacing="0" Padding="10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                                Text="{Binding Package}"
+                                FontSize="18"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2LightCondensed}"
+                                HorizontalOptions="Start" />
+                            <Label Grid.Row="1" Grid.Column="0"
+                                Text="{Binding RemainingHours}"
+                                FontSize="13"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                HorizontalOptions="Start"/>
+                            <Label Grid.Row="2" Grid.Column="0"
+                                Text="{Binding No}"
+                                FontSize="15"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                HorizontalOptions="Start"/>
+                            <Button Grid.Row="1" Grid.RowSpan="2" Grid.Column="1"
+                                Text="Payment"
+                                TextColor="White"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                FontSize="16"
+                                BackgroundColor="{StaticResource QuaternaryColor}"
+                                VerticalOptions="End"/>
+                            <Button Grid.Row="1" Grid.RowSpan="2" Grid.Column="2"
+                                Text="Session"
+                                TextColor="White"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                FontSize="16"
+                                BackgroundColor="{StaticResource TertiaryColor}"
+                                VerticalOptions="End"/>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+            <!--<StackLayout Padding="5" BackgroundColor="White">
+                <Frame Padding="5" CornerRadius="10" BorderColor="DarkGray" HasShadow="False">
+                    <StackLayout Spacing="10" Padding="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.ColumnSpan="2" Grid.Row="0"
+                                Text="{Binding No}"
+                                FontSize="24"
+                                TextColor="{StaticResource PrimaryColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                HorizontalOptions="Center"/>
+                            <Label Grid.ColumnSpan="2" Grid.Row="1" 
+                                Text="{Binding Package}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                HorizontalOptions="Center"/>
+                            <Label Grid.Column="0" Grid.Row="2" 
+                                Text="Status"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="1" Grid.Row="2" 
+                                Text="{Binding Status}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="0" Grid.Row="3" 
+                                Text="Price"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="1" Grid.Row="3" 
+                                Text="{Binding Price}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="0" Grid.Row="4" 
+                                Text="Remaining"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="1" Grid.Row="4" 
+                                Text="{Binding RemainingHours}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>-->
+        </DataTemplate>
+        <!-- Invoice Template -->
+
+        <!-- Payment Template -->
+        <DataTemplate x:Key="PaymentTemplate">
+            <StackLayout Padding="5" BackgroundColor="White">
+                <Frame Padding="5" CornerRadius="10" BorderColor="DarkGray" HasShadow="False">
+                    <StackLayout Spacing="10" Padding="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.ColumnSpan="2" Grid.Row="0"
+                                Text="{Binding No}"
+                                FontSize="24"
+                                TextColor="{StaticResource PrimaryColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"
+                                HorizontalOptions="Center"/>
+                            <Label Grid.Column="0" Grid.Row="1" 
+                                Text="Date"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="1" Grid.Row="1" 
+                                Text="{Binding Date}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="0" Grid.Row="2" 
+                                Text="Amount"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="1" Grid.Row="2" 
+                                Text="{Binding Amount}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="0" Grid.Row="3" 
+                                Text="Branch"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                            <Label Grid.Column="1" Grid.Row="3" 
+                                Text="{Binding Branch}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+        </DataTemplate>
+        <!-- Payment Template -->
+
+        <!-- Session Template -->
+        <DataTemplate x:Key="SessionTemplate">
+            <StackLayout Padding="0" BackgroundColor="White">
+                <Frame Padding="0" CornerRadius="0" BorderColor="DarkGray" HasShadow="False">
+                    <StackLayout Spacing="0" Padding="8">
+                        <Label Text="{Binding Date}"
+                           FontSize="10"
+                           TextColor="{StaticResource TextColor}"
+                           FontFamily="{StaticResource Exo2RegularCondensed}"
+                           HorizontalOptions="Start"/>
+                        <Label Text="{Binding Lesson}"
+                           FontSize="20"
+                           TextColor="{StaticResource TextColor}"
+                           FontFamily="{StaticResource Exo2RegularCondensed}"
+                           HorizontalOptions="Start"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+        </DataTemplate>
+        <!-- Session Template -->
+
+    </Application.Resources>
+</Application>

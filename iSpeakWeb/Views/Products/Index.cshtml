@@ -29,9 +29,10 @@
                             <tr>
                                 <th>@Html.DisplayNameFor(model => model.Description)</th>
                                 <th>@Html.DisplayNameFor(model => model.Barcode)</th>
-                                <th>@Html.DisplayNameFor(model => model.ForSale)</th>
                                 <th>@Html.DisplayNameFor(model => model.Unit)</th>
+                                <th>@Html.DisplayNameFor(model => model.BuyPrice)</th>
                                 <th>@Html.DisplayNameFor(model => model.SellPrice)</th>
+                                <th>@Html.DisplayNameFor(model => model.ForSale)</th>
                                 <th>@Html.DisplayNameFor(model => model.Active)</th>
                                 <th>Action</th>
                             </tr>
@@ -39,39 +40,40 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                            <tr>
-                                <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                                <td>@Html.DisplayFor(modelItem => item.Barcode)</td>
-                                <td>
-                                    @if (item.ForSale == true)
-                                    {
-                                        <span class="badge badge-success">Yes</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-danger">No</span>
-                                    }
-                                </td>
-                                <td>@Html.DisplayFor(modelItem => item.Unit)</td>
-                                <td>@Html.DisplayFor(modelItem => item.SellPrice)</td>
-                                <td>
-                                    @if (item.Active == true)
-                                    {
-                                        <span class="badge badge-primary">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-dark">Not Active</span>
-                                    }
-                                </td>
-                                <td>
-                                    @Html.ActionLink("Edit", "Edit", new { id = item.Id })
-                                    @if (ViewBag.Log == true)
-                                    {
-                                        @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Description }, null)
-                                    }
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Barcode)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Unit)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.BuyPrice)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.SellPrice)</td>
+                                    <td>
+                                        @if (item.ForSale == true)
+                                        {
+                                            <span class="badge badge-success">Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">No</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Active == true)
+                                        {
+                                            <span class="badge badge-primary">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-dark">Not Active</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Description }, null)
+                                        }
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -85,27 +87,32 @@
 </div>
 
 <script type="text/javascript">
-    $(document).ready(function () {
-        // Setting datatable defaults
-        $.extend($.fn.dataTable.defaults, {
-            autoWidth: false,
-            columnDefs: [{
-                orderable: false,
-                width: 100,
-                targets: [6]
-            }],
-            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
-            language: {
-                search: '<span>Filter:</span> _INPUT_',
-                searchPlaceholder: 'Type to filter...',
-                lengthMenu: '<span>Show:</span> _MENU_',
-                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
-            }
-        });
 
-        $('.datatable').DataTable({
-            pagingType: 'full_numbers',
-            order: [[0, 'asc']]
-        });
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            width: 100,
+            targets: [7]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+
+    $(document).ready(function () {
+        if ('@ViewBag.BuyPrice' == 'False') {
+            table.column(3).visible(false);
+        }
     });
 </script>

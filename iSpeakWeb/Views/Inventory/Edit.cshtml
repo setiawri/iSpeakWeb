@@ -104,6 +104,23 @@
 </div>
 
 <script type="text/javascript">
+    function GetBuyPrice(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetProducts", "Products")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                //alert(data.products.BuyPrice);
+                $('#BuyPrice').val(data.products.BuyPrice);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
         $('.select2').select2();
 
@@ -116,5 +133,14 @@
 
         $('#ReceiveDate').data('daterangepicker').setStartDate('@string.Format("{0:yyyy/MM/dd}", Model.ReceiveDate)');
         $('#ReceiveDate').data('daterangepicker').setEndDate('@string.Format("{0:yyyy/MM/dd}", Model.ReceiveDate)');
+
+        $('#Products_Id').change(function () {
+            if ($('#Products_Id').val() != '') {
+                GetBuyPrice($('#Products_Id').val());
+            }
+            else {
+                $('#BuyPrice').val('');
+            }
+        });
     })
 </script>

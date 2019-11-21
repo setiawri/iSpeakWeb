@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:viewModels="clr-namespace:iSpeakMobile.ViewModels"
+             xmlns:scroll="clr-namespace:Xamarin.Forms.Extended;assembly=Xamarin.Forms.Extended.InfiniteScrolling"
+             x:Class="iSpeakMobile.Views.SessionPage"
+             Title="Session - iSpeak Mobile">
+    <ContentPage.BindingContext>
+        <viewModels:SessionViewModel />
+    </ContentPage.BindingContext>
+    <StackLayout>
+        <ListView ItemsSource="{Binding Items}" CachingStrategy="RecycleElement" HasUnevenRows="True" ItemSelected="ListView_ItemSelected">
+            <ListView.Behaviors>
+                <scroll:InfiniteScrollBehavior IsLoadingMore="{Binding IsBusy}" />
+            </ListView.Behaviors>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Padding="0" BackgroundColor="White">
+                            <StackLayout Spacing="0" Padding="8">
+                                <Label Text="{Binding Date}"
+                                   FontSize="10"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>
+                                <Label Text="{Binding Lesson}"
+                                   FontSize="20"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>
+                                <!--<Label Text="{Binding .}"
+                                   FontSize="20"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>-->
+                            </StackLayout>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.Footer>
+                <Grid Padding="6" IsVisible="{Binding IsBusy}">
+                    <!-- set the footer to have a zero height when invisible -->
+                    <Grid.Triggers>
+                        <Trigger TargetType="Grid" Property="IsVisible" Value="False">
+                            <Setter Property="HeightRequest" Value="0" />
+                        </Trigger>
+                    </Grid.Triggers>
+                    <!-- the loading content -->
+                    <Label Text="Loading..." VerticalOptions="Center" HorizontalOptions="Center" />
+                </Grid>
+            </ListView.Footer>
+        </ListView>
+    </StackLayout>
+    
+    <!--<ContentPage.Content>
+        <CollectionView x:Name="cv"
+            ItemTemplate="{StaticResource SessionTemplate}"
+            SelectionMode="Single"
+            SelectionChanged="OnCollectionViewSelectionChanged"/>
+        <CollectionView x:Name="cv" ItemsSource="{Binding Session}" SelectionMode="Single" SelectionChanged="OnCollectionViewSelectionChanged">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Padding="0" BackgroundColor="White">
+                        <Frame Padding="0" CornerRadius="0" BorderColor="DarkGray" HasShadow="False">
+                            <StackLayout Spacing="0" Padding="8">
+                                <Label Text="{Binding Date}"
+                                   FontSize="10"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>
+                                <Label Text="{Binding Lesson}"
+                                   FontSize="20"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>
+                            </StackLayout>
+                        </Frame>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </ContentPage.Content>-->
+</ContentPage>

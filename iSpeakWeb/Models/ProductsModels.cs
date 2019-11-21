@@ -17,6 +17,9 @@ namespace iSpeak.Models
         [Display(Name = "Unit")]
         public Guid Units_Id { get; set; }
         public string Barcode { get; set; }
+        [Display(Name = "Buy Price")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int BuyPrice { get; set; }
         [Display(Name = "For Sale")]
         public bool ForSale { get; set; }
         [Display(Name = "Sell Price")]
@@ -31,6 +34,9 @@ namespace iSpeak.Models
         public Guid Id { get; set; }
         public string Description { get; set; }
         public string Barcode { get; set; }
+        [Display(Name = "Buy Price")]
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int BuyPrice { get; set; }
         [Display(Name = "For Sale")]
         public bool ForSale { get; set; }
         public string Unit { get; set; }

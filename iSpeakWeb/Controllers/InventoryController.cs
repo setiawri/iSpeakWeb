@@ -48,6 +48,7 @@ namespace iSpeak.Controllers
                         BuyPrice = item.i.BuyPrice
                     });
                 }
+                ViewBag.BuyPrice = p.IsGranted(User.Identity.Name, "show_buyprice");
                 ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
             }

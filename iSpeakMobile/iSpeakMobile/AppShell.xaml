@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Shell xmlns="http://xamarin.com/schemas/2014/forms" 
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       mc:Ignorable="d"
+       xmlns:views="clr-namespace:iSpeakMobile.Views"
+       Title="iSpeakMobile"
+       x:Class="iSpeakMobile.AppShell">
+
+    <Shell.FlyoutHeader>
+        <views:HeaderView />
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Route="ispeak" Title="iSpeak" Shell.TabBarIsVisible="True" FlyoutDisplayOptions="AsMultipleItems">
+        <ShellContent Route="home" Title="Home" ContentTemplate="{DataTemplate views:HomePage}">
+            <ShellContent.Icon>
+                <FontImageSource
+                    FontFamily="{StaticResource MaterialFont}"
+                    Glyph="&#xf006f;"
+                    Color="Black">
+                </FontImageSource>
+            </ShellContent.Icon>
+        </ShellContent>
+        <ShellContent Route="payment" Title="Payment" ContentTemplate="{DataTemplate views:PaymentPage}">
+            <ShellContent.Icon>
+                <FontImageSource
+                    FontFamily="{StaticResource MaterialFont}"
+                    Glyph="&#xf0016;"
+                    Color="Black">
+                </FontImageSource>
+            </ShellContent.Icon>
+        </ShellContent>
+        <ShellContent Route="session" Title="Session" ContentTemplate="{DataTemplate views:SessionPage}">
+            <ShellContent.Icon>
+                <FontImageSource
+                    FontFamily="{StaticResource MaterialFont}"
+                    Glyph="&#xf0100;"
+                    Color="Black">
+                </FontImageSource>
+            </ShellContent.Icon>
+        </ShellContent>
+    </FlyoutItem>
+
+    <MenuItem Text="Website"
+              Command="{Binding InfoCommand}"
+              CommandParameter="http://ispeakgroup.com/">
+        <MenuItem.IconImageSource>
+            <FontImageSource
+                FontFamily="{StaticResource MaterialFont}"
+                Glyph="&#xf59f;"
+                Color="Black">
+            </FontImageSource>
+        </MenuItem.IconImageSource>
+    </MenuItem>
+    <MenuItem Text="Logout"
+              Command="{Binding LogoutCommand}"
+              Clicked="Logout_Clicked">
+        <MenuItem.IconImageSource>
+            <FontImageSource
+                FontFamily="{StaticResource MaterialFont}"
+                Glyph="&#xf425;"
+                Color="Black">
+            </FontImageSource>
+        </MenuItem.IconImageSource>
+    </MenuItem>
+
+</Shell>

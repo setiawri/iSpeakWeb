@@ -23,7 +23,7 @@ namespace iSpeak.Controllers.API
             var invoices = await (from si in db.SaleInvoices
                                   join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
                                   join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                                  where si.Cancelled == false && u.UserName == model.Username
+                                  where si.Cancelled == false && u.UserName == model.Username && sii.LessonPackages_Id != null
                                   orderby si.Timestamp descending
                                   select new { si, sii, u }).ToListAsync();
             List<InvoiceApiModels> list = new List<InvoiceApiModels>();
@@ -51,11 +51,12 @@ namespace iSpeak.Controllers.API
 
                     list.Add(new InvoiceApiModels
                     {
+                        SaleInvoiceItems_Id = invoice.sii.Id,
                         No = "Invoice No. " + invoice.si.No,
                         Package = package_name,
                         Price = string.Format("{0} {1:N0}", "Rp", invoice.sii.Price),
                         Due = string.Format("{0} {1:N0}", "Rp", invoice.si.Due),
-                        RemainingHours = string.Format("{0} of {1} hours", invoice.sii.SessionHours_Remaining.Value, invoice.sii.SessionHours.Value),
+                        RemainingHours = string.Format("Avail. {0} of {1} hours", invoice.sii.SessionHours_Remaining.Value, invoice.sii.SessionHours.Value),
                         Status = invoice.si.Due > 0 ? "Waiting Payment" : "Payment Completed"
                     });
                 }
@@ -74,16 +75,15 @@ namespace iSpeak.Controllers.API
         [AllowAnonymous]
         [HttpPost]
         [Route("api/payment")]
-        public HttpResponseMessage CheckPayments(CommonRequestModels model)
+        public async Task<HttpResponseMessage> CheckPayments(CommonRequestModels model)
         {
-            var payments = (from p in db.Payments
-                            join pi in db.PaymentItems on p.Id equals pi.Payments_Id
-                            join si in db.SaleInvoices on pi.ReferenceId equals si.Id
-                            join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                            join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                            join b in db.Branches on si.Branches_Id equals b.Id
-                            where u.UserName == model.Username
-                            select new { p, pi, si, sii, u, b }).ToList();
+            var payments = await (from p in db.Payments
+                                  join pi in db.PaymentItems on p.Id equals pi.Payments_Id
+                                  join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                  join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                                  join b in db.Branches on si.Branches_Id equals b.Id
+                                  where p.Cancelled == false && u.UserName == model.Username
+                                  select new { p, pi, si, u, b }).ToListAsync();
             List<PaymentApiModels> list = new List<PaymentApiModels>();
             if (payments.Count > 0)
             {
@@ -94,7 +94,8 @@ namespace iSpeak.Controllers.API
                         No = "Payment No. " + payment.p.No,
                         Date = string.Format("{0:yyyy/MM/dd}", TimeZoneInfo.ConvertTimeFromUtc(payment.p.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                         Amount = string.Format("{0} {1:N0}", "Rp ", payment.pi.Amount),
-                        Branch = payment.b.Name
+                        Branch = payment.b.Name,
+                        NoInvoice = "Invoice No. " + payment.si.No
                     });
                 }
             }

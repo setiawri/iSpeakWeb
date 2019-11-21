@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="iSpeakMobile.Views.SessionByIdPage">
+    <ContentPage.Content>
+        <CollectionView x:Name="cv" ItemsSource="{Binding Session}" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Spacing="0" Padding="0" BackgroundColor="White">
+                        <Frame Margin="2" Padding="10" BorderColor="DarkGray" HasShadow="False">
+                            <StackLayout>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="3*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Label Grid.Column="0" Grid.Row="0" 
+                                Text="Date"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="1" Grid.Row="0" 
+                                Text="{Binding Date}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="0" Grid.Row="1" 
+                                Text="Lesson"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="1" Grid.Row="1" 
+                                Text="{Binding Lesson}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="0" Grid.Row="2" 
+                                Text="Hour"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="1" Grid.Row="2" 
+                                Text="{Binding Hour}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="0" Grid.Row="3" 
+                                Text="Tutor"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="1" Grid.Row="3" 
+                                Text="{Binding Tutor}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="0" Grid.Row="4" 
+                                Text="Review"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                    <Label Grid.Column="1" Grid.Row="4" 
+                                Text="{Binding Review}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                                </Grid>
+                            </StackLayout>
+                        </Frame>
+                    </StackLayout>
+                    <!--<StackLayout Padding="0" BackgroundColor="White">
+                        <Frame Padding="0" CornerRadius="0" BorderColor="DarkGray" HasShadow="False">
+                            <StackLayout Spacing="0" Padding="8">
+                                <Label Text="{Binding Date}"
+                                   FontSize="10"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>
+                                <Label Text="{Binding Lesson}"
+                                   FontSize="20"
+                                   TextColor="{StaticResource TextColor}"
+                                   FontFamily="{StaticResource Exo2RegularCondensed}"
+                                   HorizontalOptions="Start"/>
+                            </StackLayout>
+                        </Frame>
+                    </StackLayout>-->
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </ContentPage.Content>
+</ContentPage>

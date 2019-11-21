@@ -11,7 +11,7 @@ namespace iSpeak.Controllers.API
 {
     public class SessionsController : ApiController
     {
-        private iSpeakContext db = new iSpeakContext();
+        private readonly iSpeakContext db = new iSpeakContext();
 
         [AllowAnonymous]
         [HttpPost]
@@ -33,6 +33,7 @@ namespace iSpeak.Controllers.API
                 {
                     list.Add(new SessionApiModels
                     {
+                        SaleInvoiceItems_Id = session.sii.Id,
                         Date = string.Format("{0:yyy/MM/dd HH:mm}", session.ls.Timestamp),
                         Lesson = session.lp.Name,
                         Hour = session.ls.SessionHours,

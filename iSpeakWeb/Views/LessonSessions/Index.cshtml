@@ -45,7 +45,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model)
+                            @*@foreach (var item in Model)
                             {
                                 <tr>
                                     <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
@@ -53,11 +53,11 @@
                                     <td>@Html.DisplayFor(modelItem => item.Student)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
                                     <td>@Html.DisplayFor(modelItem => item.SessionHours)</td>
-                                    @*@if (ViewBag.IsShowHourlyRate)
+                                    @if (ViewBag.IsShowHourlyRate)
                                     {
                                         <td>@Html.DisplayFor(modelItem => item.HourlyRates_Rate)</td>
-                                    }*@
-                                    @*<td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
+                                    }
+                                    <td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
                                     <td>@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
                                     <td>
                                         @if (item.Deleted == false)
@@ -68,7 +68,7 @@
                                         {
                                             <span class="badge badge-danger d-block">YES</span>
                                         }
-                                    </td>*@
+                                    </td>
                                     <td>
                                         @if (item.Deleted == false)
                                         {
@@ -88,7 +88,7 @@
                                         }
                                     </td>
                                 </tr>
-                            }
+                            }*@
                         </tbody>
                     </table>
                 </div>
@@ -161,6 +161,70 @@
 
 <script type="text/javascript">
 
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            width: 140,
+            targets: [lastColumn]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var lastColumn = 0;
+    if ('@ViewBag.Cancel' == 'True') {
+        lastColumn = 6;
+    }
+    else {
+        lastColumn = 5;
+    }
+
+    var table = $('.datatable').DataTable({
+        processing: true,
+        serverSide: true,
+        columns: [
+            { data: 'Timestamp', name: 'Timestamp' },
+            { data: 'Lesson', name: 'Lesson' },
+            { data: 'Student', name: 'Student' },
+            { data: 'Tutor', name: 'Tutor' },
+            {
+                data: 'SessionHours', name: 'SessionHours', render: function (e) {
+                    return parseFloat(e).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+                }
+            },
+            {
+                data: 'Deleted', name: 'Deleted', render: function (data, type, row) {
+                    if (data == false) {
+                        return '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.Timestamp + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ', ' + "'" + parseFloat(row.SessionHours).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') + "'" + ')">Cancel</span></a>';
+                    }
+                    else {
+                        return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes_Cancel + '</span>';
+                    }
+                }
+            },
+            {
+                data: 'Action', name: 'Action', render: function (data, type, row) {
+                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.Student + '">Log</a>';
+                    return '<a href="javascript:void(0)" onclick="View(' + "'" + row.Id + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ')">View</a> | <a href="' + '@Url.Content("~")' + 'LessonSessions/Edit/' + row.Id + '">Edit</a>' + link_log;
+                }
+            },
+        ],
+        ajax: {
+            url: '@Url.Action("GetData", "LessonSessions")',
+            type: 'POST',
+            dataType: 'json',
+        },
+        pagingType: 'full_numbers',
+        order: [[0, 'desc']]
+    });
+
     function View(id, lesson, student, tutor) {
         $.ajax({
             type: "POST",
@@ -213,35 +277,6 @@
     }
 
     $(document).ready(function () {
-        var lastColumn = 0;
-        if ('@ViewBag.Cancel' == 'True') {
-            lastColumn = 6;
-        }
-        else {
-            lastColumn = 5;
-        }
-
-        // Setting datatable defaults
-        $.extend($.fn.dataTable.defaults, {
-            autoWidth: false,
-            columnDefs: [{
-                orderable: false,
-                width: 140,
-                targets: [lastColumn]
-            }],
-            dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
-            language: {
-                search: '<span>Filter:</span> _INPUT_',
-                searchPlaceholder: 'Type to filter...',
-                lengthMenu: '<span>Show:</span> _MENU_',
-                paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
-            }
-        });
-
-        var table = $('.datatable').DataTable({
-            pagingType: 'full_numbers',
-            order: [[0, 'desc']]
-        });
 
         if ('@ViewBag.Cancel' == 'False') {
             table.column(5).visible(false);

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -45,7 +46,7 @@ namespace iSpeak.Controllers
         public async Task<JsonResult> GetData()
         {
             Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
-            List<PaymentsIndexModels> list_pim = new List<PaymentsIndexModels>();
+            List<PaymentsIndexModels> list = new List<PaymentsIndexModels>();
             foreach (var item in db.Payments.ToList())
             {
                 var check_session = await(from pi in db.PaymentItems
@@ -58,7 +59,7 @@ namespace iSpeak.Controllers
                 {
                     Id = item.Id,
                     No = item.No,
-                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                     CashAmount = item.CashAmount,
                     DebitAmount = item.DebitAmount,
                     ConsignmentAmount = item.ConsignmentAmount,
@@ -66,15 +67,47 @@ namespace iSpeak.Controllers
                     Confirmed = item.Confirmed,
                     Notes_Cancel = item.Notes_Cancel,
                     HasSession = check_session.Count > 0 ? true : false
+                    //Action = item.Notes_Cancel
                 };
                 Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
                 Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
                 pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
                 if (branch_id == user_branch)
-                    list_pim.Add(pim);
+                    list.Add(pim);
             }
 
-            return Json(new { data = list_pim }, JsonRequestBehavior.AllowGet);
+            int totalRows = list.Count;
+
+            //Server Side Parameters
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][name]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            //Filtering
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                list = list
+                    .Where(x => x.Branch.ToLower().Contains(searchValue.ToLower())
+                        || x.Timestamp.ToLower().Contains(searchValue.ToLower())
+                        || x.No.ToLower().Contains(searchValue.ToLower())
+                        || x.CashAmount.ToString().Contains(searchValue.ToLower())
+                        || x.DebitAmount.ToString().Contains(searchValue.ToLower())
+                        || x.ConsignmentAmount.ToString().Contains(searchValue.ToLower())
+                    ).ToList();
+            }
+            int totalRowsFiltered = list.Count;
+
+            //Sorting
+            list = list.OrderBy(sortColumnName + " " + sortDirection).ToList();
+
+            //Paging
+            list = list.Skip(start).Take(length).ToList();
+
+            return Json(new { data = list, draw = Request["draw"], recordsTotal = totalRows, recordsFiltered = totalRowsFiltered }, JsonRequestBehavior.AllowGet);
+
+            //return Json(new { data = list }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Get Payment

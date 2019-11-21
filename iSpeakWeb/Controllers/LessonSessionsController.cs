@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -17,6 +18,84 @@ namespace iSpeak.Controllers
         private readonly iSpeakContext db = new iSpeakContext();
 
         #region JSON
+        #region GetData
+        public async Task<JsonResult> GetData()
+        {
+            Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+            var is_student = await (from u in db.User
+                                    join ur in db.UserRole on u.Id equals ur.UserId
+                                    join r in db.Role on ur.RoleId equals r.Id
+                                    where r.Name.ToLower() == "student" && u.UserName == User.Identity.Name
+                                    select new { u }).FirstOrDefaultAsync();
+
+            List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
+
+            var sessions = (is_student == null)
+                ? await (from ls in db.LessonSessions
+                         join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                         join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                         join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                         join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                         join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                         where ls.Branches_Id == user_branch
+                         select new { ls, u, sii, si, s, lp }).ToListAsync()
+                : await (from ls in db.LessonSessions
+                         join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                         join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                         join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                         join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                         join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                         where ls.Branches_Id == user_branch && s.UserName == User.Identity.Name
+                         select new { ls, u, sii, si, s, lp }).ToListAsync();
+
+            foreach (var session in sessions)
+            {
+                list.Add(new LessonSessionsViewModels
+                {
+                    Id = session.ls.Id,
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", session.ls.Timestamp),
+                    Lesson = session.lp.Name,
+                    Student = session.s.Firstname + " " + session.s.Middlename + " " + session.s.Lastname,
+                    Tutor = session.u.Firstname + " " + session.u.Middlename + " " + session.u.Lastname,
+                    SessionHours = session.ls.SessionHours,
+                    HourlyRates_Rate = session.ls.HourlyRates_Rate,
+                    TravelCost = session.ls.TravelCost,
+                    TutorTravelCost = session.ls.TutorTravelCost,
+                    Deleted = session.ls.Deleted,
+                    Notes_Cancel = session.ls.Notes_Cancel
+                });
+            }
+
+            int totalRows = list.Count;
+
+            //Server Side Parameters
+            int start = Convert.ToInt32(Request["start"]);
+            int length = Convert.ToInt32(Request["length"]);
+            string searchValue = Request["search[value]"];
+            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][name]"];
+            string sortDirection = Request["order[0][dir]"];
+
+            //Filtering
+            if (!string.IsNullOrEmpty(searchValue))
+            {
+                list = list
+                    .Where(x => x.Timestamp.ToLower().Contains(searchValue.ToLower())
+                        || x.Lesson.ToLower().Contains(searchValue.ToLower())
+                        || x.Student.ToLower().Contains(searchValue.ToLower())
+                        || x.Tutor.ToString().Contains(searchValue.ToLower())
+                    ).ToList();
+            }
+            int totalRowsFiltered = list.Count;
+
+            //Sorting
+            list = list.OrderBy(sortColumnName + " " + sortDirection).ToList();
+
+            //Paging
+            list = list.Skip(start).Take(length).ToList();
+
+            return Json(new { data = list, draw = Request["draw"], recordsTotal = totalRows, recordsFiltered = totalRowsFiltered }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #region Get Lesson List
         public JsonResult GetLessonList(string student_id)
         {
@@ -176,61 +255,20 @@ namespace iSpeak.Controllers
         #endregion
         #endregion
 
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
-                var sessions = await (from ls in db.LessonSessions
-                                      join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
-                                      join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                                      join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                                      join s in db.User on si.Customer_UserAccounts_Id equals s.Id
-                                      join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                                      where ls.Branches_Id == user_branch
-                                      select new LessonSessionsViewModels
-                                      {
-                                          Id = ls.Id,
-                                          Timestamp = ls.Timestamp,
-                                          Lesson = lp.Name,
-                                          Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
-                                          Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                                          SessionHours = ls.SessionHours,
-                                          HourlyRates_Rate = ls.HourlyRates_Rate,
-                                          TravelCost = ls.TravelCost,
-                                          TutorTravelCost = ls.TutorTravelCost,
-                                          Deleted = ls.Deleted,
-                                          Notes_Cancel = ls.Notes_Cancel
-                                      }).ToListAsync();
-
-                //List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
-                //foreach (var session in sessions)
-                //{
-                //    list.Add(new LessonSessionsViewModels
-                //    {
-                //        Id = session.Id,
-                //        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(session.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
-                //        Lesson = session.Lesson,
-                //        Student = session.Student,
-                //        Tutor = session.Tutor,
-                //        SessionHours = session.SessionHours,
-                //        HourlyRates_Rate = session.HourlyRates_Rate,
-                //        TravelCost = session.TravelCost,
-                //        TutorTravelCost = session.TutorTravelCost,
-                //        Deleted = session.Deleted
-                //    });
-                //}
-
                 ViewBag.TanggalNow = string.Format("{0:yyyy/MM/dd HH:mm}", DateTime.Now);
                 ViewBag.TanggalUtc = string.Format("{0:yyyy/MM/dd HH:mm}", DateTime.UtcNow);
 
                 ViewBag.IsShowHourlyRate = p.IsGranted(User.Identity.Name, "lessonsessions_showhourlyrate");
                 ViewBag.Cancel = p.IsGranted(User.Identity.Name, "lessonsessions_cancel");
                 ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
-                return View(sessions);
+                return View();
             }
         }
 

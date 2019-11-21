@@ -148,42 +148,49 @@
 
     var table = $('.datatable').DataTable({
         processing: true,
+        serverSide: true,
         columns: [
-            { data: 'Branch' },
+            { data: 'Branch', name: 'Branch' },
+            { data: 'Timestamp', name: 'Timestamp' },
+            //{
+            //    data: 'Timestamp', render: function (e) {
+            //        var dt = new Date(parseInt(e.substr(6)));
+            //        return `${
+            //            dt.getFullYear().toString().padStart(4, '0')}/${
+            //            (dt.getMonth()+1).toString().padStart(2, '0')}/${
+            //            dt.getDate().toString().padStart(2, '0')} ${
+            //            dt.getHours().toString().padStart(2, '0')}:${
+            //            dt.getMinutes().toString().padStart(2, '0')
+            //        }`
+            //    }
+            //},
+            { data: 'No', name: 'No' },
             {
-                data: 'Timestamp', render: function (e) {
-                    var dt = new Date(parseInt(e.substr(6)));
-                    return `${
-                        (dt.getMonth()+1).toString().padStart(2, '0')}/${
-                        dt.getDate().toString().padStart(2, '0')}/${
-                        dt.getFullYear().toString().padStart(4, '0')} ${
-                        dt.getHours().toString().padStart(2, '0')}:${
-                        dt.getMinutes().toString().padStart(2, '0')
-                    }`
-                }
-            },
-            { data: 'No' },
-            {
-                data: 'CashAmount', render: function (e) {
+                data: 'CashAmount', name: 'CashAmount', render: function (e) {
                     return parseFloat(e).toLocaleString();
                 }
             },
             {
-                data: 'DebitAmount', render: function (e) {
+                data: 'DebitAmount', name: 'DebitAmount', render: function (e) {
                     return parseFloat(e).toLocaleString();
                 }
             },
             {
-                data: 'ConsignmentAmount', render: function (e) {
+                data: 'ConsignmentAmount', name: 'ConsignmentAmount', render: function (e) {
                     return parseFloat(e).toLocaleString();
                 }
             },
             {
-                data: 'Cancelled', render: function (data, type, row) {
-                    if (row.HasSession == false) {
-                        return data == false
-                            ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
-                            : '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes_Cancel + '</span>'
+                data: 'Cancelled', name: 'Cancelled', render: function (data, type, row) {
+                    if (row.Confirmed == false) {
+                        if (row.HasSession == false) {
+                            return data == false
+                                ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
+                                : '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes_Cancel + '</span>'
+                        }
+                        else {
+                            return '';
+                        }
                     }
                     else {
                         return '';
@@ -191,14 +198,14 @@
                 }
             },
             {
-                data: 'Confirmed', render: function (data, type, row) {
+                data: 'Confirmed', name: 'Confirmed', render: function (data, type, row) {
                     return data == false
                         ? '<a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">None</span></a>'
                         : '<a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Approved</span></a>'
                 }
             },
             {
-                data: 'Action', render: function (data, type, row) {
+                data: 'Action', name: 'Action', render: function (data, type, row) {
                     var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '/Print&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '">Log</a>';
                     return '<a href="@Url.Content("~")' + 'Payments/Print/' + row.Id + '">Print</a>' + link_log;
                 }

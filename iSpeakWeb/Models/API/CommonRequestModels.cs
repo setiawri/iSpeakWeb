@@ -7,6 +7,7 @@ namespace iSpeak.Models.API
 {
     public class CommonRequestModels
     {
+        public string ReffId { get; set; }
         public string Username { get; set; }
     }
 }

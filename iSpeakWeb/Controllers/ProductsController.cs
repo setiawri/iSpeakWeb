@@ -16,6 +16,13 @@ namespace iSpeak.Controllers
     {
         private readonly iSpeakContext db = new iSpeakContext();
 
+        #region GetProducts
+        public async Task<JsonResult> GetProducts(Guid id)
+        {
+            var products = await db.Products.FindAsync(id);
+            return Json(new { products }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #region GetProductAvailable
         public async Task<JsonResult> GetProductAvailable(Guid product_id)
         {
@@ -89,11 +96,13 @@ namespace iSpeak.Controllers
                                 Id = pr.Id,
                                 Description = pr.Description,
                                 Barcode = pr.Barcode,
+                                BuyPrice = pr.BuyPrice,
                                 ForSale = pr.ForSale,
                                 Unit = u.Name,
                                 SellPrice = pr.SellPrice,
                                 Active = pr.Active
                             }).ToListAsync();
+                ViewBag.BuyPrice = p.IsGranted(User.Identity.Name, "show_buyprice");
                 ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(await list);
             }
@@ -113,7 +122,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Description,Units_Id,Barcode,ForSale,SellPrice,Notes")] ProductsModels productsModels)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Description,Units_Id,Barcode,BuyPrice,ForSale,SellPrice,Notes")] ProductsModels productsModels)
         {
             var check = db.Products.AsNoTracking().Where(x => 
                 x.Description == productsModels.Description 
@@ -161,7 +170,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Description,Units_Id,Barcode,ForSale,SellPrice,Notes,Active")] ProductsModels productsModels)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Description,Units_Id,Barcode,BuyPrice,ForSale,SellPrice,Notes,Active")] ProductsModels productsModels)
         {
             var check = db.Products.AsNoTracking().Where(x =>
                 x.Id != productsModels.Id
@@ -179,6 +188,7 @@ namespace iSpeak.Controllers
                 current_data.Description = productsModels.Description;
                 current_data.Units_Id = productsModels.Units_Id;
                 current_data.Barcode = productsModels.Barcode;
+                current_data.BuyPrice = productsModels.BuyPrice;
                 current_data.ForSale = productsModels.ForSale;
                 current_data.SellPrice = productsModels.SellPrice;
                 current_data.Notes = productsModels.Notes;

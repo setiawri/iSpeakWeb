@@ -1,7 +1,10 @@
-﻿namespace iSpeak.Models.API
+﻿using System;
+
+namespace iSpeak.Models.API
 {
     public class SessionApiModels
     {
+        public Guid SaleInvoiceItems_Id { get; set; }
         public string Date { get; set; }
         public string Lesson { get; set; }
         public decimal Hour { get; set; }

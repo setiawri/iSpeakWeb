@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="iSpeakMobile.Views.HomePage"
+             Title="Home - iSpeak Mobile">
+    <ContentPage.Content>
+        <ScrollView>
+            <!--<CollectionView x:Name="cv"
+                ItemTemplate="{StaticResource InvoiceTemplate}"
+                SelectionMode="None"/>-->
+            <CollectionView x:Name="cv" ItemsSource="{Binding Invoice}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Padding="0" BackgroundColor="White">
+                            <Frame Padding="0" CornerRadius="0" BorderColor="DarkGray" HasShadow="False">
+                                <StackLayout Spacing="0" Padding="10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+                                            Text="{Binding Package}"
+                                            FontSize="18"
+                                            TextColor="{StaticResource TextColor}"
+                                            FontFamily="{StaticResource Exo2LightCondensed}"
+                                            HorizontalOptions="Start"/>
+                                        <Label Grid.Row="1" Grid.Column="0"
+                                            Text="{Binding RemainingHours}"
+                                            FontSize="12"
+                                            TextColor="{StaticResource TextColor}"
+                                            FontFamily="{StaticResource Exo2RegularCondensed}"
+                                            HorizontalOptions="Start"/>
+                                        <Label Grid.Row="2" Grid.Column="0"
+                                            Text="{Binding No}"
+                                            FontSize="15"
+                                            TextColor="{StaticResource TextColor}"
+                                            FontFamily="{StaticResource Exo2RegularCondensed}"
+                                            HorizontalOptions="Start" />
+                                        <Button Grid.Row="1" Grid.RowSpan="2" Grid.Column="1"
+                                            Text="Payment"
+                                            TextColor="White"
+                                            FontFamily="{StaticResource Exo2RegularCondensed}"
+                                            FontSize="15"
+                                            BackgroundColor="{StaticResource QuaternaryColor}"
+                                            VerticalOptions="End"
+                                            Clicked="Payment_Clicked"
+                                            CommandParameter="{Binding No}"/>
+                                        <Button Grid.Row="1" Grid.RowSpan="2" Grid.Column="2"
+                                            Text="Session"
+                                            TextColor="White"
+                                            FontFamily="{StaticResource Exo2RegularCondensed}"
+                                            FontSize="15"
+                                            BackgroundColor="{StaticResource QuinaryColor}"
+                                            VerticalOptions="End"
+                                            Clicked="Session_Clicked"
+                                            CommandParameter="{Binding SaleInvoiceItems_Id}"/>
+                                    </Grid>
+                                </StackLayout>
+                            </Frame>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

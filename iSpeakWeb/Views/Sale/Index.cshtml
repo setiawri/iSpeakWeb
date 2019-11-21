@@ -229,9 +229,9 @@
                 data: 'Timestamp', render: function (e) {
                     var dt = new Date(parseInt(e.substr(6)));
                     return `${
+                        dt.getFullYear().toString().padStart(4, '0')}/${
                         (dt.getMonth()+1).toString().padStart(2, '0')}/${
-                        dt.getDate().toString().padStart(2, '0')}/${
-                        dt.getFullYear().toString().padStart(4, '0')} ${
+                        dt.getDate().toString().padStart(2, '0')} ${
                         dt.getHours().toString().padStart(2, '0')}:${
                         dt.getMinutes().toString().padStart(2, '0')
                     }`
@@ -262,13 +262,18 @@
             },
             {
                 data: 'Cancelled', render: function (data, type, row) {
-                    if (data == false) {
-                        return row.Amount == row.Due
-                            ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
-                            : '';
+                    if (row.IsChecked == false) {
+                        if (data == false) {
+                            return row.Amount == row.Due
+                                ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
+                                : '';
+                        }
+                        else {
+                            return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes + '</span>';
+                        }
                     }
                     else {
-                        return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes + '</span>';
+                        return '';
                     }
                 }
             },

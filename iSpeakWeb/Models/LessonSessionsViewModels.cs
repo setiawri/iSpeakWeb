@@ -10,8 +10,8 @@ namespace iSpeak.Models
     {
         public Guid Id { get; set; }
         [Display(Name = "Date")]
-        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
-        public DateTime Timestamp { get; set; }
+        //[DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
+        public string Timestamp { get; set; }
         public string Lesson { get; set; }
         public string Student { get; set; }
         public string Tutor { get; set; }

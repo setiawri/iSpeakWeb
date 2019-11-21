@@ -11,5 +11,6 @@ namespace iSpeak.Models.API
         public string Date { get; set; }
         public string Amount { get; set; }
         public string Branch { get; set; }
+        public string NoInvoice { get; set; }
     }
 }

@@ -53,8 +53,10 @@ namespace iSpeak.Controllers
                     string description;
                     if (string.IsNullOrEmpty(item.l.Description))
                     {
+                        string column_name = item.l.ColumnName;
+                        if (column_name == "IsChecked" || column_name == "Confirmed") { column_name = "Approved"; }
                         description = item.l.Action == "Modified"
-                            ? string.Format("Updated {0}: {1} to {2}", item.l.ColumnName, string.IsNullOrEmpty(item.l.OriginalValue) ? "' '" : item.l.OriginalValue, string.IsNullOrEmpty(item.l.NewValue) ? "' '" : item.l.NewValue)
+                            ? string.Format("Updated {0}: {1} to {2}", column_name, string.IsNullOrEmpty(item.l.OriginalValue) ? "' '" : item.l.OriginalValue, string.IsNullOrEmpty(item.l.NewValue) ? "' '" : item.l.NewValue)
                             : string.Format("{0}", item.l.Action);
                     }
                     else
