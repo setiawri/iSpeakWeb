@@ -220,75 +220,76 @@
         $('.check-styled').uniform();
 
         $('.mdl-btn-submit').click(function () {
-            var bank_amount = 0;
-            if ($('.mdl-card').val() != '') {
-                bank_amount = parseFloat($('.mdl-card').val());
-            }
+            if (!event.detail || event.detail == 1) { //only execute 1 times (prevent double click from users)
+                var bank_amount = 0;
+                if ($('.mdl-card').val() != '') {
+                    bank_amount = parseFloat($('.mdl-card').val());
+                }
 
-            var cash_amount = 0;
-            if ($('.mdl-cash').val() != '') {
-                cash_amount = parseFloat($('.mdl-cash').val());
-            }
+                var cash_amount = 0;
+                if ($('.mdl-cash').val() != '') {
+                    cash_amount = parseFloat($('.mdl-cash').val());
+                }
 
-            var consignment_amount = 0;
-            if ($('.mdl-consignment').val() != '') {
-                consignment_amount = parseFloat($('.mdl-consignment').val());
-            }
+                var consignment_amount = 0;
+                if ($('.mdl-consignment').val() != '') {
+                    consignment_amount = parseFloat($('.mdl-consignment').val());
+                }
 
-            var total_due = parseFloat($('.mdl-due').val().replace(/,/g, ''));
-            var total_paid = parseFloat($('.mdl-paid').val().replace(/,/g, ''));
-            //console.log('due: ' + total_due + ', paid: ' + total_paid);
-            if (total_paid > total_due) {
-                $('.modal-validation').html('Max Payment is ' + total_due.toLocaleString()).show();
-            }
-            else if (total_paid == 0) {
-                $('.modal-validation').html('The field Total Payment is required.').show();
-            }
-            else if (bank_amount > 0 && $('.mdl-reff').val() == '') {
-                $('.modal-validation').html('The field REF # is required.').show();
-            }
-            else if (consignment_amount > 0 && $('#Consignment').val() == '') {
-                $('.modal-validation').html('The field Consignment is required.').show();
-            }
-            else {
-                $('.modal-validation').html('').hide();
+                var total_due = parseFloat($('.mdl-due').val().replace(/,/g, ''));
+                var total_paid = parseFloat($('.mdl-paid').val().replace(/,/g, ''));
+                //console.log('due: ' + total_due + ', paid: ' + total_paid);
+                if (total_paid > total_due) {
+                    $('.modal-validation').html('Max Payment is ' + total_due.toLocaleString()).show();
+                }
+                else if (total_paid == 0) {
+                    $('.modal-validation').html('The field Total Payment is required.').show();
+                }
+                else if (bank_amount > 0 && $('.mdl-reff').val() == '') {
+                    $('.modal-validation').html('The field REF # is required.').show();
+                }
+                else if (consignment_amount > 0 && $('#Consignment').val() == '') {
+                    $('.modal-validation').html('The field Consignment is required.').show();
+                }
+                else {
+                    $('.modal-validation').html('').hide();
 
-                var ids_selected = '';
-                $('.modal-bank-input div div label').find('.check-styled').each(function () {
-                    if ($(this).prop('checked') == true) {
-                        ids_selected = $('input:radio.check-styled:checked').map(function () {
-                            return this.id;
-                        }).get();
-                    }
-                });
-                var bank_type = ids_selected[0]; //Debit or Transfer
+                    var ids_selected = '';
+                    $('.modal-bank-input div div label').find('.check-styled').each(function () {
+                        if ($(this).prop('checked') == true) {
+                            ids_selected = $('input:radio.check-styled:checked').map(function () {
+                                return this.id;
+                            }).get();
+                        }
+                    });
+                    var bank_type = ids_selected[0]; //Debit or Transfer
 
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("SavePayments", "Payments")',
-                    data: {
-                        branch_id: $('#Branch').val(),
-                        cash_amount: cash_amount,
-                        consignment_amount: consignment_amount,
-                        consignment_id: $('#Consignment').val(),
-                        bank_amount: bank_amount,
-                        bank_name: $('.mdl-bank').val(),
-                        owner_name: $('.mdl-name').val(),
-                        bank_number: $('.mdl-nocard').val(),
-                        reff_no: $('.mdl-reff').val(),
-                        notes: $('.mdl-notes').val(),
-                        bank_type: bank_type,
-                        invoices_id: '@ViewBag.Invoices'
-                    },
-                    success: function (data) {
-                        var url = '@Url.Action("Print", "Payments", new { id = "_id" })';
-                        window.location.href = url.replace('_id', data.payment_id);
-                    }, //end success
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                    } //end error
-                }); //end ajax
-
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("SavePayments", "Payments")',
+                        data: {
+                            branch_id: $('#Branch').val(),
+                            cash_amount: cash_amount,
+                            consignment_amount: consignment_amount,
+                            consignment_id: $('#Consignment').val(),
+                            bank_amount: bank_amount,
+                            bank_name: $('.mdl-bank').val(),
+                            owner_name: $('.mdl-name').val(),
+                            bank_number: $('.mdl-nocard').val(),
+                            reff_no: $('.mdl-reff').val(),
+                            notes: $('.mdl-notes').val(),
+                            bank_type: bank_type,
+                            invoices_id: '@ViewBag.Invoices'
+                        },
+                        success: function (data) {
+                            var url = '@Url.Action("Print", "Payments", new { id = "_id" })';
+                            window.location.href = url.replace('_id', data.payment_id);
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
             }
         });
     });
