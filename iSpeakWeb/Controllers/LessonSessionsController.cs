@@ -82,7 +82,7 @@ namespace iSpeak.Controllers
                     .Where(x => x.Timestamp.ToLower().Contains(searchValue.ToLower())
                         || x.Lesson.ToLower().Contains(searchValue.ToLower())
                         || x.Student.ToLower().Contains(searchValue.ToLower())
-                        || x.Tutor.ToString().Contains(searchValue.ToLower())
+                        || x.Tutor.ToLower().Contains(searchValue.ToLower())
                     ).ToList();
             }
             int totalRowsFiltered = list.Count;

@@ -34,7 +34,7 @@ namespace iSpeak.Controllers
                     Id = item.si.Id,
                     Branches = item.b.Name,
                     No = item.si.No,
-                    Timestamp = TimeZoneInfo.ConvertTimeFromUtc(item.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                     Customer = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
                     Amount = item.si.Amount,
                     Due = item.si.Due,
