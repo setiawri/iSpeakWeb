@@ -106,6 +106,11 @@ namespace iSpeak.Models
 
         public Guid Branches_Id { get; set; }
 
+        [Display(Name = "Promotion Events")]
+        public Guid? PromotionEvents_Id { get; set; }
+
+        public string[] Interest { get; set; }
+
         //[Required]
         [EmailAddress]
         [Display(Name = "Email")]

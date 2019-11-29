@@ -1,9 +1,12 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -684,6 +687,118 @@ namespace iSpeak.Controllers
                 ViewBag.initDateEnd = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.DaysInMonth(DateTime.UtcNow.Year, DateTime.UtcNow.Month), 23, 59, 59);
                 return View();
             }
+        }
+
+        public ActionResult SendEmails()
+        {
+            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> SendEmails([Bind(Include = "InterestLanguage,From,To,Subject,Footer,Password")] EmailSenderViewModels emailSenderViewModels, HttpPostedFileBase file)
+        {
+            if (file == null)
+            {
+                ModelState.AddModelError("Image", "Image file is required.");
+            }
+
+            //check to mail addressed
+            List<string> list_mailTo = new List<string>();
+            var customers = await (from u in db.User
+                                   join ur in db.UserRole on u.Id equals ur.UserId
+                                   join r in db.Role on ur.RoleId equals r.Id
+                                   where r.Name.ToLower() == "student"
+                                   select new { u }).ToListAsync();
+            foreach (var customer in customers)
+            {
+                if (!string.IsNullOrEmpty(customer.u.Email))
+                {
+                    if (!string.IsNullOrEmpty(emailSenderViewModels.InterestLanguage))
+                    {
+                        if (!string.IsNullOrEmpty(customer.u.Interest))
+                        {
+                            var interest = JsonConvert.DeserializeObject<List<InterestViewModels>>(customer.u.Interest);
+                            if (interest.Count > 0)
+                            {
+                                foreach (var i in interest)
+                                {
+                                    if (i.Languages_Id == emailSenderViewModels.InterestLanguage)
+                                    {
+                                        list_mailTo.Add(customer.u.Email);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        list_mailTo.Add(customer.u.Email);
+                    }
+                }
+            }
+
+            if (list_mailTo.Count == 0)
+            {
+                ModelState.AddModelError("None", "None of Email address selected.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                string Dir = Server.MapPath("~/assets/email/");
+                if (!Directory.Exists(Dir))
+                {
+                    DirectoryInfo di = Directory.CreateDirectory(Dir);
+                }
+                string namaFile = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                string fullPath = Path.Combine(Dir, namaFile);
+                file.SaveAs(fullPath);
+
+                using (var client = new SmtpClient())
+                {
+                    MailMessage mail = new MailMessage();
+                    mail.From = new MailAddress(emailSenderViewModels.From);
+                    mail.To.Add(string.Join(",", list_mailTo));
+                    mail.Subject = emailSenderViewModels.Subject;
+                    mail.IsBodyHtml = true;
+
+                    //mail.Body = string.Format("<h2>{0}</h2><img src='{1}' alt='iSpeak' title='iSpeak' style='display:block' />"
+                    //    , emailSenderViewModels.Body
+                    //    , HttpContext.Request.Url.Scheme + "://" + HttpContext.Request.Url.Host + ":" + HttpContext.Request.Url.Port + "/assets/email/" + namaFile);
+
+                    var inlineImage = new LinkedResource(fullPath)
+                    {
+                        ContentId = Guid.NewGuid().ToString()
+                    };
+
+                    string htmlBody = string.Format(@"
+                        <img src=""cid:{0}"" /><br />
+                        <b>{1}</b>
+                    ", inlineImage.ContentId, emailSenderViewModels.Footer.Replace("\n", "<br />"));
+
+                    var view = AlternateView.CreateAlternateViewFromString(htmlBody, null, System.Net.Mime.MediaTypeNames.Text.Html);
+                    view.LinkedResources.Add(inlineImage);
+                    mail.AlternateViews.Add(view);
+
+                    Attachment att = new Attachment(fullPath);
+                    att.ContentDisposition.Inline = true;
+                    att.ContentDisposition.FileName = namaFile;
+                    mail.Attachments.Add(att);
+
+                    client.Host = "smtp.gmail.com";
+                    client.Port = 587;
+                    client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
+                    client.EnableSsl = true;
+                    client.Send(mail);
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            return View(emailSenderViewModels);
         }
     }
 }

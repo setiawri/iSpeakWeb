@@ -1,5 +1,6 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -186,21 +187,44 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                EditUserViewModels editUserViewModels = new EditUserViewModels();
-                editUserViewModels.User = db.User.Where(x => x.Id == id).FirstOrDefault();
-                editUserViewModels.RoleId = db.UserRole.Where(x => x.UserId == id).Select(x => x.RoleId).ToList();
+                EditUserViewModels editUserViewModels = new EditUserViewModels
+                {
+                    User = db.User.Where(x => x.Id == id).FirstOrDefault(),
+                    RoleId = db.UserRole.Where(x => x.UserId == id).Select(x => x.RoleId).ToList()
+                };
+                var interest_vm = editUserViewModels.User.Interest == null ? null : JsonConvert.DeserializeObject<List<InterestViewModels>>(editUserViewModels.User.Interest);
+                if (interest_vm != null)
+                {
+                    editUserViewModels.LanguageId = interest_vm.Select(x => x.Languages_Id).ToList();
+                }
+
                 ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listLanguage = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listPromo = new SelectList(db.PromotionEvents.OrderBy(x => x.Name).ToList(), "Id", "Name");
                 return View(editUserViewModels);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "User,RoleId")] EditUserViewModels editUserViewModels)
+        public ActionResult Edit([Bind(Include = "User,RoleId,LanguageId")] EditUserViewModels editUserViewModels)
         {
             if (ModelState.IsValid)
             {
+                List<InterestViewModels> ivm = new List<InterestViewModels>();
+                if (editUserViewModels.LanguageId != null)
+                {
+                    foreach (var i in editUserViewModels.LanguageId)
+                    {
+                        ivm.Add(new InterestViewModels
+                        {
+                            Languages_Id = i
+                        });
+                    }
+                }
+                string list_interest = editUserViewModels.LanguageId == null ? string.Empty : JsonConvert.SerializeObject(ivm);
+
                 var current_data = db.User.Find(editUserViewModels.User.Id);
                 current_data.Firstname = editUserViewModels.User.Firstname;
                 current_data.Middlename = editUserViewModels.User.Middlename;
@@ -214,6 +238,8 @@ namespace iSpeak.Controllers
                 current_data.Notes = editUserViewModels.User.Notes;
                 current_data.Active = editUserViewModels.User.Active;
                 current_data.Branches_Id = editUserViewModels.User.Branches_Id;
+                current_data.PromotionEvents_Id = editUserViewModels.User.PromotionEvents_Id;
+                current_data.Interest = list_interest;
                 db.Entry(current_data).State = EntityState.Modified;
                 db.SaveChanges();
 
@@ -283,6 +309,8 @@ namespace iSpeak.Controllers
 
             ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listLanguage = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listPromo = new SelectList(db.PromotionEvents.OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(editUserViewModels);
         }
 

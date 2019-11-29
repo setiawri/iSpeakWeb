@@ -354,6 +354,8 @@ namespace iSpeak.Controllers
                 ViewBag.listService = new SelectList(db.Services.Where(x => x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
                 ViewBag.listRole = role_list;
                 ViewBag.RoleValueDefault = db.Role.Find(role_id_allowed).Name;
+                ViewBag.listLanguage = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listPromo = new SelectList(db.PromotionEvents.OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.DOB = DateTime.UtcNow.Date;
 
                 return View();
@@ -522,7 +524,7 @@ namespace iSpeak.Controllers
             ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
             ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
             ViewBag.listProduct = new SelectList(products, "Id", "Name");
-            
+
             return View(saleInvoicesViewModels);
         }
 

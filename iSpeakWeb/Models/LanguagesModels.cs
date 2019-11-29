@@ -16,4 +16,9 @@ namespace iSpeak.Models
         public string Name { get; set; }
         public bool Active { get; set; }
     }
+
+    public class InterestViewModels
+    {
+        public string Languages_Id { get; set; }
+    }
 }

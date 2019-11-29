@@ -211,7 +211,7 @@
             },
             {
                 data: 'Action', name: 'Action', render: function (data, type, row) {
-                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.Student + '">Log</a>';
+                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.Student + '" target="_blank">Log</a>';
                     return '<a href="javascript:void(0)" onclick="View(' + "'" + row.Id + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ')">View</a> | <a href="' + '@Url.Content("~")' + 'LessonSessions/Edit/' + row.Id + '">Edit</a>' + link_log;
                 }
             },
@@ -268,7 +268,9 @@
                 notes: notes
             },
             success: function (data) {
-                location.reload();
+                //location.reload();
+                $('#modal_cancel').modal('toggle');
+                table.ajax.reload(null, false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);

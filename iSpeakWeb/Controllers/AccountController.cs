@@ -12,6 +12,7 @@ using iSpeak.Models;
 using System.Collections.Generic;
 using iSpeak.Common;
 using System.Data.Entity;
+using Newtonsoft.Json;
 
 namespace iSpeak.Controllers
 {
@@ -210,6 +211,8 @@ namespace iSpeak.Controllers
                 ViewBag.Roles = list;
                 ViewBag.RoleValueDefault = db.Role.Find(role_id_allowed).Name;
                 ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listLanguage = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listPromo = new SelectList(db.PromotionEvents.OrderBy(x => x.Name).ToList(), "Id", "Name");
                 ViewBag.DOB = DateTime.UtcNow.Date;
                 return View();
             }
@@ -224,6 +227,19 @@ namespace iSpeak.Controllers
         {
             if (ModelState.IsValid)
             {
+                List<InterestViewModels> ivm = new List<InterestViewModels>();
+                if (model.Interest != null)
+                {
+                    foreach (var i in model.Interest)
+                    {
+                        ivm.Add(new InterestViewModels
+                        {
+                            Languages_Id = i
+                        });
+                    }
+                }
+                string list_interest = model.Interest == null ? string.Empty : JsonConvert.SerializeObject(ivm);
+
                 var user = new ApplicationUser
                 {
                     UserName = model.UserName,
@@ -237,7 +253,9 @@ namespace iSpeak.Controllers
                     Birthday = model.Birthday,
                     Notes = model.Notes,
                     Active = model.Active,
-                    Branches_Id = model.Branches_Id
+                    Branches_Id = model.Branches_Id,
+                    PromotionEvents_Id = model.PromotionEvents_Id,
+                    Interest = list_interest
                 };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
@@ -293,17 +311,32 @@ namespace iSpeak.Controllers
             }
             ViewBag.Roles = list;
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listLanguage = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listPromo = new SelectList(db.PromotionEvents.OrderBy(x => x.Name).ToList(), "Id", "Name");
             ViewBag.DOB = model.Birthday;
             return View(model);
         }
 
         //Register New User Using AjaxCall
-        public async Task<JsonResult> RegisterAjaxSync(Guid branch_id, string[] roles, DateTime birthday, string first_name, string middle_name, string last_name, string username, string email, string phone1, string phone2, string address, string notes, string password)
+        public async Task<JsonResult> RegisterAjaxSync(Guid branch_id, string[] roles, DateTime birthday, string first_name, string middle_name, string last_name, string username, string email, string phone1, string phone2, string address, string notes, string password, string[] interest, Guid? promotion_event)
         {
             var cek_username = await db.User.Where(x => x.UserName.ToLower() == username.ToLower()).ToListAsync();
             string status = (cek_username.Count > 0) ? "200" : "404";
             if (cek_username.Count == 0)
             {
+                List<InterestViewModels> ivm = new List<InterestViewModels>();
+                if (interest != null)
+                {
+                    foreach (var i in interest)
+                    {
+                        ivm.Add(new InterestViewModels
+                        {
+                            Languages_Id = i
+                        });
+                    }
+                }
+                string list_interest = interest == null ? string.Empty : JsonConvert.SerializeObject(ivm);
+
                 #region Save New User
                 var user = new ApplicationUser
                 {
@@ -318,7 +351,9 @@ namespace iSpeak.Controllers
                     Birthday = birthday,
                     Notes = notes,
                     Active = true,
-                    Branches_Id = branch_id
+                    Branches_Id = branch_id,
+                    PromotionEvents_Id = promotion_event,
+                    Interest = list_interest
                 };
                 var result = await UserManager.CreateAsync(user, password);
                 if (result.Succeeded)

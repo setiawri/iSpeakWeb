@@ -217,6 +217,7 @@
     <Compile Include="Controllers\PettyCashRecordsCategoriesController.cs" />
     <Compile Include="Controllers\PettyCashRecordsController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="Controllers\PromotionEventsController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
@@ -245,6 +246,10 @@
     <Compile Include="Migrations\201907270231344_addBranchesId.Designer.cs">
       <DependentUpon>201907270231344_addBranchesId.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201911280725472_addPromoInterest.cs" />
+    <Compile Include="Migrations\201911280725472_addPromoInterest.Designer.cs">
+      <DependentUpon>201911280725472_addPromoInterest.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccessModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -257,6 +262,7 @@
     <Compile Include="Models\BirthdayViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\ConsignmentsModels.cs" />
+    <Compile Include="Models\EmailSenderViewModels.cs" />
     <Compile Include="Models\ExpenseCategoriesModels.cs" />
     <Compile Include="Models\ExpensesModels.cs" />
     <Compile Include="Models\ExpensesViewModels.cs" />
@@ -284,6 +290,7 @@
     <Compile Include="Models\ProductsModels.cs" />
     <Compile Include="Models\Products_QtyModels.cs" />
     <Compile Include="Models\ProfitLossViewModels.cs" />
+    <Compile Include="Models\PromotionEventsModels.cs" />
     <Compile Include="Models\ReceiptPayrollViewModels.cs" />
     <Compile Include="Models\ReceiptViewModels.cs" />
     <Compile Include="Models\RemindersModels.cs" />
@@ -548,6 +555,10 @@
     <Content Include="Views\Reports\ProfitLoss.cshtml" />
     <Content Include="Views\User\Info.cshtml" />
     <Content Include="Views\Logs\Index.cshtml" />
+    <Content Include="Views\PromotionEvents\Index.cshtml" />
+    <Content Include="Views\PromotionEvents\Create.cshtml" />
+    <Content Include="Views\PromotionEvents\Edit.cshtml" />
+    <Content Include="Views\Reports\SendEmails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -572,6 +583,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201907270231344_addBranchesId.resx">
       <DependentUpon>201907270231344_addBranchesId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201911280725472_addPromoInterest.resx">
+      <DependentUpon>201911280725472_addPromoInterest.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

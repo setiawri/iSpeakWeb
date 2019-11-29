@@ -40,5 +40,6 @@ namespace iSpeak.Models
     {
         public UserModels User { get; set; }
         public List<string> RoleId { get; set; }
+        public List<string> LanguageId { get; set; }
     }
 }

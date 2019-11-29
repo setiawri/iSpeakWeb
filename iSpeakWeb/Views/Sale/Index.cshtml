@@ -280,7 +280,7 @@
             },
             {
                 data: 'Action', render: function (data, type, row) {
-                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=SaleInvoices&header=' + row.No + '">Log</a>';
+                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=SaleInvoices&header=' + row.No + '" target="_blank">Log</a>';
                     return '<a href="javascript:void(0)" onclick="View_Item(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">View</a> | <a href="javascript:void(0)" onclick="View_Log(' + "'" + row.Id + "'" + ')">Payment</a>' + link_log;
                 }
             }

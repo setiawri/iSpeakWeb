@@ -38,6 +38,11 @@ namespace iSpeak.Models
         [Display(Name = "Branch")]
         public Guid Branches_Id { get; set; }
 
+        [Display(Name = "Promotion Events")]
+        public Guid? PromotionEvents_Id { get; set; }
+
+        public string Interest { get; set; }
+
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType

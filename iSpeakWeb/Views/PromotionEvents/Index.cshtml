@@ -1,7 +1,7 @@
-﻿@model IEnumerable<iSpeak.Models.VouchersModels>
+﻿@model IEnumerable<iSpeak.Models.PromotionEventsModels>
 
 @{
-    ViewBag.Root = "Vouchers";
+    ViewBag.Root = "Promotion Events";
     ViewBag.Title = "Index";
 }
 
@@ -22,16 +22,17 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Vouchers")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <a href="@Url.Action("Create", "PromotionEvents")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
                             <tr>
-                                <th>@Html.DisplayNameFor(model => model.Code)</th>
-                                <th>@Html.DisplayNameFor(model => model.Description)</th>
-                                <th>@Html.DisplayNameFor(model => model.Amount)</th>
-                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
-                                <th>@Html.DisplayNameFor(model => model.Active)</th>
+                                <th>@Html.DisplayNameFor(model => model.Name)</th>
+                                <th>@Html.DisplayNameFor(model => model.Location)</th>
+                                <th>@Html.DisplayNameFor(model => model.TotalDays)</th>
+                                <th>@Html.DisplayNameFor(model => model.EventFee)</th>
+                                <th>@Html.DisplayNameFor(model => model.PersonnelCost)</th>
+                                <th>@Html.DisplayNameFor(model => model.AdditionalCost)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -39,25 +40,17 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@Html.DisplayFor(modelItem => item.Code)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
-                                    <td>
-                                        @if (item.Active == true)
-                                        {
-                                            <span class="badge badge-primary">Active</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-dark">Not Active</span>
-                                        }
-                                    </td>
+                                    <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Location)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.TotalDays)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.EventFee)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.PersonnelCost)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.AdditionalCost)</td>
                                     <td>
                                         @Html.ActionLink("Edit", "Edit", new { id = item.Id })
                                         @if (ViewBag.Log == true)
                                         {
-                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Description }, new { target = "_blank" })
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Name }, new { target = "_blank" })
                                         }
                                     </td>
                                 </tr>
@@ -80,7 +73,7 @@
         columnDefs: [{
             orderable: false,
             width: 100,
-            targets: [5]
+            targets: [6]
         }],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
         language: {
@@ -91,8 +84,17 @@
         }
     });
 
-    var datatable = $('.datatable').DataTable({
+    var table = $('.datatable').DataTable({
         pagingType: 'full_numbers',
         order: [[0, 'asc']]
     });
+
+    $(document).ready(function () {
+        if ('@ViewBag.Add' == 'False' || '@ViewBag.Edit' == 'False') {
+            table.column(3).visible(false);
+            table.column(4).visible(false);
+            table.column(5).visible(false);
+        }
+    });
+
 </script>

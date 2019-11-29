@@ -317,7 +317,7 @@
             { data: 'UserInput' },
             {
                 data: 'Action', render: function (data, type, row) {
-                    var link_log = '<a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '">Log</a>';
+                    var link_log = '<a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '" target="_blank">Log</a>';
                     return link_log;
                 }
             }

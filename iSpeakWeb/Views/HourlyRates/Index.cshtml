@@ -49,7 +49,7 @@
                                         @Html.ActionLink("Delete", "Delete", new { id = item.Id })
                                         @if (ViewBag.Log == true)
                                         {
-                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.UserAccounts }, null)
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.UserAccounts }, new { target = "_blank" })
                                         }
                                     </td>
                                 </tr>
@@ -72,7 +72,7 @@
             autoWidth: false,
             columnDefs: [{
                 orderable: false,
-                width: 120,
+                width: 140,
                 targets: [5]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',

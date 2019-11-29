@@ -26,6 +26,9 @@ namespace iSpeak.Models
         public bool Active { get; set; }
         [Display(Name = "Branch")]
         public Guid Branches_Id { get; set; }
+        [Display(Name = "Promotion Event")]
+        public Guid? PromotionEvents_Id { get; set; }
+        public string Interest { get; set; }
     }
 
     [Table("AspNetRoles")]

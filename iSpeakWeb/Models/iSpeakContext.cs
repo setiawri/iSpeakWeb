@@ -48,6 +48,7 @@ namespace iSpeak.Models
         public DbSet<UploadFilesModels> UploadFiles { get; set; }
         public DbSet<ExpenseCategoriesModels> ExpenseCategories { get; set; }
         public DbSet<ExpensesModels> Expenses { get; set; }
+        public DbSet<PromotionEventsModels> PromotionEvents { get; set; }
 
 
         public override int SaveChanges()
