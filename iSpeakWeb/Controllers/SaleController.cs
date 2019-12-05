@@ -177,6 +177,29 @@ namespace iSpeak.Controllers
             sale_invoice.Notes = notes;
             db.Entry(sale_invoice).State = EntityState.Modified;
 
+            var sale_invoice_items = await db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == id && x.Products_Id != null).ToListAsync();
+            if (sale_invoice_items.Count > 0)
+            {
+                foreach (var item in sale_invoice_items)
+                {
+                    var products_qty = await db.Products_Qty.Where(x => x.Products_Id == item.Products_Id && x.Branches_Id == sale_invoice.Branches_Id).FirstOrDefaultAsync();
+                    products_qty.Qty += item.Qty;
+                    db.Entry(products_qty).State = EntityState.Modified;
+
+                    var sii_inventory = await (from si in db.SaleInvoiceItems_Inventory
+                                               join i in db.Inventory on si.Inventory_Id equals i.Id
+                                               where si.SaleInvoiceItems_Id == item.Id && i.Products_Id == item.Products_Id
+                                               orderby i.ReceiveDate
+                                               select new { si, i }).ToListAsync();
+                    foreach (var subitem in sii_inventory)
+                    {
+                        var inventory = await db.Inventory.FindAsync(subitem.i.Id);
+                        inventory.AvailableQty += subitem.si.Qty;
+                        db.Entry(inventory).State = EntityState.Modified;
+                    }
+                }
+            }
+
             await db.SaveChangesAsync();
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
