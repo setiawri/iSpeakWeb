@@ -1,0 +1,191 @@
+﻿@model IEnumerable<iSpeak.Models.SaleReturnViewModels>
+
+@{
+    ViewBag.Root = "Returns";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Create", "Return")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
+                                <th>@Html.DisplayNameFor(model => model.No)</th>
+                                <th>@Html.DisplayNameFor(model => model.Notes)</th>
+                                <th>@Html.DisplayNameFor(model => model.Approved)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*@foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                    <td>
+                                        @if (item.Approved)
+                                        {
+                                            <a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id')">Approved</span></a>
+                                        }
+                                        else
+                                        {
+                                            <a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve('@item.Id')">None</span></a>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="javascript:void(0)" onclick="View_Item('@item.Id', '@item.No')">View</a>
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.No }, new { target = "_blank" })
+                                        }
+                                    </td>
+                                </tr>
+                            }*@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [
+            {
+                width: 150,
+                targets: [3]
+            },
+            {
+                orderable: false,
+                width: 100,
+                targets: [4]
+            }
+        ],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var table = $('.datatable').DataTable({
+        processing: true,
+        columns: [
+            { data: 'Timestamp' },
+            { data: 'No' },
+            { data: 'Notes' },
+            {
+                data: 'Approved', render: function (data, type, row) {
+                    if (data == true) {
+                        return '<a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove(' + "'" + row.Id + "'" + ')">Approved</span></a>';
+                    }
+                    else {
+                        return '<a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve(' + "'" + row.Id + "'" + ')">None</span></a>';
+                    }
+                }
+            },
+            {
+                data: 'Action', render: function (data, type, row) {
+                    var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=SaleReturns&header=' + row.No + '" target="_blank">Log</a>';
+                    return '<a href="javascript:void(0)" onclick="View_Item(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">View</a>' + link_log;
+                }
+            }
+        ],
+        ajax: {
+            url: '@Url.Action("GetData", "Return")',
+            type: 'POST',
+            dataType: 'json'
+        },
+        pagingType: 'full_numbers',
+        order: [[0, 'desc']]
+    });
+
+    function View_Item(id, no) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetItem", "Return")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Sale Return No: ' + no,
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function Approve(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Approved", "Return")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                //location.reload();
+                table.ajax.reload(null, false);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function CancelApprove(id) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("CancelApproved", "Return")',
+            data: {
+                id: id
+            },
+            success: function (data) {
+                //location.reload();
+                table.ajax.reload(null, false);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    $(document).ready(function () {
+        if ('@ViewBag.Approve' == 'False') {
+            table.column(3).visible(false);
+        }
+    });
+
+</script>

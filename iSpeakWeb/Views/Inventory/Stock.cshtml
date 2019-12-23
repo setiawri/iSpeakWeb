@@ -1,0 +1,89 @@
+﻿@model IEnumerable<iSpeak.Models.StockOnHandViewModels>
+
+@{
+    ViewBag.Root = "Stock On Hand";
+    ViewBag.Title = "Stock On Hand";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("Index", "Inventory")" class="btn btn-sm btn-secondary">Back to Inventory List <i class="icon-circle-left2 ml-2"></i></a>
+                <a href="@Url.Action("Excel", "Inventory")" class="btn btn-sm btn-success">Download Excel <i class="icon-file-excel ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Product)</th>
+                                <th>@Html.DisplayNameFor(model => model.Qty)</th>
+                                <th>@Html.DisplayNameFor(model => model.Unit)</th>
+                                <th>@Html.DisplayNameFor(model => model.ForSale)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Product)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Qty)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Unit)</td>
+                                    <td>
+                                        @if (item.ForSale)
+                                        {
+                                            <span class='badge badge-success'>Yes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class='badge badge-danger'>No</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            width: 100,
+            targets: [3]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var datatable = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+</script>

@@ -164,10 +164,13 @@ namespace iSpeak.Controllers
             payment.Notes_Cancel = notes;
             db.Entry(payment).State = EntityState.Modified;
 
-            var payment_item = await db.PaymentItems.Where(x => x.Payments_Id == id).FirstOrDefaultAsync();
-            var sale_invoice = await db.SaleInvoices.FindAsync(payment_item.ReferenceId);
-            sale_invoice.Due += payment_item.Amount;
-            db.Entry(sale_invoice).State = EntityState.Modified;
+            var payment_item = await db.PaymentItems.Where(x => x.Payments_Id == id).ToListAsync();
+            foreach (var item in payment_item)
+            {
+                var sale_invoice = await db.SaleInvoices.FindAsync(item.ReferenceId);
+                sale_invoice.Due += item.Amount;
+                db.Entry(sale_invoice).State = EntityState.Modified;
+            }
 
             await db.SaveChangesAsync();
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);

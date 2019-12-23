@@ -45,6 +45,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus, Version=4.5.3.2, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.5.3.2\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
       <Private>True</Private>
@@ -56,6 +59,7 @@
     <Reference Include="Microsoft.Owin.Cors, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Cors.4.0.1\lib\net45\Microsoft.Owin.Cors.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -65,6 +69,7 @@
     <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Web.Cors, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Cors.5.0.0\lib\net45\System.Web.Cors.dll</HintPath>
     </Reference>
@@ -191,6 +196,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Common\BranchesActionFilter.cs" />
+    <Compile Include="Common\ExportExcel.cs" />
     <Compile Include="Common\IdentityExtension.cs" />
     <Compile Include="Common\Permission.cs" />
     <Compile Include="Common\Select2Pagination.cs" />
@@ -219,6 +225,7 @@
     <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Controllers\PromotionEventsController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
+    <Compile Include="Controllers\ReturnController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
@@ -302,9 +309,13 @@
     <Compile Include="Models\SaleInvoiceItems_VouchersModels.cs" />
     <Compile Include="Models\SaleInvoicesModels.cs" />
     <Compile Include="Models\SaleInvoicesViewModels.cs" />
+    <Compile Include="Models\SaleReturnItemsModels.cs" />
+    <Compile Include="Models\SaleReturnsModels.cs" />
+    <Compile Include="Models\SaleReturnViewModels.cs" />
     <Compile Include="Models\ServicesModels.cs" />
     <Compile Include="Models\SettingsModels.cs" />
     <Compile Include="Models\SettingsViewModels.cs" />
+    <Compile Include="Models\StockOnHandViewModels.cs" />
     <Compile Include="Models\StudentPackageViewModels.cs" />
     <Compile Include="Models\SuppliersModels.cs" />
     <Compile Include="Models\TokenIdentity.cs" />
@@ -559,6 +570,9 @@
     <Content Include="Views\PromotionEvents\Create.cshtml" />
     <Content Include="Views\PromotionEvents\Edit.cshtml" />
     <Content Include="Views\Reports\SendEmails.cshtml" />
+    <Content Include="Views\Inventory\Stock.cshtml" />
+    <Content Include="Views\Return\Index.cshtml" />
+    <Content Include="Views\Return\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

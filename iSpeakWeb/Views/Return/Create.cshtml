@@ -1,0 +1,139 @@
+﻿@model iSpeak.Models.SaleReturnsModels
+
+@{
+    ViewBag.Root = "Return";
+    ViewBag.Title = "Create";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        @using (Html.BeginForm("Create", "Return", FormMethod.Post, new { id = "target" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="No" name="No" value="1" />
+            <input type="hidden" id="Items" name="Items" />
+            <!-- Form inputs -->
+            <div class="card">
+                <div class="card-header header-elements-inline">
+                    <h5 class="card-title">@ViewBag.Root</h5>
+                    <div class="header-elements">
+                        <div class="list-icons">
+                            <a class="list-icons-item" data-action="collapse"></a>
+                            <a class="list-icons-item" data-action="reload"></a>
+                            <a class="list-icons-item" data-action="remove"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <fieldset class="mb-3">
+                        <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.Notes, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-lg-2">No. Invoice</label>
+                            <div class="col-lg-5">
+                                <select class="form-control" id="Invoice_Id" name="Invoice_Id"></select>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessage("Invoice_Id", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-lg-2">&nbsp;</label>
+                            <div class="col-lg-10">
+                                <div class="table-responsive">
+                                    <table class="table table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:67% !important">Description</th>
+                                                <th style="width:11% !important">Qty Invoice</th>
+                                                <th style="width:11% !important">Qty Returned</th>
+                                                <th style="width:11% !important">Qty Return</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="data-body">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div>
+                        <a href="@Url.Action("Index", "Return")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
+                    </div>
+                </div>
+            </div>
+            <!-- /form inputs -->
+        }
+    </div>
+    <!-- /content area -->
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Invoice_Id').select2({
+            placeholder: 'Select No. Invoice',
+            ajax: {
+                url: '@Url.Action("GetInvoiceNo", "Return")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        branch_id: $('#Branch').val()
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
+
+        $('#Invoice_Id').change(function () {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetInventoryData", "Return")',
+                data: {
+                    invoice_id: $('#Invoice_Id').val()
+                },
+                async: false,
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                    return false;
+                }, //end error
+                success: function (data) {
+                    console.log(data);
+                    $('#data-body').empty();
+                    $('#data-body').append(data.body);
+                } //end success
+            }); //end ajax
+        });
+
+        $('#target').submit(function (e) {
+
+            var arrItem = [];
+            $('#data-body tr').each(function () {
+                var description = $(this).find('input.desc').val();
+                var qty_inv = parseFloat($(this).find('input.qty_inv').val());
+                var qty_returned = parseFloat($(this).find('input.qty_returned').val());
+                var qty_return = parseFloat($(this).find('input.qty_return').val());
+                var inv_item_id = $(this).find('input.inv_item_id').val();
+
+                var obj = { description: description, qty_inv: qty_inv, qty_returned: qty_returned, qty_return: qty_return, inv_item_id: inv_item_id };
+                arrItem.push(obj);
+            });
+            $('#Items').val(JSON.stringify(arrItem));
+
+        });
+    });
+</script>

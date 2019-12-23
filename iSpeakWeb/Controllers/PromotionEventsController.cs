@@ -11,6 +11,7 @@ using System.Web.Mvc;
 
 namespace iSpeak.Controllers
 {
+    [Authorize]
     public class PromotionEventsController : Controller
     {
         private readonly iSpeakContext db = new iSpeakContext();

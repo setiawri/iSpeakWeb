@@ -252,13 +252,18 @@
             {
                 data: 'Cancelled', render: function (data, type, row) {
                     if (row.IsChecked == false) {
-                        if (data == false) {
-                            return row.Amount == row.Due
-                                ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
-                                : '';
+                        if (row.IsReturnExist == false) {
+                            if (data == false) {
+                                return row.Amount == row.Due
+                                    ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
+                                    : '';
+                            }
+                            else {
+                                return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes + '</span>';
+                            }
                         }
                         else {
-                            return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes + '</span>';
+                            return '';
                         }
                     }
                     else {

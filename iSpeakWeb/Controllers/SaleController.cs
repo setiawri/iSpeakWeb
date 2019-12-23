@@ -29,6 +29,12 @@ namespace iSpeak.Controllers
             List<SaleInvoicesIndexModels> list = new List<SaleInvoicesIndexModels>();
             foreach (var item in data)
             {
+                var retur = await (from si in db.SaleInvoices
+                                   join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                   join sri in db.SaleReturnItems on sii.Id equals sri.SaleInvoiceItems_Id
+                                   where si.Id == item.si.Id
+                                   select new { si, sii, sri }).ToListAsync();
+
                 list.Add(new SaleInvoicesIndexModels
                 {
                     Id = item.si.Id,
@@ -40,7 +46,8 @@ namespace iSpeak.Controllers
                     Due = item.si.Due,
                     Cancelled = item.si.Cancelled,
                     IsChecked = item.si.IsChecked,
-                    Notes = item.si.Notes
+                    Notes = item.si.Notes,
+                    IsReturnExist = retur.Count > 0 ? true : false
                 });
             }
 
@@ -314,6 +321,7 @@ namespace iSpeak.Controllers
                                join l in db.Languages on lp.Languages_Id equals l.Id
                                join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
                                where lp.Active == true
+                               orderby lp.Name
                                select new LessonPackagesViewModels
                                {
                                    Id = lp.Id,
@@ -339,6 +347,7 @@ namespace iSpeak.Controllers
                 var list_product = (from pr in db.Products
                                     join pq in db.Products_Qty on pr.Id equals pq.Products_Id
                                     where pq.Branches_Id == user_login.Branches_Id
+                                    orderby pr.Description
                                     select new { pr, pq }).ToList();
                 List<object> products = new List<object>();
                 foreach (var product in list_product)
@@ -506,6 +515,7 @@ namespace iSpeak.Controllers
                            join l in db.Languages on lp.Languages_Id equals l.Id
                            join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
                            where lp.Active == true
+                           orderby lp.Name
                            select new LessonPackagesViewModels
                            {
                                Id = lp.Id,
@@ -531,6 +541,7 @@ namespace iSpeak.Controllers
             var list_product = (from pr in db.Products
                                 join pq in db.Products_Qty on pr.Id equals pq.Products_Id
                                 where pq.Branches_Id == user_login.Branches_Id
+                                orderby pr.Description
                                 select new { pr, pq }).ToList();
             List<object> products = new List<object>();
             foreach (var product in list_product)

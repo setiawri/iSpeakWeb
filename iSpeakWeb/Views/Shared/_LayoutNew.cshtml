@@ -99,30 +99,41 @@
         <div class="navbar-collapse collapse" id="navbar-navigation">
             <ul class="navbar-nav">
                 @*<li class="nav-item">
-                    <select id="Branch" name="Branch" class="navbar-nav-link">
-                        @foreach (SelectListItem option in ViewBag.LoginBranch)
-                        {
-                            <option value="@option.Value" @(option.Value == User.Identity.GetBranches_Id() ? "selected='selected'" : "")>@option.Text</option>
-                        }
-                    </select>
-                </li>*@
+            <select id="Branch" name="Branch" class="navbar-nav-link">
+                @foreach (SelectListItem option in ViewBag.LoginBranch)
+                {
+                    <option value="@option.Value" @(option.Value == User.Identity.GetBranches_Id() ? "selected='selected'" : "")>@option.Text</option>
+                }
+            </select>
+        </li>*@
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="navbar-nav-link">
                         <i class="icon-home4 mr-2"></i>
                         Dashboard
                     </a>
                 </li>
-                <li class="nav-item" @(ViewBag.SaleMenu == "" ? "" : Html.Raw(ViewBag.SaleMenu))>
-                    <a href="@Url.Action("Index", "Sale")" class="navbar-nav-link">
+                @*<li class="nav-item" @(ViewBag.SaleMenu == "" ? "" : Html.Raw(ViewBag.SaleMenu))>
+            <a href="@Url.Action("Index", "Sale")" class="navbar-nav-link">
+                <i class="icon-list3 mr-2"></i>
+                Sale
+            </a>
+        </li>
+        <li class="nav-item" @(ViewBag.PaymentMenu == "" ? "" : Html.Raw(ViewBag.PaymentMenu))>
+            <a href="@Url.Action("Print", "Payments")" class="navbar-nav-link">
+                <i class="icon-cash3 mr-2"></i>
+                Payment
+            </a>
+        </li>*@
+                <li class="nav-item dropdown" @(ViewBag.SaleMenu == "" ? "" : Html.Raw(ViewBag.SaleMenu))>
+                    <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
                         <i class="icon-list3 mr-2"></i>
                         Sale
                     </a>
-                </li>
-                <li class="nav-item" @(ViewBag.PaymentMenu == "" ? "" : Html.Raw(ViewBag.PaymentMenu))>
-                    <a href="@Url.Action("Print", "Payments")" class="navbar-nav-link">
-                        <i class="icon-cash3 mr-2"></i>
-                        Payment
-                    </a>
+                    <div class="dropdown-menu">
+                        <a href="@Url.Action("Index", "Sale")" class="dropdown-item">Sale Invoices</a>
+                        <a href="@Url.Action("Print", "Payments")" class="dropdown-item">Payments</a>
+                        <a href="@Url.Action("Index", "Return")" class="dropdown-item">Returns</a>
+                    </div>
                 </li>
                 <li class="nav-item" @(ViewBag.SessionsMenu == "" ? "" : Html.Raw(ViewBag.SessionsMenu))>
                     <a href="@Url.Action("Index", "LessonSessions")" class="navbar-nav-link">

@@ -42,6 +42,7 @@ namespace iSpeak.Models
         [Display(Name = "Approved")]
         public bool IsChecked { get; set; }
         public string Notes { get; set; }
+        public bool IsReturnExist { get; set; }
     }
 
     public class SaleInvoiceItemDetails
