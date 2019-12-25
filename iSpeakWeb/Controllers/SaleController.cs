@@ -20,11 +20,11 @@ namespace iSpeak.Controllers
         public async Task<JsonResult> GetData()
         {
             var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            var data = await(from si in db.SaleInvoices
-                             join b in db.Branches on si.Branches_Id equals b.Id
-                             join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                             where si.Branches_Id == user_login.Branches_Id //login_session.Branches_Id
-                             select new { si, b, u }).ToListAsync();
+            var data = await (from si in db.SaleInvoices
+                              join b in db.Branches on si.Branches_Id equals b.Id
+                              join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+                              where si.Branches_Id == user_login.Branches_Id //login_session.Branches_Id
+                              select new { si, b, u }).ToListAsync();
 
             List<SaleInvoicesIndexModels> list = new List<SaleInvoicesIndexModels>();
             foreach (var item in data)
@@ -105,10 +105,10 @@ namespace iSpeak.Controllers
         {
             //var lessonPackage = db.LessonPackages.Where(x => x.Id == lesson_package_id).FirstOrDefault();
             var lesson = await (from lp in db.LessonPackages
-                                 join l in db.Languages on lp.Languages_Id equals l.Id
-                                 join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
-                                 where lp.Id == lesson_package_id
-                                 select new { lp, l, lt }).FirstOrDefaultAsync();
+                                join l in db.Languages on lp.Languages_Id equals l.Id
+                                join lt in db.LessonTypes on lp.LessonTypes_Id equals lt.Id
+                                where lp.Id == lesson_package_id
+                                select new { lp, l, lt }).FirstOrDefaultAsync();
             string description = "[" + lesson.lt.Name + ", " + lesson.l.Name + "] " + lesson.lp.Name + " (" + hours + " hours)";
             int price = lesson.lp.Price;
             //decimal voucher = string.IsNullOrEmpty(voucher_id) ? 0 : db.Vouchers.Where(x => x.Id.ToString() == voucher_id).FirstOrDefault().Amount;
@@ -274,7 +274,7 @@ namespace iSpeak.Controllers
                 //return View(list);
             }
         }
-        
+
         [HttpGet]
         public ActionResult Create()
         {
@@ -398,6 +398,16 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create([Bind(Include = "Branches_Id,LessonPackages_Id,Products_Id,Vouchers_Id,Customers_Id,Notes")] SaleInvoicesViewModels saleInvoicesViewModels, int Amount, string Items)
         {
+            if (saleInvoicesViewModels.Customers_Id == Guid.Empty)
+            {
+                ModelState.AddModelError("Customers_Id", "The field Customer is required.");
+            }
+
+            if (Items == "[]" || Amount == 0)
+            {
+                ModelState.AddModelError("Items", "The field Items is required.");
+            }
+
             var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
 
             if (ModelState.IsValid)
@@ -477,7 +487,8 @@ namespace iSpeak.Controllers
 
                 return RedirectToAction("Index");
             }
-            
+
+            Permission p = new Permission();
             #region List Voucher
             var vouchers = db.Vouchers.Where(x => x.Active == true).OrderBy(x => x.Code).ToList();
             List<object> voucher_list = new List<object>();
@@ -553,11 +564,36 @@ namespace iSpeak.Controllers
                 });
             }
             #endregion
+            #region List Role
+            string role_id_allowed = db.Settings.Find(SettingsValue.GUID_UserSetRoleAllowed).Value_Guid.Value.ToString();
+            List<SelectListItem> role_list = new List<SelectListItem>();
+            bool setRole = p.IsGranted(User.Identity.Name, "user_setroles");
+            if (setRole)
+            {
+                foreach (var role in db.Role.OrderBy(x => x.Name))
+                {
+                    role_list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                }
+            }
+            else
+            {
+                foreach (var role in db.Role.Where(x => x.Id == role_id_allowed).OrderBy(x => x.Name))
+                {
+                    role_list.Add(new SelectListItem() { Value = role.Name, Text = role.Name });
+                }
+            }
+            #endregion
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             ViewBag.listVoucher = new SelectList(voucher_list, "Id", "Name");
             ViewBag.listCustomer = new SelectList(customer_list, "Id", "Name");
             ViewBag.listLesson = new SelectList(lesson_list, "Id", "Name");
             ViewBag.listProduct = new SelectList(products, "Id", "Name");
+            ViewBag.listService = new SelectList(db.Services.Where(x => x.Active == true).OrderBy(x => x.Description).ToList(), "Id", "Description");
+            ViewBag.listRole = role_list;
+            ViewBag.RoleValueDefault = db.Role.Find(role_id_allowed).Name;
+            ViewBag.listLanguage = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.listPromo = new SelectList(db.PromotionEvents.OrderBy(x => x.Name).ToList(), "Id", "Name");
+            ViewBag.DOB = DateTime.UtcNow.Date;
 
             return View(saleInvoicesViewModels);
         }

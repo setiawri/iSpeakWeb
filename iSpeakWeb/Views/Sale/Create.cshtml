@@ -144,6 +144,7 @@
                         </div>
                         <div class="col-lg-4">
                             @Html.ValidationMessageFor(model => model.Vouchers_Id, "", new { @class = "text-danger" })
+                            @Html.ValidationMessage("Items", "", new { @class = "text-danger" })
                             <label class="error-sale text-danger" style="display: none"></label>
                         </div>
                     </div>
@@ -187,16 +188,19 @@
                     </div>
                     <div class="form-group row">
                         @Html.LabelFor(model => model.Customers_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
-                        <div class="col-lg-5">
-                            @*@Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })*@
-                            <select class="form-control" id="Customers_Id" name="Customers_Id"></select>
+                        <div class="col-lg-6">
+                            <div class="form-group row">
+                                <div class="col-lg-10">
+                                    @*@Html.DropDownListFor(model => model.Customers_Id, ViewBag.listCustomer as SelectList, "Select Customer", new { @class = "form-control select2" })*@
+                                    <select class="form-control" id="Customers_Id" name="Customers_Id"></select>
+                                </div>
+                                <div class="col-lg-2">
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_cust">New <i class="icon-plus22 ml-2"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-lg-4">
-                            @*<a href="@Url.Action("Register", "Account")" class="btn btn-success">New <i class="icon-plus22 ml-2"></i></a>*@
-                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_cust">New <i class="icon-plus22 ml-2"></i></button>
-                        </div>
-                        <div class="col-lg-4">
-                            @Html.ValidationMessageFor(model => model.Customers_Id, "", new { @class = "text-danger" })
+                            @Html.ValidationMessage("Customers_Id", "", new { @class = "text-danger" })
                         </div>
                     </div>
                     <div class="form-group row" style="display: none">
@@ -799,9 +803,9 @@
             }
         });
 
-        var arrItem = [];
         $('#target').submit(function (e) {
             //e.preventDefault();
+            var arrItem = [];
             var total = 0;
             $('#data-body tr').each(function () {
                 var desc = $(this).find('input.desc').val();
@@ -828,6 +832,7 @@
             });
             $('#Amount').val(total);
             $('#Items').val(JSON.stringify(arrItem));
+
         });
     })
 </script>

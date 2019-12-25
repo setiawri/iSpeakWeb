@@ -116,7 +116,7 @@ namespace iSpeak.Controllers
             var list = (from pi in db.PaymentItems
                         join si in db.SaleInvoices on pi.ReferenceId equals si.Id
                         join p in db.Payments on pi.Payments_Id equals p.Id
-                        where si.Id == id && p.Cancelled == false
+                        where si.Id == id //&& p.Cancelled == false
                         orderby p.Timestamp descending
                         select new { pi, si, p }).ToList();
             string message = @"<div class='table-responsive'>
@@ -128,6 +128,7 @@ namespace iSpeak.Controllers
                                                 <th>Due Before</th>
                                                 <th>Payment</th>
                                                 <th>Due After</th>
+                                                <th>Status</th>
                                                 <th>Approved</th>
                                             </tr>
                                         </thead>
@@ -136,6 +137,10 @@ namespace iSpeak.Controllers
             bool canApprove = permission.IsGranted(User.Identity.Name, "payments_approve");
             foreach (var item in list)
             {
+                string status = (item.p.Cancelled) 
+                    ? "<span class='badge badge-warning d-block'>Cancel</span>" 
+                    : "";
+
                 string approved_render = "";
                 if (canApprove)
                 {
@@ -148,6 +153,7 @@ namespace iSpeak.Controllers
                                 <td>" + item.pi.DueBefore.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.Amount.ToString("#,##0") + @"</td>
                                 <td>" + item.pi.DueAfter.ToString("#,##0") + @"</td>
+                                <td>" + status + @"</td>
                                 <td>" + approved_render + @"</td>
                             </tr>";
             }
