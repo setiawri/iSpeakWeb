@@ -228,6 +228,7 @@
     <Compile Include="Controllers\ReturnController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
     <Compile Include="Controllers\SaleController.cs" />
+    <Compile Include="Controllers\SchedulesController.cs" />
     <Compile Include="Controllers\ServicesController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Controllers\SuppliersController.cs" />
@@ -269,6 +270,7 @@
     <Compile Include="Models\BirthdayViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />
     <Compile Include="Models\ConsignmentsModels.cs" />
+    <Compile Include="Models\DayOfWeekEnum.cs" />
     <Compile Include="Models\EmailSenderViewModels.cs" />
     <Compile Include="Models\ExpenseCategoriesModels.cs" />
     <Compile Include="Models\ExpensesModels.cs" />
@@ -320,6 +322,10 @@
     <Compile Include="Models\SuppliersModels.cs" />
     <Compile Include="Models\TokenIdentity.cs" />
     <Compile Include="Models\TutorPayrollViewModels.cs" />
+    <Compile Include="Models\TutorSchedulesModels.cs" />
+    <Compile Include="Models\TutorSchedulesViewModels.cs" />
+    <Compile Include="Models\TutorStudentSchedulesModels.cs" />
+    <Compile Include="Models\TutorStudentSchedulesViewModels.cs" />
     <Compile Include="Models\UnitsModels.cs" />
     <Compile Include="Models\UploadFilesModels.cs" />
     <Compile Include="Models\UserModels.cs" />
@@ -391,6 +397,7 @@
     <Content Include="assets\js\plugins\forms\styling\uniform.min.js" />
     <Content Include="assets\js\plugins\loaders\blockui.min.js" />
     <Content Include="assets\js\plugins\notifications\bootbox.min.js" />
+    <Content Include="assets\js\plugins\pickers\anytime.min.js" />
     <Content Include="assets\js\plugins\pickers\daterangepicker.js" />
     <Content Include="assets\js\plugins\pickers\pickadate\picker.date.js" />
     <Content Include="assets\js\plugins\pickers\pickadate\picker.js" />
@@ -573,6 +580,12 @@
     <Content Include="Views\Inventory\Stock.cshtml" />
     <Content Include="Views\Return\Index.cshtml" />
     <Content Include="Views\Return\Create.cshtml" />
+    <Content Include="Views\Schedules\TutorCreate.cshtml" />
+    <Content Include="Views\Schedules\TutorIndex.cshtml" />
+    <Content Include="Views\Schedules\TutorEdit.cshtml" />
+    <Content Include="Views\Schedules\StudentIndex.cshtml" />
+    <Content Include="Views\Schedules\StudentCreate.cshtml" />
+    <Content Include="Views\Schedules\StudentEdit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

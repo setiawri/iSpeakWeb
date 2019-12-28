@@ -1,0 +1,197 @@
+﻿@model iSpeak.Models.TutorStudentSchedulesModels
+
+@{
+    ViewBag.Root = "Student Schedules";
+    ViewBag.Title = "Edit";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <!-- Form inputs -->
+            <div class="card">
+                <div class="card-header header-elements-inline">
+                    <h5 class="card-title">@ViewBag.Root</h5>
+                    <div class="header-elements">
+                        <div class="list-icons">
+                            <a class="list-icons-item" data-action="collapse"></a>
+                            <a class="list-icons-item" data-action="reload"></a>
+                            <a class="list-icons-item" data-action="remove"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <fieldset class="mb-3">
+                        <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                        <div class="form-group row">
+                            <div class="col-lg-12">
+                                @Html.ValidationMessage("Exist", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.Student_UserAccounts_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                <select class="form-control" id="Student_UserAccounts_Id" name="Student_UserAccounts_Id"></select>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Student_UserAccounts_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.Tutor_UserAccounts_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                <select class="form-control" id="Tutor_UserAccounts_Id" name="Tutor_UserAccounts_Id"></select>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Tutor_UserAccounts_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.InvoiceItems_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                @Html.DropDownListFor(model => model.InvoiceItems_Id, ViewBag.listLesson as SelectList, "Select Lesson", new { @class = "form-control select2" })
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.InvoiceItems_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-lg-2">Schedule</label>
+                            <div class="col-lg-5">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        @Html.EnumDropDownListFor(model => model.DayOfWeek, new { @class = "form-control select2" })
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="input-group">
+                                            <span class="input-group-prepend">
+                                                <span class="input-group-text">Start</span>
+                                            </span>
+                                            <input type="text" class="form-control" id="StartTime" name="StartTime">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="input-group">
+                                            <span class="input-group-prepend">
+                                                <span class="input-group-text">End</span>
+                                            </span>
+                                            <input type="text" class="form-control" id="EndTime" name="EndTime">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessage("Schedule", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.Notes, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                <div class="form-check form-check-switchery">
+                                    <label class="form-check-label">
+                                        @Html.EditorFor(model => model.IsActive, new { htmlAttributes = new { @class = "form-check-input-switchery" } })
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div>
+                        <a href="@Url.Action("StudentIndex", "Schedules")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                        <button type="submit" class="btn btn-primary">Save <i class="icon-checkmark4 ml-2"></i></button>
+                    </div>
+                </div>
+            </div>
+            <!-- /form inputs -->
+        }
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var switchery = new Switchery(document.querySelector('.form-check-input-switchery'));
+
+        $('.select2').select2();
+
+        $('#StartTime,#EndTime').AnyTime_picker({
+            format: '%H:%i'
+        });
+
+        $('#Tutor_UserAccounts_Id').select2({
+            placeholder: 'Select Tutor',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'tutor'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
+
+        var $newOption = $("<option selected='selected'></option>").val('@Model.Tutor_UserAccounts_Id').text('@ViewBag.TutorName');
+        $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
+
+        $('#Student_UserAccounts_Id').select2({
+            placeholder: 'Select Student',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'student'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
+
+        var $newOption2 = $("<option selected='selected'></option>").val('@Model.Student_UserAccounts_Id').text('@ViewBag.StudentName');
+        $("#Student_UserAccounts_Id").append($newOption2).trigger('change');
+
+        $('#Student_UserAccounts_Id').change(function () {
+            $("#InvoiceItems_Id").empty();
+            $("#InvoiceItems_Id").append("<option value=''>Select Lesson</option");
+
+            if ($('#Student_UserAccounts_Id').val() != '') {
+                $.get('@Url.Action("GetLessonList", "LessonSessions")', { student_id: $("#Student_UserAccounts_Id").val() }, function (data) {
+                    $.each(data.ddl, function (index, row) {
+                        $("#InvoiceItems_Id").append("<option value='" + row.Value + "'>" + row.Text + "</option>")
+                    });
+                });
+            }
+        });
+
+        $('#StartTime').val('@string.Format("{0:HH:mm}", Model.StartTime)');
+        $('#EndTime').val('@string.Format("{0:HH:mm}", Model.EndTime)');
+
+    });
+</script>

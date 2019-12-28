@@ -1,0 +1,102 @@
+﻿@model IEnumerable<iSpeak.Models.TutorStudentSchedulesViewModels>
+
+@{
+    ViewBag.Root = "Student Schedules";
+    ViewBag.Title = "Index";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Root</h5>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a class="list-icons-item" data-action="collapse"></a>
+                        <a class="list-icons-item" data-action="reload"></a>
+                        <a class="list-icons-item" data-action="remove"></a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <a href="@Url.Action("StudentCreate", "Schedules")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Student)</th>
+                                <th>@Html.DisplayNameFor(model => model.Invoice)</th>
+                                <th>@Html.DisplayNameFor(model => model.Tutor)</th>
+                                <th>@Html.DisplayNameFor(model => model.DayOfWeek)</th>
+                                <th>@Html.DisplayNameFor(model => model.StartTime)</th>
+                                <th>@Html.DisplayNameFor(model => model.EndTime)</th>
+                                <th>@Html.DisplayNameFor(model => model.IsActive)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.DisplayFor(modelItem => item.Student)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Invoice)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.DayOfWeek)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.EndTime)</td>
+                                    <td>
+                                        @if (item.IsActive == true)
+                                        {
+                                            <span class="badge badge-primary">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-dark">Not Active</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Edit", "StudentEdit", new { id = item.Id })
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Student }, new { target = "_blank" })
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    // Setting datatable defaults
+    $.extend($.fn.dataTable.defaults, {
+        autoWidth: false,
+        columnDefs: [{
+            orderable: false,
+            width: 100,
+            targets: [7]
+        }],
+        dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;' }
+        }
+    });
+
+    var datatable = $('.datatable').DataTable({
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']]
+    });
+</script>

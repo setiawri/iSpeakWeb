@@ -51,6 +51,8 @@ namespace iSpeak.Models
         public DbSet<PromotionEventsModels> PromotionEvents { get; set; }
         public DbSet<SaleReturnsModels> SaleReturns { get; set; }
         public DbSet<SaleReturnItemsModels> SaleReturnItems { get; set; }
+        public DbSet<TutorSchedulesModels> TutorSchedules { get; set; }
+        public DbSet<TutorStudentSchedulesModels> TutorStudentSchedules { get; set; }
 
 
         public override int SaveChanges()
