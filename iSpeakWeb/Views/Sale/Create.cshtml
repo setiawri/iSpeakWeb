@@ -200,7 +200,7 @@
                             </div>
                         </div>
                         <div class="col-lg-4">
-                            @Html.ValidationMessage("Customers_Id", "", new { @class = "text-danger" })
+                            @Html.ValidationMessage("Customers_Id", "", new { @class = "text-danger err_customer" })
                         </div>
                     </div>
                     <div class="form-group row" style="display: none">
@@ -805,33 +805,45 @@
 
         $('#target').submit(function (e) {
             //e.preventDefault();
-            var arrItem = [];
-            var total = 0;
-            $('#data-body tr').each(function () {
-                var desc = $(this).find('input.desc').val();
-                var qty = parseFloat($(this).find('input.qty').val());
-                var price = parseFloat($(this).find('input.price').val().replace(/,/g, ''));
-                var travel = parseFloat($(this).find('input.travel').val().replace(/,/g, ''));
-                var tutor = parseFloat($(this).find('input.tutor').val().replace(/,/g, ''));
-                var disc = parseFloat($(this).find('input.disc').val().replace(/,/g, ''));
-                var voucher = parseFloat($(this).find('input.voucher').val().replace(/,/g, ''));
-                var subtotal = parseFloat($(this).find('input.subtotal').val().replace(/,/g, ''));
-                var hours = parseFloat($(this).find('input.hours').val().replace(/,/g, ''));
-                var voucher_id = $(this).find('input.voucher_id').val();
-                var note = $(this).find('input.note').val();
-                var lesson_id = $(this).find('input.lesson_id').val();
-                var inventory_id = $(this).find('input.inventory_id').val();
-                var service_id = $(this).find('input.service_id').val();
 
-                total += subtotal;
-                var obj = {
-                    desc: desc, qty: qty, price: price, travel: travel, tutor: tutor, disc: disc, voucher: voucher, subtotal: subtotal,
-                    hours: hours, voucher_id: voucher_id, note: note, lesson_id: lesson_id, inventory_id: inventory_id, service_id: service_id
-                };
-                arrItem.push(obj);
-            });
-            $('#Amount').val(total);
-            $('#Items').val(JSON.stringify(arrItem));
+            if ($('#Customers_Id').val() == null) {
+                $('.err_customer').html('The field Customer is required.').show();
+                return false;
+            }
+            else {
+
+                var arrItem = [];
+                var total = 0;
+                $('#data-body tr').each(function () {
+                    var desc = $(this).find('input.desc').val();
+                    var qty = parseFloat($(this).find('input.qty').val());
+                    var price = parseFloat($(this).find('input.price').val().replace(/,/g, ''));
+                    var travel = parseFloat($(this).find('input.travel').val().replace(/,/g, ''));
+                    var tutor = parseFloat($(this).find('input.tutor').val().replace(/,/g, ''));
+                    var disc = parseFloat($(this).find('input.disc').val().replace(/,/g, ''));
+                    var voucher = parseFloat($(this).find('input.voucher').val().replace(/,/g, ''));
+                    var subtotal = parseFloat($(this).find('input.subtotal').val().replace(/,/g, ''));
+                    var hours = parseFloat($(this).find('input.hours').val().replace(/,/g, ''));
+                    var voucher_id = $(this).find('input.voucher_id').val();
+                    var note = $(this).find('input.note').val();
+                    var lesson_id = $(this).find('input.lesson_id').val();
+                    var inventory_id = $(this).find('input.inventory_id').val();
+                    var service_id = $(this).find('input.service_id').val();
+
+                    total += subtotal;
+                    var obj = {
+                        desc: desc, qty: qty, price: price, travel: travel, tutor: tutor, disc: disc, voucher: voucher, subtotal: subtotal,
+                        hours: hours, voucher_id: voucher_id, note: note, lesson_id: lesson_id, inventory_id: inventory_id, service_id: service_id
+                    };
+                    arrItem.push(obj);
+                });
+                $('#Amount').val(total);
+                $('#Items').val(JSON.stringify(arrItem));
+
+                $('.err_customer').html('').hide();
+                return true;
+
+            }
 
         });
     })

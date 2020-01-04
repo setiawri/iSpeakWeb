@@ -79,6 +79,24 @@
                                 @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
                             </div>
                         </div>
+                        <hr />
+                        <div class="form-group row">
+                            <label class="col-lg-2">Schedule List</label>
+                            <div class="col-lg-5">
+                                <div class="table-responsive">
+                                    <table class="table table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th>Tutor</th>
+                                                <th>Day of Week</th>
+                                                <th>Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="data-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </fieldset>
                     <div>
                         <a href="@Url.Action("TutorIndex", "Schedules")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
@@ -118,6 +136,43 @@
             },
             //minimumInputLength: 2
         });
+
+        $('#Tutor_UserAccounts_Id').change(function () {
+            $('#data-body').empty();
+            if ($('#Tutor_UserAccounts_Id').val() != '') {
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetTutorSchedule", "Schedules")',
+                    data: {
+                        tutor_id: $('#Tutor_UserAccounts_Id').val()
+                    },
+                    async: false,
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                        return false;
+                    }, //end error
+                    success: function (data) {
+                        //console.log(data);
+                        $('#data-body').append(data.body);
+                    } //end success
+                }); //end ajax
+            }
+        });
+
+        console.log('@ViewBag.Error');
+        console.log('@ViewBag.TutorName');
+        console.log('@ViewBag.TutorId');
+
+
+        if ('@ViewBag.Error' != '') {
+            $('#StartTime').val('@ViewBag.StartTime');
+            $('#EndTime').val('@ViewBag.EndTime');
+        }
+
+        if (('@ViewBag.Error' == 'init' && '@ViewBag.TutorName' != '') || ('@ViewBag.Error' == 'duplicate_schedule' && '@ViewBag.TutorName' != '') || ('@ViewBag.Error' == 'invalid_time' && '@ViewBag.TutorName' != '')) {
+            var $newOption = $("<option selected='selected'></option>").val('@ViewBag.TutorId').text('@ViewBag.TutorName');
+            $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
+        }
         
     });
 </script>

@@ -133,13 +133,6 @@
                         <a href="@Url.Action("Index", "Sale")" class="dropdown-item">Sale Invoices</a>
                         <a href="@Url.Action("Print", "Payments")" class="dropdown-item">Payments</a>
                         <a href="@Url.Action("Index", "Return")" class="dropdown-item">Returns</a>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item dropdown-toggle">Schedules</a>
-                            <div class="dropdown-menu">
-                                <a href="@Url.Action("TutorIndex", "Schedules")" class="dropdown-item">Tutor</a>
-                                <a href="@Url.Action("StudentIndex", "Schedules")" class="dropdown-item">Student</a>
-                            </div>
-                        </div>
                     </div>
                 </li>
                 <li class="nav-item" @(ViewBag.SessionsMenu == "" ? "" : Html.Raw(ViewBag.SessionsMenu))>
@@ -211,6 +204,13 @@
                                 <a href="@Url.Action("Index", "Branches")" class="dropdown-item">Branches</a>
                             </div>
                         </div>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item dropdown-toggle">Schedules</a>
+                            <div class="dropdown-menu">
+                                <a href="@Url.Action("TutorIndex", "Schedules")" class="dropdown-item">Tutor</a>
+                                <a href="@Url.Action("StudentIndex", "Schedules")" class="dropdown-item">Student</a>
+                            </div>
+                        </div>
 
                         <a href="@Url.Action("Index", "Consignments")" class="dropdown-item">Consignments</a>
                         <a href="@Url.Action("Index", "Vouchers")" class="dropdown-item">Vouchers</a>
@@ -256,7 +256,7 @@
             </span>
         </div>
         <div class="mt-2">
-            <span class="badge badge-success">v.191225</span>
+            <span class="badge badge-success">v.200104</span>
         </div>
     </div>
     <!-- /footer -->

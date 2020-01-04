@@ -17,6 +17,7 @@ namespace iSpeak.Models
         [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime Timestamp { get; set; }
         [Required]
+        [Display(Name = "Reason")]
         public string Notes { get; set; }
         public bool Approved { get; set; }
     }

@@ -17,6 +17,36 @@ namespace iSpeak.Controllers
         private readonly iSpeakContext db = new iSpeakContext();
 
         #region TUTOR
+        public async Task<JsonResult> GetTutorSchedule(string tutor_id)
+        {
+            var items = await (from ts in db.TutorSchedules
+                               join u in db.User on ts.Tutor_UserAccounts_Id equals u.Id
+                               where ts.Tutor_UserAccounts_Id == tutor_id
+                               orderby ts.DayOfWeek
+                               select new TutorSchedulesViewModels
+                               {
+                                   Id = ts.Id,
+                                   Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                   DayOfWeek = ts.DayOfWeek,
+                                   StartTime = ts.StartTime,
+                                   EndTime = ts.EndTime,
+                                   IsActive = ts.IsActive,
+                                   Notes = ts.Notes
+                               }).ToListAsync();
+            
+            string content = "";
+            foreach (var item in items)
+            {
+                content += @"<tr>
+                                <td>" + item.Tutor + @"</td>
+                                <td>" + item.DayOfWeek + @"</td>
+                                <td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + @"</td>
+                            </tr>";
+            }
+
+            return Json(new { body = content }, JsonRequestBehavior.AllowGet);
+        }
+
         public async Task<ActionResult> TutorIndex()
         {
             Permission p = new Permission();
@@ -42,13 +72,22 @@ namespace iSpeak.Controllers
             }
         }
 
-        public ActionResult TutorCreate()
+        public async Task<ActionResult> TutorCreate(string id)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    var tutor = await db.User.FindAsync(id);
+                    ViewBag.Error = "init";
+                    ViewBag.TutorId = tutor == null ? "" : tutor.Id;
+                    ViewBag.TutorName = tutor == null ? "" : tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
+                    ViewBag.StartTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0));
+                    ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
+                }
                 return View();
             }
         }
@@ -57,6 +96,8 @@ namespace iSpeak.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> TutorCreate([Bind(Include = "Id,Tutor_UserAccounts_Id,DayOfWeek,StartTime,EndTime,IsActive,Notes")] TutorSchedulesModels tutorSchedulesModels)
         {
+            string message_error = "";
+
             var start = new DateTime(1970, 01, 01, tutorSchedulesModels.StartTime.Hour, tutorSchedulesModels.StartTime.Minute, 0);
             var end = new DateTime(1970, 01, 01, tutorSchedulesModels.EndTime.Hour, tutorSchedulesModels.EndTime.Minute, 0);
 
@@ -66,9 +107,11 @@ namespace iSpeak.Controllers
                     && x.StartTime == start && x.EndTime == end).FirstOrDefaultAsync();
             if (isExist != null)
             {
-                var tutor = await db.User.FindAsync(tutorSchedulesModels.Tutor_UserAccounts_Id);
-                string tutor_name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
+                var _tutor = await db.User.FindAsync(tutorSchedulesModels.Tutor_UserAccounts_Id);
+                string tutor_name = _tutor.Firstname + " " + _tutor.Middlename + " " + _tutor.Lastname;
                 ModelState.AddModelError("Exist", "This schedule already exist ( " + string.Format("{0}: {1}, {2:HH:mm} - {3:HH:mm}", tutor_name, tutorSchedulesModels.DayOfWeek, start, end) + " ).");
+                message_error = "duplicate_schedule";
+                ViewBag.Error = message_error;
             }
 
             if (tutorSchedulesModels.StartTime.Hour > tutorSchedulesModels.EndTime.Hour
@@ -76,6 +119,8 @@ namespace iSpeak.Controllers
                     && tutorSchedulesModels.StartTime.Minute > tutorSchedulesModels.EndTime.Minute))
             {
                 ModelState.AddModelError("Schedule", "The Start Time ( " + string.Format("{0:HH:mm}", tutorSchedulesModels.StartTime) + " ) field cannot greater than End Time ( " + string.Format("{0:HH:mm}", tutorSchedulesModels.EndTime) + " ) field.");
+                message_error = "invalid_time";
+                ViewBag.Error = message_error;
             }
 
             if (ModelState.IsValid)
@@ -87,9 +132,15 @@ namespace iSpeak.Controllers
                 db.TutorSchedules.Add(tutorSchedulesModels);
                 await db.SaveChangesAsync();
 
-                return RedirectToAction("TutorIndex");
+                return RedirectToAction("TutorCreate", new { id = tutorSchedulesModels.Tutor_UserAccounts_Id });
+                //return RedirectToAction("TutorIndex");
             }
 
+            var tutor = await db.User.FindAsync(tutorSchedulesModels.Tutor_UserAccounts_Id);
+            ViewBag.TutorId = tutor == null ? "" : tutor.Id;
+            ViewBag.TutorName = tutor == null ? "" : tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
+            ViewBag.StartTime = string.Format("{0:HH:mm}", start);
+            ViewBag.EndTime = string.Format("{0:HH:mm}", end);
             return View(tutorSchedulesModels);
         }
 

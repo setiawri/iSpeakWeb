@@ -35,7 +35,7 @@
                                 @Html.EditorFor(model => model.Notes, new { htmlAttributes = new { @class = "form-control" } })
                             </div>
                             <div class="col-lg-5">
-                                @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger err_notes" })
                             </div>
                         </div>
                         <div class="form-group row">
@@ -44,7 +44,7 @@
                                 <select class="form-control" id="Invoice_Id" name="Invoice_Id"></select>
                             </div>
                             <div class="col-lg-5">
-                                @Html.ValidationMessage("Invoice_Id", "", new { @class = "text-danger" })
+                                @Html.ValidationMessage("Invoice_Id", "", new { @class = "text-danger err_inv" })
                             </div>
                         </div>
                         <div class="form-group row">
@@ -112,7 +112,7 @@
                     return false;
                 }, //end error
                 success: function (data) {
-                    console.log(data);
+                    //console.log(data);
                     $('#data-body').empty();
                     $('#data-body').append(data.body);
                 } //end success
@@ -122,6 +122,7 @@
         $('#target').submit(function (e) {
 
             var arrItem = [];
+            var total_return = 0;
             $('#data-body tr').each(function () {
                 var description = $(this).find('input.desc').val();
                 var qty_inv = parseFloat($(this).find('input.qty_inv').val());
@@ -131,8 +132,30 @@
 
                 var obj = { description: description, qty_inv: qty_inv, qty_returned: qty_returned, qty_return: qty_return, inv_item_id: inv_item_id };
                 arrItem.push(obj);
+                total_return += qty_return;
             });
             $('#Items').val(JSON.stringify(arrItem));
+
+            if ($('#Notes').val() == '') {
+                $('.err_notes').html('The field Reason is required.').show();
+                $('.err_inv').html('').hide();
+                return false;
+            }
+            else if ($('#Invoice_Id').val() == null) {
+                $('.err_notes').html('').hide();
+                $('.err_inv').html('The field No. Invoice is required.').show();
+                return false;
+            }
+            else if (total_return == 0) {
+                $('.err_notes').html('').hide();
+                $('.err_inv').html('None of return is selected.').show();
+                return false;
+            }
+            else {
+                $('.err_notes').html('').hide();
+                $('.err_inv').html('').hide();
+                return true;
+            }
 
         });
     });
