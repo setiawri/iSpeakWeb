@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="iSpeakMobile.Views.PaymentPage"
-             Title="Payment - iSpeak Mobile">
+             Title="Payment">
     <ContentPage.Content>
         <CollectionView x:Name="cv" ItemsSource="{Binding Payment}" SelectionMode="None">
             <CollectionView.ItemTemplate>

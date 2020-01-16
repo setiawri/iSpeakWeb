@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.Text;
 
-namespace iSpeak.Models.API
+namespace iSpeakMobile.Models
 {
     public class CommonRequestModels
     {

@@ -9,7 +9,7 @@
 
     <!-- Content area -->
     <div class="content">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("TutorCreate", "Schedules", FormMethod.Post, new { id = "target" }))
         {
             @Html.AntiForgeryToken()
             <!-- Form inputs -->
@@ -82,14 +82,14 @@
                         <hr />
                         <div class="form-group row">
                             <label class="col-lg-2">Schedule List</label>
-                            <div class="col-lg-5">
+                            <div class="col-lg-7">
                                 <div class="table-responsive">
                                     <table class="table table-condensed">
                                         <thead>
                                             <tr>
-                                                <th>Tutor</th>
                                                 <th>Day of Week</th>
                                                 <th>Time</th>
+                                                <th>Notes</th>
                                             </tr>
                                         </thead>
                                         <tbody id="data-body"></tbody>
@@ -162,7 +162,8 @@
         console.log('@ViewBag.Error');
         console.log('@ViewBag.TutorName');
         console.log('@ViewBag.TutorId');
-
+        console.log('@ViewBag.FullAccess');
+        console.log('@ViewBag.LoginId');
 
         if ('@ViewBag.Error' != '') {
             $('#StartTime').val('@ViewBag.StartTime');
@@ -173,6 +174,18 @@
             var $newOption = $("<option selected='selected'></option>").val('@ViewBag.TutorId').text('@ViewBag.TutorName');
             $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
         }
+
+        if ('@ViewBag.FullAccess' == 'False') {
+            if ('@ViewBag.Error' == '') {
+                var $newOption = $("<option selected='selected'></option>").val('@ViewBag.LoginId').text('@ViewBag.LoginFullName');
+                $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
+            }
+            document.getElementById('Tutor_UserAccounts_Id').disabled = true;
+        }
+
+        $('#target').submit(function (e) {
+            document.getElementById('Tutor_UserAccounts_Id').disabled = false;
+        });
         
     });
 </script>

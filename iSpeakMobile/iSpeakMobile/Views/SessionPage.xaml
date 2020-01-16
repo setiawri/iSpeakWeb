@@ -7,7 +7,7 @@
              xmlns:viewModels="clr-namespace:iSpeakMobile.ViewModels"
              xmlns:scroll="clr-namespace:Xamarin.Forms.Extended;assembly=Xamarin.Forms.Extended.InfiniteScrolling"
              x:Class="iSpeakMobile.Views.SessionPage"
-             Title="Session - iSpeak Mobile">
+             Title="Session">
     <ContentPage.BindingContext>
         <viewModels:SessionViewModel />
     </ContentPage.BindingContext>

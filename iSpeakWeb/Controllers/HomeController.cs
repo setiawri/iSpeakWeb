@@ -132,6 +132,7 @@ namespace iSpeak.Controllers
                                     join r in db.Role on ur.RoleId equals r.Id
                                     where r.Name.ToLower() == "student" && u.UserName == User.Identity.Name
                                     select new { u }).FirstOrDefaultAsync();
+
             List<StudentPackageViewModels> student_packages = new List<StudentPackageViewModels>();
             if (is_student != null)
             {
@@ -156,16 +157,37 @@ namespace iSpeak.Controllers
                 }
             }
 
+            var student_schedule = await (from tss in db.TutorStudentSchedules
+                                          join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
+                                          join s in db.User on tss.Student_UserAccounts_Id equals s.Id
+                                          join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
+                                          where s.UserName == User.Identity.Name && tss.IsActive == true
+                                          orderby tss.DayOfWeek
+                                          select new TutorStudentSchedulesViewModels
+                                          {
+                                              Id = tss.Id,
+                                              Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
+                                              Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                                              DayOfWeek = tss.DayOfWeek,
+                                              StartTime = tss.StartTime,
+                                              EndTime = tss.EndTime,
+                                              Invoice = sii.Description,
+                                              IsActive = tss.IsActive,
+                                              Notes = tss.Notes
+                                          }).ToListAsync();
+
             BirthdayHome birthdayAlert = new BirthdayHome
             {
                 Reminders = await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed).ToListAsync(),
                 ThisMonth = this_month,
                 NextMonth = next_month,
                 StudentPackages = student_packages,
+                StudentSchedules = student_schedule,
                 IsStudentBirthday = student_bday == null ? false : true,
                 ShowBirthdayList = is_admin == null ? false : true,
                 IsRemindersAllowed = isAllowReminders,
-                ShowStudentPackage = is_student == null ? false : true
+                ShowStudentPackage = is_student == null ? false : true,
+                ShowStudentSchedule = is_student == null ? false : true
             };
 
             ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Name", "Name");

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="iSpeakMobile.Views.SchedulePage"
+             Title="Schedule">
+    <ContentPage.ToolbarItems>
+        <!--<ToolbarItem x:Name="add" Text="+ ADD" Clicked="Added_Clicked" />-->
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <StackLayout>
+            <ListView x:Name="lv" ItemsSource="{Binding Schedule}" HasUnevenRows="True" ItemSelected="lv_ItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout Padding="8" BackgroundColor="White">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"
+                                        Text="{Binding TimeSchedule}"
+                                        FontSize="10"
+                                        TextColor="{StaticResource TextColor}"
+                                        FontFamily="{StaticResource Exo2LightCondensed}"
+                                        HorizontalOptions="Start"/>
+                                    <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                                        Text="{Binding Lesson}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource TextColor}"
+                                        FontFamily="{StaticResource Exo2LightCondensed}"
+                                        HorizontalOptions="Start"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Text="{Binding Tutor}"
+                                        FontSize="8"
+                                        TextColor="{StaticResource TextColor}"
+                                        FontFamily="{StaticResource Exo2LightCondensed}"
+                                        HorizontalOptions="Start"/>
+                                    <Label Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
+                                        Text="{Binding Notes}"
+                                        FontSize="8"
+                                        TextColor="{StaticResource TextColor}"
+                                        FontFamily="{StaticResource Exo2LightCondensed}"
+                                        HorizontalOptions="Start"/>
+                                </Grid>
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackLayout>
+        
+        <!--<ScrollView>
+            <CollectionView x:Name="cv" ItemsSource="{Binding Schedule}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Padding="8" BackgroundColor="White">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"
+                                    Text="{Binding TimeSchedule}"
+                                    FontSize="10"
+                                    TextColor="{StaticResource TextColor}"
+                                    FontFamily="{StaticResource Exo2LightCondensed}"
+                                    HorizontalOptions="Start"/>
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                                    Text="{Binding Lesson}"
+                                    FontSize="13"
+                                    TextColor="{StaticResource TextColor}"
+                                    FontFamily="{StaticResource Exo2LightCondensed}"
+                                    HorizontalOptions="Start"/>
+                                <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                    Text="{Binding Tutor}"
+                                    FontSize="8"
+                                    TextColor="{StaticResource TextColor}"
+                                    FontFamily="{StaticResource Exo2LightCondensed}"
+                                    HorizontalOptions="Start"/>
+                                <Label Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2"
+                                    Text="{Binding Notes}"
+                                    FontSize="8"
+                                    TextColor="{StaticResource TextColor}"
+                                    FontFamily="{StaticResource Exo2LightCondensed}"
+                                    HorizontalOptions="Start"/>
+                            </Grid>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>-->
+    </ContentPage.Content>
+</ContentPage>

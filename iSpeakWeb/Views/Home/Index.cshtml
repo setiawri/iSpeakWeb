@@ -340,7 +340,7 @@
                 <!-- /form Birthday Student -->
                 <!-- Student Package -->
                 <div class="card student-package">
-                    <div class="card-header bg-primary">
+                    <div class="card-header bg-success">
                         <h7>
                             <a data-toggle="collapse" class="text-white" href="#accordion-student-package">STUDENT PACKAGE</a>
                         </h7>
@@ -378,46 +378,46 @@
                                                             foreach (var item in Model.StudentPackages)
                                                             {
                                                                 int row = 0;
-                                                        <tr>
-                                                            <td>@Html.DisplayFor(modelItem => item.No)</td>
-                                                            <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
-                                                            <td>
-                                                                @foreach (var subitem in item.SaleInvoiceItems)
-                                                                {
-                                                                    if (row > 0)
-                                                                    {
-                                                                        <hr />
-                                                                    }
-                                                                    <span class="badge badge-primary">@subitem.Description</span><br />
-                                                                    <span class="badge badge-dark">Qty: @subitem.Qty</span>
-                                                                    <span class="badge badge-success">Price: @string.Format("{0:N0}", subitem.Price)</span>
-                                                                    <span class="badge badge-warning">Avail. Hours: @subitem.SessionHours_Remaining</span>
-                                                                    <span style="display: none">@(row++)</span>
-                                                                }
-                                                            </td>
-                                                            <td>@Html.DisplayFor(modelItem => item.Amount)</td>
-                                                            <td>@Html.DisplayFor(modelItem => item.Due)</td>
-                                                            <td>
-                                                                @if (item.Due > 0)
-                                                                {
-                                                                    if (item.Cancelled == true)
-                                                                    {
-                                                                        <span class="badge badge-dark d-block">Cancelled</span>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <span class="badge badge-warning d-block">Waiting Payment</span>
-                                                                    }
-                                                                }
-                                                                else
-                                                                {
-                                                                    <span class="badge badge-primary d-block">Completed</span>
-                                                                }
-                                                            </td>
-                                                            <td>
-                                                                <a href="javascript:void(0)" onclick="View_Payments('@item.SaleInvoices_Id')">View</a>
-                                                            </td>
-                                                        </tr>
+                                                                <tr>
+                                                                    <td>@Html.DisplayFor(modelItem => item.No)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                                                    <td>
+                                                                        @foreach (var subitem in item.SaleInvoiceItems)
+                                                                        {
+                                                                            if (row > 0)
+                                                                            {
+                                                                                <hr />
+                                                                            }
+                                                                            <span class="badge badge-primary">@subitem.Description</span><br />
+                                                                            <span class="badge badge-dark">Qty: @subitem.Qty</span>
+                                                                            <span class="badge badge-success">Price: @string.Format("{0:N0}", subitem.Price)</span>
+                                                                            <span class="badge badge-warning">Avail. Hours: @subitem.SessionHours_Remaining</span>
+                                                                            <span style="display: none">@(row++)</span>
+                                                                        }
+                                                                    </td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Due)</td>
+                                                                    <td>
+                                                                        @if (item.Due > 0)
+                                                                        {
+                                                                            if (item.Cancelled == true)
+                                                                            {
+                                                                                <span class="badge badge-dark d-block">Cancelled</span>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <span class="badge badge-warning d-block">Waiting Payment</span>
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="badge badge-primary d-block">Completed</span>
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="javascript:void(0)" onclick="View_Payments('@item.SaleInvoices_Id')">View</a>
+                                                                    </td>
+                                                                </tr>
                                                             }
                                                         }
                                                     </tbody>
@@ -431,6 +431,64 @@
                     </div>
                 </div>
                 <!-- /student Package -->
+                <!-- Student Schedule -->
+                <div class="card student-schedule">
+                    <div class="card-header bg-primary">
+                        <h7>
+                            <a data-toggle="collapse" class="text-white" href="#accordion-student-schedule">STUDENT SCHEDULE</a>
+                        </h7>
+                    </div>
+                    <div id="accordion-student-schedule" class="collapse" data-parent="#accordion-styled">
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-header header-elements-inline">
+                                            <h5 class="card-title">Schedule List</h5>
+                                            <div class="header-elements">
+                                                <div style="float: right">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover dt-schedule">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Day of Week</th>
+                                                            <th>Start Time</th>
+                                                            <th>End Time</th>
+                                                            <th>Lesson</th>
+                                                            <th>Tutor</th>
+                                                            <th>Notes</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @if (Model.StudentSchedules != null)
+                                                        {
+                                                            foreach (var item in Model.StudentSchedules)
+                                                            {
+                                                                <tr>
+                                                                    <td>@Html.DisplayFor(modelItem => item.DayOfWeek)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.StartTime)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.EndTime)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Invoice)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
+                                                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                                                                </tr>
+                                                            }
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /student Schedule -->
             </div>
         </div>
         <!-- /collapsible -->
@@ -481,6 +539,16 @@
             search: 'Student'
         },
         order: [[0, 'asc']]
+    });
+
+    var dt_schedule = $('.dt-schedule').DataTable({
+        pagingType: 'full_numbers',
+        //columnDefs: [{
+        //    orderable: false,
+        //    width: 120,
+        //    targets: [3]
+        //}],
+        order: [[3, 'asc']]
     });
 
     function Next() {
@@ -597,6 +665,10 @@
 
         if ('@Model.ShowStudentPackage' == 'False') {
             $('.student-package').hide();
+        }
+
+        if ('@Model.ShowStudentSchedule' == 'False') {
+            $('.student-schedule').hide();
         }
 
         $('#listRole_this').val('Student').trigger('change');

@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="iSpeakMobile.Views.ScheduleAddPage"
+             Title="Schedule Add">
+    <ContentPage.Content>
+        <ScrollView>
+            <StackLayout Spacing="20" Padding="10" BackgroundColor="White">
+                <Label Text="Day of Week" 
+                    Margin="0,0,0,-10" />
+                <Picker x:Name="pDay"
+                    Title="Select Day"
+                    TitleColor="{StaticResource PrimaryColor}"
+                    TextColor="{StaticResource TextColor}"
+                    FontFamily="{StaticResource Exo2LightCondensed}">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>Senin</x:String>
+                            <x:String>Selasa</x:String>
+                            <x:String>Rabu</x:String>
+                            <x:String>Kamis</x:String>
+                            <x:String>Jumat</x:String>
+                            <x:String>Sabtu</x:String>
+                            <x:String>Minggu</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+
+                <Label Text="Start Time" 
+                    Margin="0,0,0,-10" />
+                <TimePicker x:Name="tpStart"
+                    Time="8:00:00"
+                    TextColor="{StaticResource TextColor}"
+                    FontFamily="{StaticResource Exo2LightCondensed}"/>
+
+                <Label Text="End Time" 
+                    Margin="0,0,0,-10" />
+                <TimePicker x:Name="tpEnd"
+                    Time="12:00:00"
+                    TextColor="{StaticResource TextColor}"
+                    FontFamily="{StaticResource Exo2LightCondensed}"/>
+
+                <Label Text="Notes" 
+                    Margin="0,0,0,-10" />
+                <Entry x:Name="txtNotes"
+                    FontFamily="{StaticResource Exo2LightCondensed}" />
+
+                <Button Text="Add Schedule"
+                    TextColor="White"
+                    FontFamily="{StaticResource Exo2RegularCondensed}"
+                    FontSize="15"
+                    BackgroundColor="{StaticResource QuaternaryColor}"
+                    HorizontalOptions="Start"
+                    Clicked="Button_Clicked"/>
+
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

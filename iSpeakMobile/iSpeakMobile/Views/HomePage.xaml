@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="iSpeakMobile.Views.HomePage"
-             Title="Home - iSpeak Mobile">
+             Title="Home">
     <ContentPage.Content>
         <ScrollView>
             <!--<CollectionView x:Name="cv"

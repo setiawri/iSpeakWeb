@@ -21,9 +21,11 @@ namespace iSpeak.Models
         public List<BirthdayViewModels> ThisMonth { get; set; }
         public List<BirthdayViewModels> NextMonth { get; set; }
         public List<StudentPackageViewModels> StudentPackages { get; set; }
+        public List<TutorStudentSchedulesViewModels> StudentSchedules { get; set; }
         public bool IsStudentBirthday { get; set; }
         public bool ShowBirthdayList { get; set; }
         public bool IsRemindersAllowed { get; set; }
         public bool ShowStudentPackage { get; set; }
+        public bool ShowStudentSchedule { get; set; }
     }
 }

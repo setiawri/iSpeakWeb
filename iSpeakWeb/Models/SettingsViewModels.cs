@@ -14,5 +14,7 @@ namespace iSpeak.Models
         public Guid UserSetRoleAllowed { get; set; }
         [Display(Name = "Role Access for Reminders")]
         public List<string> RoleAccessForReminders { get; set; }
+        [Display(Name = "Full Access for Tutor Schedules")]
+        public List<string> FullAccessForTutorSchedules { get; set; }
     }
 }

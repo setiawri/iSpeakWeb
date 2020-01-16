@@ -31,6 +31,15 @@
                 </FontImageSource>
             </ShellContent.Icon>
         </ShellContent>
+        <ShellContent Route="session" Title="Schedule" ContentTemplate="{DataTemplate views:SchedulePage}">
+            <ShellContent.Icon>
+                <FontImageSource
+                    FontFamily="{StaticResource MaterialFont}"
+                    Glyph="&#xf021;"
+                    Color="Black">
+                </FontImageSource>
+            </ShellContent.Icon>
+        </ShellContent>
         <ShellContent Route="session" Title="Session" ContentTemplate="{DataTemplate views:SessionPage}">
             <ShellContent.Icon>
                 <FontImageSource

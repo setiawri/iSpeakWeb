@@ -61,6 +61,22 @@ namespace iSpeak.Controllers
             return Json(new { obj = list_filtered }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region ChangePeriod
+        public JsonResult ChangePeriod(string action, int month, int year)
+        {
+            DateTime tanggal = new DateTime(year, month, 1);
+            if (action == "back")
+            {
+                tanggal = tanggal.AddMonths(-1);
+            }
+            else
+            {
+                tanggal = tanggal.AddMonths(1);
+            }
+
+            return Json(new { newMonth = tanggal.Month, newYear = tanggal.Year }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #region GetTutorPayroll
         public async Task<JsonResult> GetTutorPayroll(Guid branch_id, int month, int year)
         {
@@ -88,7 +104,7 @@ namespace iSpeak.Controllers
                                 select new { PayrollPaymentItems_Id = x.Key, TotalAmount = x.ToList() }).ToList();
 
                 var payroll_manual = await db.PayrollPaymentItems
-                    .Where(x => x.UserAccounts_Id == tutor.u.Id && x.Hour == 0 && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+                    .Where(x => x.UserAccounts_Id == tutor.u.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
                     .OrderBy(x => x.Timestamp).ToListAsync();
 
                 if (payrolls.Count > 0)
@@ -178,7 +194,7 @@ namespace iSpeak.Controllers
             }
 
             var payroll_manual = await db.PayrollPaymentItems
-                .Where(x => x.UserAccounts_Id == tutor_id && x.Hour == 0 && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+                .Where(x => x.UserAccounts_Id == tutor_id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
                 .OrderBy(x => x.Timestamp).ToListAsync();
             foreach (var payroll in payroll_manual)
             {

@@ -13,6 +13,8 @@
         {
             @Html.AntiForgeryToken()
             <input type="hidden" id="Items" name="Items" />
+            <input type="hidden" id="ChangeSchedule" name="ChangeSchedule" />
+            <input type="hidden" id="Waive" name="Waive" />
             <!-- Form inputs -->
             <div class="card">
                 <div class="card-header header-elements-inline">
@@ -37,6 +39,30 @@
                             </div>
                             <div class="col-lg-4">
                                 @Html.ValidationMessageFor(model => model.Branches_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-2">
+                                <div class="form-check mt-1">
+                                    <label class="form-check-label">
+                                        <input type="checkbox" id="chkChangeSchedule" class="check-styled-info" onclick="CallChangeSchedule()" data-fouc>
+                                        Change Schedule
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-light badge-striped badge-striped-left border-left-info mt-1">Set session hours to 0 and no Tutor fee.</span>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-check mt-1">
+                                    <label class="form-check-label">
+                                        <input type="checkbox" id="chkWaive" class="check-styled-danger" data-fouc>
+                                        Waive Tutor Fee
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-light badge-striped badge-striped-left border-left-danger mt-1">Reduce session hours as selected (for expired schedule) and no Tutor fee.</span>
                             </div>
                         </div>
                         <div class="row">
@@ -148,7 +174,7 @@
                     </div>
                 </div>
             </div>
-			<!-- /form inputs -->
+            <!-- /form inputs -->
         }
     </div>
     <!-- /content area -->
@@ -176,8 +202,26 @@
         $('#item_' + no).remove();
     }
 
+    function CallChangeSchedule() {
+        var nilai = $('#chkChangeSchedule').prop('checked');
+        if (nilai == true) {
+            document.getElementById('SessionHours').disabled = true;
+        }
+        else {
+            document.getElementById('SessionHours').disabled = false;
+        }
+    }
+
     $(document).ready(function () {
         $('.select2').select2();
+
+        $('.check-styled').uniform();
+        $('.check-styled-info').uniform({
+            wrapperClass: 'border-info-600 text-info-800'
+        });
+        $('.check-styled-danger').uniform({
+            wrapperClass: 'border-danger-600 text-danger-800'
+        });
 
         $('#Branches_Id').val($('#Branch').val()).trigger('change');
 
@@ -281,6 +325,8 @@
                 arrItem.push(obj);
             });
             $('#Items').val(JSON.stringify(arrItem));
+            $('#ChangeSchedule').val($('#chkChangeSchedule').prop('checked'));
+            $('#Waive').val($('#chkWaive').prop('checked'));
 
             if ($('#Tutor_UserAccounts_Id').val() == '') {
                 $('.session-validation').html('The Tutor field is required.').show();

@@ -37,6 +37,9 @@ namespace iSpeakMobile
             routes.Add("paymentbyno", typeof(Views.PaymentByNoPage));
             routes.Add("sessiondetails", typeof(Views.SessionDetailsPage));
             routes.Add("sessionbyid", typeof(Views.SessionByIdPage));
+            routes.Add("schedule", typeof(Views.SchedulePage));
+            routes.Add("scheduleadd", typeof(Views.ScheduleAddPage));
+            routes.Add("scheduleedit", typeof(Views.ScheduleEditPage));
 
             foreach (var item in routes)
             {

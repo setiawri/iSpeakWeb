@@ -20,6 +20,8 @@ namespace iSpeak.Controllers
             var settings_aefcp = await db.Settings.FindAsync(SettingsValue.GUID_AutoEntryForCashPayments);
             var settings_usra = await db.Settings.FindAsync(SettingsValue.GUID_UserSetRoleAllowed);
             var settings_rafr = await db.Settings.FindAsync(SettingsValue.GUID_RoleAccessForReminders);
+            var settings_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+
             List<string> role_for_reminder = new List<string>();
             if (!string.IsNullOrEmpty(settings_rafr.Value_String))
             {
@@ -30,11 +32,22 @@ namespace iSpeak.Controllers
                 }
             }
 
+            List<string> role_for_tutor_schedule = new List<string>();
+            if (!string.IsNullOrEmpty(settings_fafts.Value_String))
+            {
+                string[] ids = settings_fafts.Value_String.Split(',');
+                foreach (var id in ids)
+                {
+                    role_for_tutor_schedule.Add(id);
+                }
+            }
+
             SettingsViewModels settingsViewModels = new SettingsViewModels()
             {
                 AutoEntryForCashPayments = settings_aefcp.Value_Guid ?? Guid.Empty,
                 UserSetRoleAllowed = settings_usra.Value_Guid ?? Guid.Empty,
-                RoleAccessForReminders = role_for_reminder
+                RoleAccessForReminders = role_for_reminder,
+                FullAccessForTutorSchedules = role_for_tutor_schedule
             };
 
             ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
@@ -43,7 +56,7 @@ namespace iSpeak.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Index([Bind(Include = "AutoEntryForCashPayments,UserSetRoleAllowed,RoleAccessForReminders")] SettingsViewModels settingsViewModels)
+        public async Task<ActionResult> Index([Bind(Include = "AutoEntryForCashPayments,UserSetRoleAllowed,RoleAccessForReminders,FullAccessForTutorSchedules")] SettingsViewModels settingsViewModels)
         {
             if (settingsViewModels.AutoEntryForCashPayments == Guid.Empty || settingsViewModels.AutoEntryForCashPayments == null)
             {
@@ -60,6 +73,11 @@ namespace iSpeak.Controllers
                 ModelState.AddModelError("RoleAccessForReminders", "The field Role for Reminders is required.");
             }
 
+            if (settingsViewModels.FullAccessForTutorSchedules == null)
+            {
+                ModelState.AddModelError("FullAccessForTutorSchedules", "The field Role for Tutor Schedule is required.");
+            }
+
             if (ModelState.IsValid)
             {
                 SettingsModels settingsModels_aefcp = await db.Settings.FindAsync(SettingsValue.GUID_AutoEntryForCashPayments);
@@ -73,6 +91,10 @@ namespace iSpeak.Controllers
                 SettingsModels settingsModels_rafr = await db.Settings.FindAsync(SettingsValue.GUID_RoleAccessForReminders);
                 settingsModels_rafr.Value_String = string.Join(",", settingsViewModels.RoleAccessForReminders);
                 db.Entry(settingsModels_rafr).State = EntityState.Modified;
+
+                SettingsModels settingsModels_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+                settingsModels_fafts.Value_String = string.Join(",", settingsViewModels.FullAccessForTutorSchedules);
+                db.Entry(settingsModels_fafts).State = EntityState.Modified;
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");

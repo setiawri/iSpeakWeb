@@ -56,6 +56,18 @@
                         </div>
                     </div>
                     <div class="col-lg-3">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="btn-toolbar">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-light" onclick="ChangePeriod('back')">&lt;</button>
+                                    <button type="button" class="btn btn-light" onclick="ChangePeriod('next')">&gt;</button>
+                                    <button type="button" class="btn btn-sm btn-primary form-control" id="btnGo">Show Data <i class="icon-paperplane ml-2"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div class="col-lg-3">
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="form-group">
@@ -64,7 +76,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>*@
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -247,6 +259,26 @@
 </div>
 
 <script type="text/javascript">
+
+    function ChangePeriod(action) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ChangePeriod", "Reports")',
+            data: {
+                action: action,
+                month: $('.period-month').val(),
+                year: $('.period-year').val()
+            },
+            success: function (data) {
+                //console.log(data.obj);
+                $('.period-month').val(data.newMonth).trigger('change');
+                $('.period-year').val(data.newYear);
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
 
     function ShowData() {
         $.ajax({

@@ -317,41 +317,51 @@ namespace iSpeak.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ValidateInput(false)]
-        public ActionResult Create([Bind(Include = "Branches_Id,Timestamp,Tutor_UserAccounts_Id,SessionHours,Review,InternalNotes")] LessonSessionsModels lessonSessionsModels, string Items, string Description)
+        public ActionResult Create([Bind(Include = "Branches_Id,Timestamp,Tutor_UserAccounts_Id,SessionHours,Review,InternalNotes")] LessonSessionsModels lessonSessionsModels, string Items, string Description, bool ChangeSchedule, bool Waive)
         {
             if (ModelState.IsValid)
             {
                 var hourly_rate = db.HourlyRates.Where(x => x.UserAccounts_Id == lessonSessionsModels.Tutor_UserAccounts_Id).ToList();
-
-                #region Payroll Payment Items Add
-                PayrollPaymentItemsModels payrollPaymentItemsModels = new PayrollPaymentItemsModels
+                Guid ppi_id = Guid.NewGuid();
+                if (ChangeSchedule)
                 {
-                    Id = Guid.NewGuid(),
-                    Timestamp = lessonSessionsModels.Timestamp,
-                    Description = Description,
-                    Hour = lessonSessionsModels.SessionHours,
-                    UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id
-                };
-
-                if (hourly_rate.Count == 0)
-                {
-                    payrollPaymentItemsModels.HourlyRate = 0; //this tutor not found in hourly rate
+                    lessonSessionsModels.SessionHours = 0; //Change Schedule checked, set hours = 0
                 }
                 else
                 {
-                    foreach (var rate in hourly_rate)
+                    #region Payroll Payment Items Add
+                    PayrollPaymentItemsModels payrollPaymentItemsModels = new PayrollPaymentItemsModels
                     {
-                        payrollPaymentItemsModels.HourlyRate = rate.Rate; //use tutor rate with null branch
-                        if (lessonSessionsModels.Branches_Id.HasValue && rate.Branches_Id == lessonSessionsModels.Branches_Id.Value) //found tutor with exact branch
+                        Id = ppi_id,
+                        Timestamp = lessonSessionsModels.Timestamp,
+                        Description = Description,
+                        Hour = lessonSessionsModels.SessionHours,
+                        UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id
+                    };
+
+                    if (hourly_rate.Count == 0)
+                    {
+                        payrollPaymentItemsModels.HourlyRate = 0; //this tutor not found in hourly rate
+                    }
+                    else
+                    {
+                        foreach (var rate in hourly_rate)
                         {
-                            payrollPaymentItemsModels.HourlyRate = rate.Rate;
-                            break;
+                            payrollPaymentItemsModels.HourlyRate = rate.Rate; //use tutor rate with null branch
+                            if (lessonSessionsModels.Branches_Id.HasValue && rate.Branches_Id == lessonSessionsModels.Branches_Id.Value) //found tutor with exact branch
+                            {
+                                payrollPaymentItemsModels.HourlyRate = rate.Rate;
+                                break;
+                            }
                         }
                     }
+
+                    if (Waive) { payrollPaymentItemsModels.Hour = 0; } //if Waives Tutor Fee checked, Payment Hour set to 0
+
+                    payrollPaymentItemsModels.Amount = payrollPaymentItemsModels.Hour * payrollPaymentItemsModels.HourlyRate;
+                    db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
+                    #endregion
                 }
-                payrollPaymentItemsModels.Amount = payrollPaymentItemsModels.Hour * payrollPaymentItemsModels.HourlyRate;
-                db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
-                #endregion
                 #region Lesson Sessions Add
                 List<LessonSessionsDetails> details = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
                 foreach (var item in details)
@@ -369,10 +379,10 @@ namespace iSpeak.Controllers
                         InternalNotes = item.internal_notes, //lessonSessionsModels.InternalNotes;
                         Deleted = false,
                         Tutor_UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id,
-                        TravelCost = sale_invoice_item.TravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
-                        TutorTravelCost = sale_invoice_item.TutorTravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
+                        TravelCost = ChangeSchedule ? 0 : sale_invoice_item.TravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
+                        TutorTravelCost = ChangeSchedule ? 0 : sale_invoice_item.TutorTravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
                         Adjustment = 0,
-                        PayrollPaymentItems_Id = payrollPaymentItemsModels.Id
+                        PayrollPaymentItems_Id = ChangeSchedule ? (Guid?)null : ppi_id
                     };
 
                     if (hourly_rate.Count == 0)

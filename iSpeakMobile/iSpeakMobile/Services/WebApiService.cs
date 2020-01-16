@@ -107,5 +107,78 @@ namespace iSpeakMobile.Services
                 return response_edit;
             }
         }
+
+        public async Task<List<Schedule>> ScheduleApi(string username)
+        {
+            using (var client = new HttpClient())
+            {
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("username", username)
+                });
+
+                var request = await client.PostAsync(baseurl + "api/schedules", formContent);
+                var content = await request.Content.ReadAsStringAsync();
+                List<Schedule> response = JsonConvert.DeserializeObject<List<Schedule>>(content);
+                return response;
+            }
+        }
+
+        public async Task<TutorSchedule> TutorScheduleApi(string ReffId)
+        {
+            using (var client = new HttpClient())
+            {
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("ReffId", ReffId)
+                });
+
+                var request = await client.PostAsync(baseurl + "api/tutorschedules", formContent);
+                var content = await request.Content.ReadAsStringAsync();
+                TutorSchedule response = JsonConvert.DeserializeObject<TutorSchedule>(content);
+                return response;
+            }
+        }
+
+        public async Task<CommonRequestModels> ScheduleAddApi(string username, string day, string start, string end, string notes)
+        {
+            using (var client = new HttpClient())
+            {
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("username", username),
+                    new KeyValuePair<string, string>("day", day),
+                    new KeyValuePair<string, string>("start", start),
+                    new KeyValuePair<string, string>("end", end),
+                    new KeyValuePair<string, string>("notes", notes)
+                });
+
+                var request = await client.PostAsync(baseurl + "api/scheduleadd", formContent);
+                var content = await request.Content.ReadAsStringAsync();
+                CommonRequestModels response = JsonConvert.DeserializeObject<CommonRequestModels>(content);
+                return response;
+            }
+        }
+
+        public async Task<CommonRequestModels> ScheduleEditApi(string username, string schedule_id, string day, string start, string end, string notes)
+        {
+            using (var client = new HttpClient())
+            {
+                var formContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("username", username),
+                    new KeyValuePair<string, string>("schedule_id", schedule_id),
+                    new KeyValuePair<string, string>("day", day),
+                    new KeyValuePair<string, string>("start", start),
+                    new KeyValuePair<string, string>("end", end),
+                    new KeyValuePair<string, string>("notes", notes)
+                });
+
+                var request = await client.PostAsync(baseurl + "api/scheduleedit", formContent);
+                var content = await request.Content.ReadAsStringAsync();
+                CommonRequestModels response = JsonConvert.DeserializeObject<CommonRequestModels>(content);
+                return response;
+            }
+        }
     }
 }

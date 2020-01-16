@@ -202,6 +202,7 @@
     <Compile Include="Common\Select2Pagination.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\API\InvoiceController.cs" />
+    <Compile Include="Controllers\API\SchedulesController.cs" />
     <Compile Include="Controllers\API\SessionsController.cs" />
     <Compile Include="Controllers\API\UserLoginController.cs" />
     <Compile Include="Controllers\BranchesController.cs" />
@@ -265,7 +266,9 @@
     <Compile Include="Models\API\InvoiceApiModels.cs" />
     <Compile Include="Models\API\CommonRequestModels.cs" />
     <Compile Include="Models\API\PaymentApiModels.cs" />
+    <Compile Include="Models\API\ScheduleApiModels.cs" />
     <Compile Include="Models\API\SessionApiModels.cs" />
+    <Compile Include="Models\API\TutorScheduleApiModels.cs" />
     <Compile Include="Models\API\UserApiModels.cs" />
     <Compile Include="Models\BirthdayViewModels.cs" />
     <Compile Include="Models\BranchesModels.cs" />

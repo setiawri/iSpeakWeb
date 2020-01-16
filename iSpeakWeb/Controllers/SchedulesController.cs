@@ -38,9 +38,9 @@ namespace iSpeak.Controllers
             foreach (var item in items)
             {
                 content += @"<tr>
-                                <td>" + item.Tutor + @"</td>
                                 <td>" + item.DayOfWeek + @"</td>
                                 <td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + @"</td>
+                                <td>" + item.Notes + @"</td>
                             </tr>";
             }
 
@@ -54,18 +54,69 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                var list = await (from ts in db.TutorSchedules
-                                  join u in db.User on ts.Tutor_UserAccounts_Id equals u.Id
-                                  select new TutorSchedulesViewModels
-                                  {
-                                      Id = ts.Id,
-                                      Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
-                                      DayOfWeek = ts.DayOfWeek,
-                                      StartTime = ts.StartTime,
-                                      EndTime = ts.EndTime,
-                                      IsActive = ts.IsActive,
-                                      Notes = ts.Notes
-                                  }).ToListAsync();
+                #region CHECK FULL ACCESS
+                var setting_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+                List<string> role_for_tutor_schedule = new List<string>();
+                if (!string.IsNullOrEmpty(setting_fafts.Value_String))
+                {
+                    string[] ids = setting_fafts.Value_String.Split(',');
+                    foreach (var _id in ids)
+                    {
+                        role_for_tutor_schedule.Add(_id);
+                    }
+                }
+
+                var user_role = await (from u in db.User
+                                       join ur in db.UserRole on u.Id equals ur.UserId
+                                       join r in db.Role on ur.RoleId equals r.Id
+                                       where u.UserName == User.Identity.Name
+                                       select new { r }).ToListAsync();
+                bool isFullAccess = false;
+                if (role_for_tutor_schedule.Count > 0)
+                {
+                    foreach (var role in user_role)
+                    {
+                        if (isFullAccess) { break; }
+                        else
+                        {
+                            foreach (var a in role_for_tutor_schedule)
+                            {
+                                if (a == role.r.Id)
+                                {
+                                    isFullAccess = true; break;
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                var list = (isFullAccess)
+                    ? await (from ts in db.TutorSchedules
+                             join u in db.User on ts.Tutor_UserAccounts_Id equals u.Id
+                             select new TutorSchedulesViewModels
+                             {
+                                 Id = ts.Id,
+                                 Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                 DayOfWeek = ts.DayOfWeek,
+                                 StartTime = ts.StartTime,
+                                 EndTime = ts.EndTime,
+                                 IsActive = ts.IsActive,
+                                 Notes = ts.Notes
+                             }).ToListAsync()
+                    : await (from ts in db.TutorSchedules
+                             join u in db.User on ts.Tutor_UserAccounts_Id equals u.Id
+                             where u.UserName == User.Identity.Name
+                             select new TutorSchedulesViewModels
+                             {
+                                 Id = ts.Id,
+                                 Tutor = u.Firstname + " " + u.Middlename + " " + u.Lastname,
+                                 DayOfWeek = ts.DayOfWeek,
+                                 StartTime = ts.StartTime,
+                                 EndTime = ts.EndTime,
+                                 IsActive = ts.IsActive,
+                                 Notes = ts.Notes
+                             }).ToListAsync();
 
                 ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
@@ -79,6 +130,50 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                #region CHECK FULL ACCESS
+                var setting_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+                List<string> role_for_tutor_schedule = new List<string>();
+                if (!string.IsNullOrEmpty(setting_fafts.Value_String))
+                {
+                    string[] ids = setting_fafts.Value_String.Split(',');
+                    foreach (var _id in ids)
+                    {
+                        role_for_tutor_schedule.Add(_id);
+                    }
+                }
+
+                var user_role = await (from u in db.User
+                                       join ur in db.UserRole on u.Id equals ur.UserId
+                                       join r in db.Role on ur.RoleId equals r.Id
+                                       where u.UserName == User.Identity.Name
+                                       select new { r }).ToListAsync();
+                bool isFullAccess = false;
+                if (role_for_tutor_schedule.Count > 0)
+                {
+                    foreach (var role in user_role)
+                    {
+                        if (isFullAccess) { break; }
+                        else
+                        {
+                            foreach (var a in role_for_tutor_schedule)
+                            {
+                                if (a == role.r.Id)
+                                {
+                                    isFullAccess = true; break;
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                if (!isFullAccess)
+                {
+                    var user_login = await db.User.Where(x => x.UserName.ToLower() == User.Identity.Name.ToLower()).FirstOrDefaultAsync();
+                    ViewBag.LoginId = user_login.Id;
+                    ViewBag.LoginFullName = user_login.Firstname + " " + user_login.Middlename + " " + user_login.Lastname;
+                }
+
                 if (!string.IsNullOrEmpty(id))
                 {
                     var tutor = await db.User.FindAsync(id);
@@ -88,6 +183,8 @@ namespace iSpeak.Controllers
                     ViewBag.StartTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0));
                     ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
                 }
+
+                ViewBag.FullAccess = isFullAccess;
                 return View();
             }
         }
@@ -213,6 +310,42 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region STUDENT
+        public async Task<JsonResult> GetStudentSchedule(string student_id)
+        {
+            var items = await (from tss in db.TutorStudentSchedules
+                               join s in db.User on tss.Student_UserAccounts_Id equals s.Id
+                               join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
+                               join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
+                               where tss.Student_UserAccounts_Id == student_id
+                               orderby tss.DayOfWeek
+                               select new TutorStudentSchedulesViewModels
+                               {
+                                   Id = tss.Id,
+                                   Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
+                                   Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                                   DayOfWeek = tss.DayOfWeek,
+                                   StartTime = tss.StartTime,
+                                   EndTime = tss.EndTime,
+                                   Invoice = sii.Description,
+                                   IsActive = tss.IsActive,
+                                   Notes = tss.Notes
+                               }).ToListAsync();
+
+            string content = "";
+            foreach (var item in items)
+            {
+                content += @"<tr>
+                                <td>" + item.DayOfWeek + @"</td>
+                                <td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + @"</td>
+                                <td>" + item.Invoice + @"</td>
+                                <td>" + item.Tutor + @"</td>
+                                <td>" + item.Notes + @"</td>
+                            </tr>";
+            }
+
+            return Json(new { body = content }, JsonRequestBehavior.AllowGet);
+        }
+
         public async Task<ActionResult> StudentIndex()
         {
             Permission p = new Permission();
@@ -242,13 +375,22 @@ namespace iSpeak.Controllers
             }
         }
 
-        public ActionResult StudentCreate()
+        public async Task<ActionResult> StudentCreate(string id)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                if (!string.IsNullOrEmpty(id))
+                {
+                    var student = await db.User.FindAsync(id);
+                    ViewBag.Error = "init";
+                    ViewBag.StudentId = student == null ? "" : student.Id;
+                    ViewBag.StudentName = student == null ? "" : student.Firstname + " " + student.Middlename + " " + student.Lastname;
+                    ViewBag.StartTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0));
+                    ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
+                }
                 return View();
             }
         }
@@ -294,7 +436,8 @@ namespace iSpeak.Controllers
                 db.TutorStudentSchedules.Add(tutorSchedulesModels);
                 await db.SaveChangesAsync();
 
-                return RedirectToAction("StudentIndex");
+                return RedirectToAction("StudentCreate", new { id = tutorSchedulesModels.Student_UserAccounts_Id });
+                //return RedirectToAction("StudentIndex");
             }
 
             return View(tutorSchedulesModels);

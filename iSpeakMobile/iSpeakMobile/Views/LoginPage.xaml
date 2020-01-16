@@ -24,23 +24,24 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Image Grid.Row="0" Source="logo.png" WidthRequest="175" BackgroundColor="White" />
-                <Entry 
-                        Grid.Row="1" 
-                        FontFamily="{StaticResource Exo2RegularCondensed}"
-                        Text="{Binding Username}" 
-                        Placeholder="Username" />
+                <Entry Grid.Row="1" 
+                    FontFamily="{StaticResource Exo2RegularCondensed}"
+                    Text="{Binding Username}" 
+                    Placeholder="Username"
+                    ReturnType="Next"/>
                 <Entry Grid.Row="2" 
-                       FontFamily="{StaticResource Exo2RegularCondensed}"
-                       Text="{Binding Password}" 
-                       Placeholder="Password" 
-                       IsPassword="True" />
+                    FontFamily="{StaticResource Exo2RegularCondensed}"
+                    Text="{Binding Password}" 
+                    Placeholder="Password" 
+                    IsPassword="True"
+                    ReturnType="Next"/>
                 <Button Grid.Row="3"
-                        FontFamily="{StaticResource Exo2RegularCondensed}"
-                        FontSize="18"
-                        Text="L o g i n" 
-                        TextColor="White"
-                        BackgroundColor="#0077BE" 
-                        Clicked="Button_Clicked" />
+                    FontFamily="{StaticResource Exo2RegularCondensed}"
+                    FontSize="18"
+                    Text="L o g i n" 
+                    TextColor="White"
+                    BackgroundColor="#0077BE" 
+                    Clicked="Button_Clicked" />
                 <forms:AnimationView 
 	                x:Name="animationView" 
 	                Grid.Row="4"
