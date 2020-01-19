@@ -22,8 +22,11 @@ namespace iSpeak.Common
                 bool isSale = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_saleinvoice");
                 filterContext.Controller.ViewBag.SaleMenu = (isSale) ? "" : "style='display: none'";
 
-                bool isPayment = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_payment");
-                filterContext.Controller.ViewBag.PaymentMenu = (isPayment) ? "" : "style='display: none'";
+                //bool isPayment = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_payment");
+                //filterContext.Controller.ViewBag.PaymentMenu = (isPayment) ? "" : "style='display: none'";
+
+                bool isSchedule = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_schedules");
+                filterContext.Controller.ViewBag.ScheduleMenu = (isSchedule) ? "" : "style='display: none'";
 
                 bool isSessions = p.IsGranted(filterContext.HttpContext.User.Identity.Name, "navmenu_sessions");
                 filterContext.Controller.ViewBag.SessionsMenu = (isSessions) ? "" : "style='display: none'";

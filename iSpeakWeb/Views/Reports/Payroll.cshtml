@@ -2,7 +2,7 @@
 
 @{
     ViewBag.Root = "Reports";
-    ViewBag.Title = "Tutor Payroll";
+    ViewBag.Title = "Payroll";
 }
 
 <style>
@@ -55,7 +55,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3">
+                    <div class="col-lg-2">
                         <div class="form-group">
                             <label class="control-label">&nbsp;</label>
                             <div class="btn-toolbar">
@@ -67,16 +67,12 @@
                             </div>
                         </div>
                     </div>
-                    @*<div class="col-lg-3">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label class="control-label">&nbsp;</label>
-                                    <button type="button" class="btn btn-sm btn-primary form-control" id="btnGo">Show Data <i class="icon-paperplane ml-2"></i></button>
-                                </div>
-                            </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <button type="button" class="btn btn btn-success form-control" data-toggle="modal" data-target="#modal_new"><i class="icon-plus22 mr-2"></i> Create New Payroll</button>
                         </div>
-                    </div>*@
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -160,6 +156,55 @@
             </div>
         </div>
         <!-- /form Details -->
+        <!-- New Payroll form modal -->
+        <div id="modal_new" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-slate">
+                        <h6 class="modal-title">New Payroll</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-new-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Name</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" id="Payroll_Id" name="Payroll_Id"></select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Date / Amount</label>
+                                <div class="col-sm-4">
+                                    <div class="input-group">
+                                        <input type="datetime" class="form-control tanggal mdl-new-timestamp" />
+                                        <span class="input-group-append">
+                                            <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control text-right mdl-new-amount">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Description</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control mdl-new-desc">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-new-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /new payroll form modal -->
         <!-- Manual Payroll form modal -->
         <div id="modal_manual" class="modal fade" tabindex="-1">
             <div class="modal-dialog">
@@ -311,6 +356,7 @@
     function Previous() {
         $('.payroll-index').show();
         $('.payroll-details').hide();
+        ShowData();
     }
 
     function Details(branch_id, month, year, tutor_id) {
@@ -359,6 +405,24 @@
             minimumResultsForSearch: -1
         });
 
+        $('#Payroll_Id').select2({
+            placeholder: 'Please Select',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'all'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
+
         $('.tanggal').daterangepicker({
             singleDatePicker: true,
             locale: {
@@ -400,6 +464,41 @@
 
         $('#btnGo').click(function () {
             ShowData();
+        });
+
+        $('.mdl-new-btn-submit').click(function () {
+            console.log($('#Payroll_Id').val());
+            if ($('#Payroll_Id').val() == null) {
+                $('.modal-new-validation').html('The field Name is required.').show();
+            }
+            else if ($('.mdl-new-amount').val() == '' || $('.mdl-new-amount').val() == '0') {
+                $('.modal-new-validation').html('The field Amount is required.').show();
+            }
+            else if ($('.mdl-new-desc').val() == '') {
+                $('.modal-new-validation').html('The field Description is required.').show();
+            }
+            else {
+                $('.modal-new-validation').html('').hide();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("SaveManualPayroll", "Reports")',
+                    data: {
+                        tutor_id: $('#Payroll_Id').val(),
+                        timestamp: $('.mdl-new-timestamp').val(),
+                        amount: parseFloat($('.mdl-new-amount').val().replace(/,/g, '')),
+                        description: $('.mdl-new-desc').val(),
+                        payroll_total: 0
+                    },
+                    success: function (data) {
+                        $('#modal_new').modal('toggle');
+                        ShowData();
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
         });
 
         $('.mdl-manual-btn-submit').click(function () {

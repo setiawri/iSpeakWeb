@@ -135,6 +135,16 @@
                         <a href="@Url.Action("Index", "Return")" class="dropdown-item">Returns</a>
                     </div>
                 </li>
+                <li class="nav-item dropdown" @(ViewBag.ScheduleMenu == "" ? "" : Html.Raw(ViewBag.ScheduleMenu))>
+                    <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
+                        <i class="icon-notebook mr-2"></i>
+                        Schedules
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="@Url.Action("TutorIndex", "Schedules")" class="dropdown-item">Tutor</a>
+                        <a href="@Url.Action("StudentIndex", "Schedules")" class="dropdown-item">Student</a>
+                    </div>
+                </li>
                 <li class="nav-item" @(ViewBag.SessionsMenu == "" ? "" : Html.Raw(ViewBag.SessionsMenu))>
                     <a href="@Url.Action("Index", "LessonSessions")" class="navbar-nav-link">
                         <i class="icon-meter2 mr-2"></i>
@@ -160,7 +170,7 @@
                     </a>
                     <div class="dropdown-menu">
                         <a href="@Url.Action("NewStudent", "Reports")" class="dropdown-item">New Student</a>
-                        <a href="@Url.Action("Payroll", "Reports")" class="dropdown-item">Tutor Payroll</a>
+                        <a href="@Url.Action("Payroll", "Reports")" class="dropdown-item">Payroll</a>
                         <a href="@Url.Action("PayrollPayments", "Reports")" class="dropdown-item">Payroll Payments</a>
                         <a href="@Url.Action("ProfitLoss", "Reports")" class="dropdown-item">Profit &amp; Loss</a>
                         <a href="@Url.Action("SendEmails", "Reports")" class="dropdown-item">Send Emails</a>
@@ -202,13 +212,6 @@
                                 <a href="@Url.Action("Index", "Settings")" class="dropdown-item">Settings</a>
                                 <a href="@Url.Action("Index", "Role")" class="dropdown-item">User Roles</a>
                                 <a href="@Url.Action("Index", "Branches")" class="dropdown-item">Branches</a>
-                            </div>
-                        </div>
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item dropdown-toggle">Schedules</a>
-                            <div class="dropdown-menu">
-                                <a href="@Url.Action("TutorIndex", "Schedules")" class="dropdown-item">Tutor</a>
-                                <a href="@Url.Action("StudentIndex", "Schedules")" class="dropdown-item">Student</a>
                             </div>
                         </div>
 
@@ -256,7 +259,7 @@
             </span>
         </div>
         <div class="mt-2">
-            <span class="badge badge-success">v.200116</span>
+            <span class="badge badge-success">v.200119</span>
         </div>
     </div>
     <!-- /footer -->

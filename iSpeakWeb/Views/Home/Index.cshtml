@@ -360,7 +360,7 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="table-responsive">
-                                                <table class="table table-hover datatable3">
+                                                <table class="table table-hover dt-package">
                                                     <thead>
                                                         <tr>
                                                             <th>No</th>
@@ -539,6 +539,17 @@
             search: 'Student'
         },
         order: [[0, 'asc']]
+    });
+
+    var dt_package = $('.dt-package').DataTable({
+        pagingType: 'full_numbers',
+        //pageLength: 5,
+        //columnDefs: [{
+        //    orderable: false,
+        //    width: 120,
+        //    targets: [3]
+        //}],
+        order: [[0, 'desc']]
     });
 
     var dt_schedule = $('.dt-schedule').DataTable({

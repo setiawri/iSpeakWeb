@@ -84,12 +84,13 @@ namespace iSpeak.Controllers
             DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
             List<TutorPayrollViewModels> list = new List<TutorPayrollViewModels>();
 
-            var tutors = await (from u in db.User
-                                join ur in db.UserRole on u.Id equals ur.UserId
-                                join r in db.Role on ur.RoleId equals r.Id
-                                where r.Name.ToLower() == "tutor"
-                                orderby u.Firstname
-                                select new { u }).ToListAsync();
+            //var tutors = await (from u in db.User
+            //                    join ur in db.UserRole on u.Id equals ur.UserId
+            //                    join r in db.Role on ur.RoleId equals r.Id
+            //                    where r.Name.ToLower() == "tutor"
+            //                    orderby u.Firstname
+            //                    select new { u }).ToListAsync();
+            var tutors = await db.User.ToListAsync();
 
             foreach (var tutor in tutors)
             {
@@ -99,12 +100,12 @@ namespace iSpeak.Controllers
                                 join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
                                 join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                                 join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.u.Id && ls.Deleted == false && ls.Timestamp >= dateFrom && ls.Timestamp <= dateTo
+                                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.Id && ls.Deleted == false && ls.Timestamp >= dateFrom && ls.Timestamp <= dateTo
                                 group ppi.Amount by ls.PayrollPaymentItems_Id into x
                                 select new { PayrollPaymentItems_Id = x.Key, TotalAmount = x.ToList() }).ToList();
 
                 var payroll_manual = await db.PayrollPaymentItems
-                    .Where(x => x.UserAccounts_Id == tutor.u.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+                    .Where(x => x.UserAccounts_Id == tutor.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
                     .OrderBy(x => x.Timestamp).ToListAsync();
 
                 if (payrolls.Count > 0)
@@ -123,11 +124,11 @@ namespace iSpeak.Controllers
 
                     list.Add(new TutorPayrollViewModels
                     {
-                        TutorId = tutor.u.Id,
-                        Name = tutor.u.Firstname + " " + tutor.u.Middlename + " " + tutor.u.Lastname,
+                        TutorId = tutor.Id,
+                        Name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname,
                         TotalHours = string.Format("{0:N2}", tot_hours),
                         TotalPayable = string.Format("{0:N2}", tot_payable),
-                        Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.u.Id + "\")'>Details</a>"
+                        Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
                     });
                 }
                 else
@@ -136,11 +137,11 @@ namespace iSpeak.Controllers
                     {
                         list.Add(new TutorPayrollViewModels
                         {
-                            TutorId = tutor.u.Id,
-                            Name = tutor.u.Firstname + " " + tutor.u.Middlename + " " + tutor.u.Lastname,
+                            TutorId = tutor.Id,
+                            Name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname,
                             TotalHours = string.Format("{0:N2}", tot_hours),
                             TotalPayable = string.Format("{0:N2}", payroll_manual.Sum(x => x.Amount)),
-                            Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.u.Id + "\")'>Details</a>"
+                            Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
                         });
                     }
                 }

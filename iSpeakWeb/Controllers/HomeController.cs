@@ -143,17 +143,21 @@ namespace iSpeak.Controllers
                                       select new { si, u }).ToListAsync();
                 foreach (var package in packages)
                 {
-                    student_packages.Add(new StudentPackageViewModels
+                    var sii_list = await db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == package.si.Id && x.LessonPackages_Id != null).ToListAsync();
+                    if (sii_list.Count > 0)
                     {
-                        SaleInvoices_Id = package.si.Id,
-                        No = package.si.No,
-                        Timestamp = TimeZoneInfo.ConvertTimeFromUtc(package.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
-                        SaleInvoiceItems = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == package.si.Id).OrderBy(x => x.RowNo).ToList(),
-                        StudentName = package.u.Firstname + " " + package.u.Middlename + " " + package.u.Lastname,
-                        Amount = package.si.Amount,
-                        Due = package.si.Due,
-                        Cancelled = package.si.Cancelled
-                    });
+                        student_packages.Add(new StudentPackageViewModels
+                        {
+                            SaleInvoices_Id = package.si.Id,
+                            No = package.si.No,
+                            Timestamp = TimeZoneInfo.ConvertTimeFromUtc(package.si.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")),
+                            SaleInvoiceItems = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == package.si.Id && x.LessonPackages_Id != null).OrderBy(x => x.RowNo).ToList(),
+                            StudentName = package.u.Firstname + " " + package.u.Middlename + " " + package.u.Lastname,
+                            Amount = package.si.Amount,
+                            Due = package.si.Due,
+                            Cancelled = package.si.Cancelled
+                        });
+                    }
                 }
             }
 

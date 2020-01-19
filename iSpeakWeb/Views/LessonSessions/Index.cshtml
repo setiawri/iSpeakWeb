@@ -5,6 +5,16 @@
     ViewBag.Title = "Index";
 }
 
+<style>
+    .limit-text {
+        display: block;
+        width: 100px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <div class="content-wrapper">
 
     <!-- Content area -->
@@ -202,10 +212,10 @@
             {
                 data: 'Deleted', name: 'Deleted', render: function (data, type, row) {
                     if (data == false) {
-                        return '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.Timestamp + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ', ' + "'" + parseFloat(row.SessionHours).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') + "'" + ')">Cancel</span></a>';
+                        return '<a href="javascript:void(0)"><span class="badge badge-warning d-block limit-text" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.Timestamp + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ', ' + "'" + parseFloat(row.SessionHours).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') + "'" + ')">Cancel</span></a>';
                     }
                     else {
-                        return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes_Cancel + '</span>';
+                        return '<span class="badge badge-flat border-danger d-block text-danger-600 limit-text" title="' + row.Notes_Cancel + '">' + row.Notes_Cancel + '</span>';
                     }
                 }
             },

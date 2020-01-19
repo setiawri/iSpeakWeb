@@ -9,7 +9,7 @@ namespace iSpeak.Models
     public class TutorPayrollViewModels
     {
         public string TutorId { get; set; }
-        [Display(Name = "Tutor Name")]
+        [Display(Name = "Name")]
         public string Name { get; set; }
         [Display(Name = "Total Hours")]
         public string TotalHours { get; set; }

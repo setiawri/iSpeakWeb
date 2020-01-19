@@ -5,6 +5,16 @@
     ViewBag.Title = "Index";
 }
 
+<style>
+    .limit-text {
+        display: block;
+        width: 100px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <div class="content-wrapper">
 
     <!-- Content area -->
@@ -255,11 +265,11 @@
                         if (row.IsReturnExist == false) {
                             if (data == false) {
                                 return row.Amount == row.Due
-                                    ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
+                                    ? '<a href="javascript:void(0)"><span class="badge badge-warning d-block limit-text" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal(' + "'" + row.Id + "'" + ', ' + "'" + row.No + "'" + ')">Cancel</span></a>'
                                     : '';
                             }
                             else {
-                                return '<span class="badge badge-flat border-danger d-block text-danger-600">' + row.Notes + '</span>';
+                                return '<span class="badge badge-flat border-danger d-block text-danger-600 limit-text" title="' + row.Notes + '">' + row.Notes + '</span>';
                             }
                         }
                         else {
