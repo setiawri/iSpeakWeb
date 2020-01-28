@@ -326,6 +326,7 @@
     <Compile Include="Models\TokenIdentity.cs" />
     <Compile Include="Models\TutorPayrollViewModels.cs" />
     <Compile Include="Models\TutorSchedulesModels.cs" />
+    <Compile Include="Models\TutorSchedulesSearchViewModels.cs" />
     <Compile Include="Models\TutorSchedulesViewModels.cs" />
     <Compile Include="Models\TutorStudentSchedulesModels.cs" />
     <Compile Include="Models\TutorStudentSchedulesViewModels.cs" />
@@ -589,6 +590,7 @@
     <Content Include="Views\Schedules\StudentIndex.cshtml" />
     <Content Include="Views\Schedules\StudentCreate.cshtml" />
     <Content Include="Views\Schedules\StudentEdit.cshtml" />
+    <Content Include="Views\Schedules\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

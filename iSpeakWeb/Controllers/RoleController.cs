@@ -162,6 +162,7 @@ namespace iSpeak.Controllers
                              MenuOrder = m.MenuOrder,
                              ParentMenu = m.ParentMenu,
                              MenuName = m.MenuName,
+                             Notes = m.Notes,
                              WebMenuAccess = m.WebMenuAccess.ToUpper(),
                              RoleName = access.RoleName ?? string.Empty,
                              IsSelected = string.IsNullOrEmpty(access.RoleName) ? false : true
@@ -185,12 +186,23 @@ namespace iSpeak.Controllers
                                 <td><input type='checkbox' id='" + menu.WebMenuAccess + "' class='check-styled' " + selected + @"/></td>
                                 <td>" + menu.ParentMenu + @"</td>
                                 <td>" + menu.MenuName + @"</td>
+                                <td><div class='input-group'><input type='text' class='form-control input-sm' value='" + menu.Notes + "' readonly/><span class='input-group-append'><button type='button' class='btn btn-sm btn-light' data-toggle='modal' data-target='#modal_notes' onclick='EditNotes(\"" + menu.WebMenuAccess + "\",\"" + menu.Notes + "\"" + @")'>Edit</button></span></div></td>
                                 <td>" + status_access + @"</td>
                             </tr>";
                 row++;
             }
 
             return Json(new { status = "200", content }, JsonRequestBehavior.AllowGet);
+        }
+
+        public async Task<JsonResult> UpdateNotes(string webmenu, string notes)
+        {
+            var mastermenu = await db.MasterMenu.Where(x => x.WebMenuAccess.ToLower() == webmenu.ToLower()).FirstOrDefaultAsync();
+            mastermenu.Notes = notes;
+            db.Entry(mastermenu).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult SaveAccess(string IdRole, string Ids_selected)

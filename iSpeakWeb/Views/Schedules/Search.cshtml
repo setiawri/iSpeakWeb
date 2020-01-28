@@ -1,0 +1,157 @@
+﻿@model iSpeak.Models.TutorSchedulesSearchViewModels
+
+@{
+    ViewBag.Root = "Tutor Schedules";
+    ViewBag.Title = "Search";
+}
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <!-- Form inputs -->
+            <div class="card">
+                <div class="card-header header-elements-inline">
+                    <h5 class="card-title">@ViewBag.Root</h5>
+                    <div class="header-elements">
+                        <div class="list-icons">
+                            <a class="list-icons-item" data-action="collapse"></a>
+                            <a class="list-icons-item" data-action="reload"></a>
+                            <a class="list-icons-item" data-action="remove"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <fieldset class="mb-3">
+                        <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                        <div class="form-group row">
+                            <div class="col-lg-12">
+                                <label class="top-validation text-danger" style="display: none"></label>
+                            </div>
+                        </div>
+                        @*<div class="form-group row">
+                            @Html.LabelFor(model => model.Tutor_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                <select class="form-control" id="Tutor_Id" name="Tutor_Id"></select>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Tutor_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>*@
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.Languages_Id, htmlAttributes: new { @class = "col-form-label col-lg-2" })
+                            <div class="col-lg-5">
+                                @Html.DropDownListFor(model => model.Languages_Id, ViewBag.listLanguages as SelectList, "Select Language", new { @class = "form-control select2" })
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessageFor(model => model.Languages_Id, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-lg-2">Schedule</label>
+                            <div class="col-lg-5">
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        @Html.EnumDropDownListFor(model => model.DayOfWeek, new { @class = "form-control select2" })
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="input-group">
+                                            <span class="input-group-prepend">
+                                                <span class="input-group-text">Start</span>
+                                            </span>
+                                            <input type="text" class="form-control" id="StartTime" name="StartTime" value="08:00">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="input-group">
+                                            <span class="input-group-prepend">
+                                                <span class="input-group-text">End</span>
+                                            </span>
+                                            <input type="text" class="form-control" id="EndTime" name="EndTime" value="12:00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                @Html.ValidationMessage("Schedule", "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-group row">
+                            <label class="col-lg-2">Schedule List</label>
+                            <div class="col-lg-10">
+                                <div class="table-responsive tblSearch"></div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div>
+                        <button type="button" id="btnSearch" class="btn btn-primary">Search <i class="icon-search4 ml-2"></i></button>
+                    </div>
+                </div>
+            </div>
+            <!-- /form inputs -->
+        }
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+
+        $('#StartTime,#EndTime').AnyTime_picker({
+            format: '%H:%i'
+        });
+
+        $('#Tutor_Id').select2({
+            placeholder: 'Select Tutor',
+            ajax: {
+                url: '@Url.Action("GetUser", "User")',
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        page: params.page || 1,
+                        limit: 20,
+                        role: 'tutor'
+                    }
+
+                    return query;
+                }
+            },
+            //minimumInputLength: 2
+        });
+
+        $('#btnSearch').click(function () {
+            if ($('#Languages_Id').val() == '') {
+                $('.top-validation').html('The Language field is required.').show();
+            }
+            else {
+                $('.top-validation').html('').hide();
+                $('.tblSearch').empty();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetAvailableSchedule", "Schedules")',
+                    data: {
+                        language_id: $('#Languages_Id').val(),
+                        dow: $('#DayOfWeek').val(),
+                        start: $('#StartTime').val(),
+                        end: $('#EndTime').val()
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        $('.tblSearch').append(data.content);
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
+        });
+
+    });
+</script>

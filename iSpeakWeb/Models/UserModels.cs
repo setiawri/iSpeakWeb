@@ -28,6 +28,7 @@ namespace iSpeak.Models
         public Guid Branches_Id { get; set; }
         [Display(Name = "Promotion Event")]
         public Guid? PromotionEvents_Id { get; set; }
+        [Display(Name = "Languages")]
         public string Interest { get; set; }
     }
 

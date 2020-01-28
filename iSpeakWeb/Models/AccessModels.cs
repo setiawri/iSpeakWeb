@@ -27,6 +27,8 @@ namespace iSpeak.Models
         [Display(Name = "Action Menu")]
         public string MenuName { get; set; }
 
+        public string Notes { get; set; }
+
         [Display(Name = "Controller Action Reff.")]
         public string WebMenuAccess { get; set; }
 

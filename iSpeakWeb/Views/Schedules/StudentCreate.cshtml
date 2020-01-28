@@ -218,5 +218,10 @@
             $("#Student_UserAccounts_Id").append($newOption).trigger('change');
         }
 
+        if ('@ViewBag.Error' == 'book' && '@ViewBag.TutorName' != '') {
+            var $newOption = $("<option selected='selected'></option>").val('@ViewBag.TutorId').text('@ViewBag.TutorName');
+            $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
+        }
+
     });
 </script>

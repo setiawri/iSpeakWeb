@@ -1,5 +1,6 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -375,7 +376,7 @@ namespace iSpeak.Controllers
             }
         }
 
-        public async Task<ActionResult> StudentCreate(string id)
+        public async Task<ActionResult> StudentCreate(string id, string book, string tutorid)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
@@ -391,6 +392,17 @@ namespace iSpeak.Controllers
                     ViewBag.StartTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0));
                     ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
                 }
+
+                if (!string.IsNullOrEmpty(book) && !string.IsNullOrEmpty(tutorid))
+                {
+                    ViewBag.Error = "book";
+                    var tutor = await db.User.FindAsync(tutorid);
+                    ViewBag.TutorId = tutor == null ? "" : tutor.Id;
+                    ViewBag.TutorName = tutor == null ? "" : tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
+                    ViewBag.StartTime = string.IsNullOrEmpty(book) ? string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0)) : book.Replace("_", ":");
+                    ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
+                }
+
                 return View();
             }
         }
@@ -560,5 +572,110 @@ namespace iSpeak.Controllers
             return View(tutorSchedulesModels);
         }
         #endregion
+
+        private void AddHeaderTable(DateTime timeStart, DateTime timeEnd, List<string> list)
+        {
+            if (timeStart <= timeEnd)
+            {
+                list.Add(string.Format("{0:HH:mm}", timeStart));
+                AddHeaderTable(timeStart.AddMinutes(30), timeEnd, list);
+            }
+        }
+
+        private void AddBookedTime(DateTime timeStart,DateTime timeEnd, List<string> list)
+        {
+            if (timeStart <= timeEnd)
+            {
+                list.Add(string.Format("{0:HH:mm}", timeStart));
+                AddBookedTime(timeStart.AddMinutes(30), timeEnd, list);
+            }
+        }
+
+        public async Task<JsonResult> GetAvailableSchedule(string language_id, DayOfWeekEnum dow, DateTime start, DateTime end)
+        {
+            string table_html = "";
+            table_html += @"
+                <table class='table table-striped table-condensed'>
+                    <thead>
+                        <tr>
+                            <th>Tutor</th>";
+
+            DateTime startFilter = new DateTime(1970, 1, 1, start.Hour, start.Minute, 0);
+            DateTime endFilter = new DateTime(1970, 1, 1, end.Hour, end.Minute, 0);
+            
+            List<string> list_header = new List<string>();
+            AddHeaderTable(startFilter, endFilter, list_header);
+            foreach (var header in list_header)
+            {
+                table_html += "<th>" + header + "</th>";
+            }
+            
+            table_html += @"
+                        </tr>
+                    </thead>
+                </thead>";
+
+            var items = await (from u in db.User
+                               join ts in db.TutorSchedules on u.Id equals ts.Tutor_UserAccounts_Id
+                               where ts.DayOfWeek == dow && ts.IsActive == true && (u.Interest != null || u.Interest != "")
+                               orderby u.Firstname ascending
+                               select new { u, ts }).ToListAsync();
+            table_html += "<tbody>";
+            
+            foreach (var item in items)
+            {
+                bool isLanguage = false;
+                var languages = JsonConvert.DeserializeObject<List<InterestViewModels>>(item.u.Interest);
+                foreach (var language in languages)
+                {
+                    if (language_id == language.Languages_Id) { isLanguage = true; }
+                }
+
+                if (isLanguage)
+                {
+                    List<string> list_booked = new List<string>();
+                    var bookings = await db.TutorStudentSchedules.Where(x => x.Tutor_UserAccounts_Id == item.u.Id && x.DayOfWeek == dow && x.IsActive == true).OrderBy(x => x.StartTime).ToListAsync();
+                    foreach (var booking in bookings)
+                    {
+                        DateTime book_start = booking.StartTime;
+                        DateTime book_end = booking.EndTime;
+                        AddBookedTime(book_start, book_end, list_booked);
+                    }
+
+                    table_html += "<tr><td>" + string.Format("{0}", item.u.Firstname) + "</td>";
+                    foreach (var t in list_header)
+                    {
+                        if (list_booked.Contains(t))
+                        {
+                            table_html += "<td><span class='badge badge-danger d-block'>Booked</span></td>";
+                        }
+                        else
+                        {
+                            string[] splitTime = t.Split(':');
+                            DateTime timeHeader = new DateTime(1970, 1, 1, int.Parse(splitTime[0]), int.Parse(splitTime[1]), 0);
+                            if (timeHeader >= item.ts.StartTime && timeHeader <= item.ts.EndTime)
+                            {
+                                table_html += "<td><a target='_blank' href='" + Url.Action("StudentCreate", "Schedules", new { book = t.Replace(":", "_"), tutorid = item.u.Id }) + "'><span class='badge badge-success d-block'>Free</span></a></td>";
+                            }
+                            else
+                            {
+                                table_html += "<td></td>";
+                            }
+                        }
+                    }
+                    table_html += "</tr>";
+                }
+            }
+
+            table_html += "</tbody></table>";
+
+            return Json(new { content = table_html }, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Search()
+        {
+            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+            return View();
+        }
     }
 }

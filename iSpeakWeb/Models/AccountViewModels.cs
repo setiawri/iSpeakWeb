@@ -109,6 +109,7 @@ namespace iSpeak.Models
         [Display(Name = "Promotion Events")]
         public Guid? PromotionEvents_Id { get; set; }
 
+        [Display(Name = "Languages")]
         public string[] Interest { get; set; }
 
         //[Required]
