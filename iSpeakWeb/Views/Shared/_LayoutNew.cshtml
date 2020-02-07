@@ -41,10 +41,10 @@
     <script src="~/assets/js/plugins/tables/datatables/datatables.min.js"></script>
     <script src="~/assets/js/plugins/notifications/bootbox.min.js"></script>
     @*<script src="../../../../global_assets/js/plugins/visualization/d3/d3.min.js"></script>
-    <script src="../../../../global_assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
-    <script src="../../../../global_assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
-    <script src="../../../../global_assets/js/plugins/ui/moment/moment.min.js"></script>
-    <script src="../../../../global_assets/js/plugins/pickers/daterangepicker.js"></script>*@
+        <script src="../../../../global_assets/js/plugins/visualization/d3/d3_tooltip.js"></script>
+        <script src="../../../../global_assets/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+        <script src="../../../../global_assets/js/plugins/ui/moment/moment.min.js"></script>
+        <script src="../../../../global_assets/js/plugins/pickers/daterangepicker.js"></script>*@
     <script src="~/assets/js/app.js"></script>
     <!-- /theme JS files -->
 </head>
@@ -99,13 +99,13 @@
         <div class="navbar-collapse collapse" id="navbar-navigation">
             <ul class="navbar-nav">
                 @*<li class="nav-item">
-            <select id="Branch" name="Branch" class="navbar-nav-link">
-                @foreach (SelectListItem option in ViewBag.LoginBranch)
-                {
-                    <option value="@option.Value" @(option.Value == User.Identity.GetBranches_Id() ? "selected='selected'" : "")>@option.Text</option>
-                }
-            </select>
-        </li>*@
+                        <select id="Branch" name="Branch" class="navbar-nav-link">
+                            @foreach (SelectListItem option in ViewBag.LoginBranch)
+                            {
+                                <option value="@option.Value" @(option.Value == User.Identity.GetBranches_Id() ? "selected='selected'" : "")>@option.Text</option>
+                            }
+                        </select>
+                    </li>*@
                 <li class="nav-item">
                     <a href="@Url.Action("Index", "Home")" class="navbar-nav-link">
                         <i class="icon-home4 mr-2"></i>
@@ -113,17 +113,17 @@
                     </a>
                 </li>
                 @*<li class="nav-item" @(ViewBag.SaleMenu == "" ? "" : Html.Raw(ViewBag.SaleMenu))>
-            <a href="@Url.Action("Index", "Sale")" class="navbar-nav-link">
-                <i class="icon-list3 mr-2"></i>
-                Sale
-            </a>
-        </li>
-        <li class="nav-item" @(ViewBag.PaymentMenu == "" ? "" : Html.Raw(ViewBag.PaymentMenu))>
-            <a href="@Url.Action("Print", "Payments")" class="navbar-nav-link">
-                <i class="icon-cash3 mr-2"></i>
-                Payment
-            </a>
-        </li>*@
+                        <a href="@Url.Action("Index", "Sale")" class="navbar-nav-link">
+                            <i class="icon-list3 mr-2"></i>
+                            Sale
+                        </a>
+                    </li>
+                    <li class="nav-item" @(ViewBag.PaymentMenu == "" ? "" : Html.Raw(ViewBag.PaymentMenu))>
+                        <a href="@Url.Action("Print", "Payments")" class="navbar-nav-link">
+                            <i class="icon-cash3 mr-2"></i>
+                            Payment
+                        </a>
+                    </li>*@
                 <li class="nav-item dropdown" @(ViewBag.SaleMenu == "" ? "" : Html.Raw(ViewBag.SaleMenu))>
                     <a href="#" class="navbar-nav-link dropdown-toggle" data-toggle="dropdown">
                         <i class="icon-list3 mr-2"></i>
@@ -260,7 +260,7 @@
             </span>
         </div>
         <div class="mt-2">
-            <span class="badge badge-success">v.200128</span>
+            <span class="badge badge-success">v.200207</span>
         </div>
     </div>
     <!-- /footer -->

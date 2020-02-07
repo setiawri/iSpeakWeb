@@ -56,7 +56,8 @@
                                     </td>
                                     <td>@Html.DisplayFor(modelItem => item.Notes)</td>
                                     <td>
-                                        @Html.ActionLink("Edit", "TutorEdit", new { id = item.Id })
+                                        @Html.ActionLink("Edit", "TutorEdit", new { id = item.Id }) |
+                                        <a href="javascript:void(0)" onclick="DeleteSchedule('@item.Id', '@item.Tutor', '@item.DayOfWeek', '@string.Format("{0:HH:mm}", item.StartTime)', '@string.Format("{0:HH:mm}", item.EndTime)')">Delete</a>
                                         @if (ViewBag.Log == true)
                                         {
                                             @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Tutor }, new { target = "_blank" })
@@ -81,7 +82,7 @@
         autoWidth: false,
         columnDefs: [{
             orderable: false,
-            width: 100,
+            width: 120,
             targets: [6]
         }],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
@@ -97,4 +98,38 @@
         pagingType: 'full_numbers',
         order: [[0, 'asc']]
     });
+
+    function DeleteSchedule(id, tutor, dow, start, end) {
+        bootbox.confirm({
+            message: "Are you sure want to delete schedule " + tutor + ": " + dow + " (" + start + " - " + end + ") ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteSchedule", "Schedules")',
+                        data: {
+                            id: id,
+                            key: 'tutor'
+                        },
+                        success: function (data) {
+                            window.location.reload(true);
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
 </script>

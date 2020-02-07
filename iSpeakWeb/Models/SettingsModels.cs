@@ -15,6 +15,7 @@ namespace iSpeak.Models
         public int? Value_Int { get; set; }
         public string Value_String { get; set; }
         public Guid? Value_Guid { get; set; }
+        public string Notes { get; set; }
     }
 
     public class SettingsValue
@@ -23,5 +24,6 @@ namespace iSpeak.Models
         public static Guid GUID_UserSetRoleAllowed = new Guid("25f53554-3b9d-4d3b-a8e5-58d921950987");
         public static Guid GUID_RoleAccessForReminders = new Guid("2f8d8208-4464-4a01-b9e1-30e54292b708");
         public static Guid GUID_FullAccessForTutorSchedule = new Guid("9b5ab31f-ce5e-4942-9e07-0fe107058910");
+        public static Guid GUID_ResetPassword = new Guid("01f2d64d-f402-4a96-b854-128f9a9ae42f");
     }
 }

@@ -79,17 +79,22 @@
                                 @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
                             </div>
                         </div>
+                        <div>
+                            <a href="@Url.Action("TutorIndex", "Schedules")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                            <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
+                        </div>
                         <hr />
                         <div class="form-group row">
                             <label class="col-lg-2">Schedule List</label>
-                            <div class="col-lg-7">
+                            <div class="col-lg-10">
                                 <div class="table-responsive">
-                                    <table class="table table-condensed">
+                                    <table class="table table-hover table-condensed">
                                         <thead>
                                             <tr>
                                                 <th>Day of Week</th>
                                                 <th>Time</th>
                                                 <th>Notes</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody id="data-body"></tbody>
@@ -98,10 +103,6 @@
                             </div>
                         </div>
                     </fieldset>
-                    <div>
-                        <a href="@Url.Action("TutorIndex", "Schedules")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
-                        <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
-                    </div>
                 </div>
             </div>
             <!-- /form inputs -->
@@ -112,6 +113,62 @@
 </div>
 
 <script type="text/javascript">
+    function GetTutorSchedule() {
+        $('#data-body').empty();
+        if ($('#Tutor_UserAccounts_Id').val() != '') {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetTutorSchedule", "Schedules")',
+                data: {
+                    tutor_id: $('#Tutor_UserAccounts_Id').val()
+                },
+                async: false,
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                    return false;
+                }, //end error
+                success: function (data) {
+                    //console.log(data);
+                    $('#data-body').append(data.body);
+                } //end success
+            }); //end ajax
+        }
+    }
+
+    function DeleteSchedule(id, tutor, dow, time) {
+        bootbox.confirm({
+            message: "Are you sure want to delete schedule " + tutor + ": " + dow + " (" + time + ") ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteSchedule", "Schedules")',
+                        data: {
+                            id: id,
+                            key: 'tutor'
+                        },
+                        success: function (data) {
+                            GetTutorSchedule();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         $('.select2').select2();
 
@@ -138,37 +195,23 @@
         });
 
         $('#Tutor_UserAccounts_Id').change(function () {
-            $('#data-body').empty();
-            if ($('#Tutor_UserAccounts_Id').val() != '') {
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("GetTutorSchedule", "Schedules")',
-                    data: {
-                        tutor_id: $('#Tutor_UserAccounts_Id').val()
-                    },
-                    async: false,
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                        return false;
-                    }, //end error
-                    success: function (data) {
-                        //console.log(data);
-                        $('#data-body').append(data.body);
-                    } //end success
-                }); //end ajax
-            }
+            GetTutorSchedule();
         });
 
-        console.log('@ViewBag.Error');
+        $('#DayOfWeek').val('@ViewBag.DOW').trigger('change');
+        $('#StartTime').val('@ViewBag.StartTime');
+        $('#EndTime').val('@ViewBag.EndTime');
+
+        @*console.log('@ViewBag.Error');
         console.log('@ViewBag.TutorName');
         console.log('@ViewBag.TutorId');
         console.log('@ViewBag.FullAccess');
-        console.log('@ViewBag.LoginId');
+        console.log('@ViewBag.LoginId');*@
 
-        if ('@ViewBag.Error' != '') {
+        @*if ('@ViewBag.Error' != '') {
             $('#StartTime').val('@ViewBag.StartTime');
             $('#EndTime').val('@ViewBag.EndTime');
-        }
+        }*@
 
         if (('@ViewBag.Error' == 'init' && '@ViewBag.TutorName' != '') || ('@ViewBag.Error' == 'duplicate_schedule' && '@ViewBag.TutorName' != '') || ('@ViewBag.Error' == 'invalid_time' && '@ViewBag.TutorName' != '')) {
             var $newOption = $("<option selected='selected'></option>").val('@ViewBag.TutorId').text('@ViewBag.TutorName');

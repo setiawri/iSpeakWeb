@@ -33,6 +33,8 @@ namespace iSpeak.Models
         public decimal Adjustment { get; set; }
         public Guid? PayrollPaymentItems_Id { get; set; }
         public string Notes_Cancel { get; set; }
+        public bool IsScheduleChange { get; set; }
+        public bool IsWaiveTutorFee { get; set; }
     }
 
     public class LessonSessionsDetails

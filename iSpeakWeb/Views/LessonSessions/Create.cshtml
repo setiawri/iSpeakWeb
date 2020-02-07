@@ -328,12 +328,15 @@
             $('#ChangeSchedule').val($('#chkChangeSchedule').prop('checked'));
             $('#Waive').val($('#chkWaive').prop('checked'));
 
-            if ($('#Tutor_UserAccounts_Id').val() == '') {
+            if ($('#Tutor_UserAccounts_Id').val() == null) {
                 $('.session-validation').html('The Tutor field is required.').show();
                 return false;
             }
-
-            if (arrItem.length == 0) {
+            else if ($('#ChangeSchedule').val() == 'true' && $('#Waive').val() == 'true') {
+                $('.session-validation').html('Please select one of Change Schedule or Waive Tutor Fee!').show();
+                return false;
+            }
+            else if (arrItem.length == 0) {
                 $('.session-validation').html('List Student-Package is required.').show();
                 return false;
             }

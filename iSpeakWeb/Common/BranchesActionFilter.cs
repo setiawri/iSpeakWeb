@@ -14,6 +14,12 @@ namespace iSpeak.Common
 
         public override void OnResultExecuting(ResultExecutingContext filterContext)
         {
+            //no-cache
+            filterContext.HttpContext.Response.Cache.SetCacheability(HttpCacheability.NoCache); // HTTP 1.1.
+            filterContext.HttpContext.Response.Cache.AppendCacheExtension("no-store, must-revalidate");
+            filterContext.HttpContext.Response.AppendHeader("Pragma", "no-cache"); // HTTP 1.0.
+            filterContext.HttpContext.Response.AppendHeader("Expires", "0"); // Proxies.
+
             //var login_session = HttpContext.Current.Session["Login"] as LoginViewModel;
             using (var db = new iSpeakContext())
             {

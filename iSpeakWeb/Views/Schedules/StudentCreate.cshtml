@@ -97,6 +97,10 @@
                                 @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
                             </div>
                         </div>
+                        <div>
+                            <a href="@Url.Action("StudentIndex", "Schedules")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
+                            <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
+                        </div>
                         <hr />
                         <div class="form-group row">
                             <label class="col-lg-2">Schedule List</label>
@@ -110,6 +114,7 @@
                                                 <th>Lesson</th>
                                                 <th>Tutor</th>
                                                 <th>Notes</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody id="data-body"></tbody>
@@ -118,10 +123,6 @@
                             </div>
                         </div>
                     </fieldset>
-                    <div>
-                        <a href="@Url.Action("StudentIndex", "Schedules")" class="btn btn-warning">Cancel <i class="icon-cross2 ml-2"></i></a>
-                        <button type="submit" class="btn btn-primary">Submit <i class="icon-paperplane ml-2"></i></button>
-                    </div>
                 </div>
             </div>
             <!-- /form inputs -->
@@ -132,6 +133,73 @@
 </div>
 
 <script type="text/javascript">
+    function GetStudentSchedule() {
+        $("#InvoiceItems_Id").empty();
+        $("#InvoiceItems_Id").append("<option value=''>Select Lesson</option");
+        $('#data-body').empty();
+
+        if ($('#Student_UserAccounts_Id').val() != '') {
+            //Lesson Available
+            $.get('@Url.Action("GetLessonList", "LessonSessions")', { student_id: $("#Student_UserAccounts_Id").val() }, function (data) {
+                $.each(data.ddl, function (index, row) {
+                    $("#InvoiceItems_Id").append("<option value='" + row.Value + "'>" + row.Text + "</option>")
+                });
+            });
+
+            //Schedule List
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetStudentSchedule", "Schedules")',
+                data: {
+                    student_id: $('#Student_UserAccounts_Id').val()
+                },
+                async: false,
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                    return false;
+                }, //end error
+                success: function (data) {
+                    //console.log(data);
+                    $('#data-body').append(data.body);
+                } //end success
+            }); //end ajax
+        }
+    }
+
+    function DeleteSchedule(id, student, dow, time) {
+        bootbox.confirm({
+            message: "Are you sure want to delete schedule " + student + ": " + dow + " (" + time + ") ?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result == true) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("DeleteSchedule", "Schedules")',
+                        data: {
+                            id: id,
+                            key: 'student'
+                        },
+                        success: function (data) {
+                            GetStudentSchedule();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
+            }
+        });
+    }
+
     $(document).ready(function () {
         $('.select2').select2();
 
@@ -176,49 +244,24 @@
         });
 
         $('#Student_UserAccounts_Id').change(function () {
-            $("#InvoiceItems_Id").empty();
-            $("#InvoiceItems_Id").append("<option value=''>Select Lesson</option");
-            $('#data-body').empty();
-
-            if ($('#Student_UserAccounts_Id').val() != '') {
-                //Lesson Available
-                $.get('@Url.Action("GetLessonList", "LessonSessions")', { student_id: $("#Student_UserAccounts_Id").val() }, function (data) {
-                    $.each(data.ddl, function (index, row) {
-                        $("#InvoiceItems_Id").append("<option value='" + row.Value + "'>" + row.Text + "</option>")
-                    });
-                });
-
-                //Schedule List
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("GetStudentSchedule", "Schedules")',
-                    data: {
-                        student_id: $('#Student_UserAccounts_Id').val()
-                    },
-                    async: false,
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                        return false;
-                    }, //end error
-                    success: function (data) {
-                        //console.log(data);
-                        $('#data-body').append(data.body);
-                    } //end success
-                }); //end ajax
-            }
+            GetStudentSchedule();
         });
 
-        if ('@ViewBag.Error' != '') {
+        @*if ('@ViewBag.Error' != '') {
             $('#StartTime').val('@ViewBag.StartTime');
             $('#EndTime').val('@ViewBag.EndTime');
-        }
+        }*@
+
+        $('#DayOfWeek').val('@ViewBag.DOW').trigger('change');
+        $('#StartTime').val('@ViewBag.StartTime');
+        $('#EndTime').val('@ViewBag.EndTime');
 
         if (('@ViewBag.Error' == 'init' && '@ViewBag.StudentName' != '') || ('@ViewBag.Error' == 'duplicate_schedule' && '@ViewBag.StudentName' != '') || ('@ViewBag.Error' == 'invalid_time' && '@ViewBag.StudentName' != '')) {
             var $newOption = $("<option selected='selected'></option>").val('@ViewBag.StudentId').text('@ViewBag.StudentName');
             $("#Student_UserAccounts_Id").append($newOption).trigger('change');
         }
 
-        if ('@ViewBag.Error' == 'book' && '@ViewBag.TutorName' != '') {
+        if ('@ViewBag.Error' == 'tutor' && '@ViewBag.TutorName' != '') {
             var $newOption = $("<option selected='selected'></option>").val('@ViewBag.TutorId').text('@ViewBag.TutorName');
             $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
         }

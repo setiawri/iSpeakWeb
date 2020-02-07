@@ -27,40 +27,80 @@
                 <div class="card-body">
                     <fieldset class="mb-3">
                         <legend class="text-uppercase font-size-sm font-weight-bold">@ViewBag.Title</legend>
+                        @Html.ValidationMessage("ValidationMessage", "", new { @class = "text-danger" })
                         <div class="form-group row">
-                            @Html.LabelFor(model => model.AutoEntryForCashPayments, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                            @Html.LabelFor(model => model.AutoEntryForCashPayments, htmlAttributes: new { @class = "col-form-label col-lg-4" })
                             <div class="col-lg-4">
                                 @Html.DropDownListFor(model => model.AutoEntryForCashPayments, ViewBag.listCategory as SelectList, "Select Category", new { @class = "form-control select2" })
                             </div>
-                            <div class="col-lg-5">
-                                @Html.ValidationMessage("AutoEntryForCashPayments", "", new { @class = "text-danger" })
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.AutoEntryForCashPayments_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            @Html.LabelFor(model => model.RoleAccessForReminders, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                            @Html.LabelFor(model => model.RoleAccessForReminders, htmlAttributes: new { @class = "col-form-label col-lg-4" })
                             <div class="col-lg-4">
                                 @Html.ListBoxFor(model => model.RoleAccessForReminders, ViewBag.listRole as SelectList, new { @class = "form-control select2", @multiple = "multiple" })
                             </div>
-                            <div class="col-lg-5">
-                                @Html.ValidationMessage("RoleAccessForReminders", "", new { @class = "text-danger" })
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.RoleAccessForReminders_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            @Html.LabelFor(model => model.FullAccessForTutorSchedules, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                            @Html.LabelFor(model => model.FullAccessForTutorSchedules, htmlAttributes: new { @class = "col-form-label col-lg-4" })
                             <div class="col-lg-4">
                                 @Html.ListBoxFor(model => model.FullAccessForTutorSchedules, ViewBag.listRole as SelectList, new { @class = "form-control select2", @multiple = "multiple" })
                             </div>
-                            <div class="col-lg-5">
-                                @Html.ValidationMessage("FullAccessForTutorSchedules", "", new { @class = "text-danger" })
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.FullAccessForTutorSchedules_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
-                            @Html.LabelFor(model => model.UserSetRoleAllowed, htmlAttributes: new { @class = "col-form-label col-lg-3" })
+                            @Html.LabelFor(model => model.UserSetRoleAllowed, htmlAttributes: new { @class = "col-form-label col-lg-4" })
                             <div class="col-lg-4">
                                 @Html.DropDownListFor(model => model.UserSetRoleAllowed, ViewBag.listRole as SelectList, "Select Role", new { @class = "form-control select2" })
                             </div>
-                            <div class="col-lg-5">
-                                @Html.ValidationMessage("UserSetRoleAllowed", "", new { @class = "text-danger" })
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.UserSetRoleAllowed_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.ResetPassword, htmlAttributes: new { @class = "col-form-label col-lg-4" })
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    @Html.PasswordFor(model => model.ResetPassword, new { @class = "form-control", @placeholder = "Reset Password" })
+                                    <span class="input-group-append">
+                                        <span class="input-group-text showpass" title="Show Password"><i class="icon icon-eye2"></i></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.ResetPassword_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                </div>
                             </div>
                         </div>
                     </fieldset>
@@ -79,5 +119,15 @@
 <script type="text/javascript">
     $(document).ready(function () {
         $('.select2').select2();
+
+        $('#ResetPassword').val('@ViewBag.password');
+
+        $('.showpass').mousedown(function () {
+            $('#ResetPassword').attr('type', 'text');
+        }).mouseup(function () {
+            $('#ResetPassword').attr('type', 'password');
+        }).mouseout(function () {
+            $('#ResetPassword').attr('type', 'password');
+        });
     })
 </script>

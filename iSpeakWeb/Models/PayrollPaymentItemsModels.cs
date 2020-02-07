@@ -17,6 +17,7 @@ namespace iSpeak.Models
         public string Description { get; set; }
         public decimal Hour { get; set; }
         public decimal HourlyRate { get; set; }
+        public int TutorTravelCost { get; set; }
         public decimal Amount { get; set; }
         public string UserAccounts_Id { get; set; }
     }

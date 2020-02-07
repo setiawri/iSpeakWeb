@@ -23,7 +23,7 @@ namespace iSpeak.Controllers
             var items = await (from ts in db.TutorSchedules
                                join u in db.User on ts.Tutor_UserAccounts_Id equals u.Id
                                where ts.Tutor_UserAccounts_Id == tutor_id
-                               orderby ts.DayOfWeek
+                               orderby ts.DayOfWeek, ts.StartTime
                                select new TutorSchedulesViewModels
                                {
                                    Id = ts.Id,
@@ -38,11 +38,12 @@ namespace iSpeak.Controllers
             string content = "";
             foreach (var item in items)
             {
-                content += @"<tr>
-                                <td>" + item.DayOfWeek + @"</td>
-                                <td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + @"</td>
-                                <td>" + item.Notes + @"</td>
-                            </tr>";
+                content += "<tr>";
+                content += "<td>" + item.DayOfWeek + "</td>";
+                content += "<td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + "</td>";
+                content += "<td>" + item.Notes + "</td>";
+                content += "<td><a href=javascript:void(0) onclick='DeleteSchedule(\"" + item.Id + "\",\"" + item.Tutor + "\",\"" + item.DayOfWeek + "\",\"" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + "\")'>Delete</a></td>";
+                content += "</tr>";
             }
 
             return Json(new { body = content }, JsonRequestBehavior.AllowGet);
@@ -119,12 +120,12 @@ namespace iSpeak.Controllers
                                  Notes = ts.Notes
                              }).ToListAsync();
 
-                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
+                //ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
             }
         }
 
-        public async Task<ActionResult> TutorCreate(string id)
+        public async Task<ActionResult> TutorCreate(string id, string dow, string start, string end)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
@@ -181,10 +182,11 @@ namespace iSpeak.Controllers
                     ViewBag.Error = "init";
                     ViewBag.TutorId = tutor == null ? "" : tutor.Id;
                     ViewBag.TutorName = tutor == null ? "" : tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
-                    ViewBag.StartTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0));
-                    ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
                 }
 
+                ViewBag.DOW = string.IsNullOrEmpty(dow) ? "0" : dow;
+                ViewBag.StartTime = string.IsNullOrEmpty(start) ? string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0)) : start.Replace("_", ":");
+                ViewBag.EndTime = string.IsNullOrEmpty(end) ? string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0)) : end.Replace("_", ":");
                 ViewBag.FullAccess = isFullAccess;
                 return View();
             }
@@ -230,7 +232,7 @@ namespace iSpeak.Controllers
                 db.TutorSchedules.Add(tutorSchedulesModels);
                 await db.SaveChangesAsync();
 
-                return RedirectToAction("TutorCreate", new { id = tutorSchedulesModels.Tutor_UserAccounts_Id });
+                return RedirectToAction("TutorCreate", new { id = tutorSchedulesModels.Tutor_UserAccounts_Id, dow = (int)tutorSchedulesModels.DayOfWeek, start = string.Format("{0:HH_mm}", start), end = string.Format("{0:HH_mm}", end) });
                 //return RedirectToAction("TutorIndex");
             }
 
@@ -318,7 +320,7 @@ namespace iSpeak.Controllers
                                join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
                                join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
                                where tss.Student_UserAccounts_Id == student_id
-                               orderby tss.DayOfWeek
+                               orderby tss.DayOfWeek, tss.StartTime
                                select new TutorStudentSchedulesViewModels
                                {
                                    Id = tss.Id,
@@ -335,13 +337,14 @@ namespace iSpeak.Controllers
             string content = "";
             foreach (var item in items)
             {
-                content += @"<tr>
-                                <td>" + item.DayOfWeek + @"</td>
-                                <td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + @"</td>
-                                <td>" + item.Invoice + @"</td>
-                                <td>" + item.Tutor + @"</td>
-                                <td>" + item.Notes + @"</td>
-                            </tr>";
+                content += "<tr>";
+                content += "<td>" + item.DayOfWeek + "</td>";
+                content += "<td>" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + "</td>";
+                content += "<td>" + item.Invoice + "</td>";
+                content += "<td>" + item.Tutor + "</td>";
+                content += "<td>" + item.Notes + "</td>";
+                content += "<td><a href=javascript:void(0) onclick='DeleteSchedule(\"" + item.Id + "\",\"" + item.Student + "\",\"" + item.DayOfWeek + "\",\"" + string.Format("{0:HH:mm} - {1:HH:mm}", item.StartTime, item.EndTime) + "\")'>Delete</a></td>";
+                content += "</tr>";
             }
 
             return Json(new { body = content }, JsonRequestBehavior.AllowGet);
@@ -371,12 +374,12 @@ namespace iSpeak.Controllers
                                       Notes = tss.Notes
                                   }).ToListAsync();
 
-                ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
+                //ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
             }
         }
 
-        public async Task<ActionResult> StudentCreate(string id, string book, string tutorid)
+        public async Task<ActionResult> StudentCreate(string id, string dow, string start, string end, string tutorid)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
@@ -393,16 +396,17 @@ namespace iSpeak.Controllers
                     ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
                 }
 
-                if (!string.IsNullOrEmpty(book) && !string.IsNullOrEmpty(tutorid))
+                if (!string.IsNullOrEmpty(tutorid))
                 {
-                    ViewBag.Error = "book";
+                    ViewBag.Error = "tutor";
                     var tutor = await db.User.FindAsync(tutorid);
                     ViewBag.TutorId = tutor == null ? "" : tutor.Id;
                     ViewBag.TutorName = tutor == null ? "" : tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
-                    ViewBag.StartTime = string.IsNullOrEmpty(book) ? string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0)) : book.Replace("_", ":");
-                    ViewBag.EndTime = string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0));
                 }
 
+                ViewBag.DOW = string.IsNullOrEmpty(dow) ? "0" : dow;
+                ViewBag.StartTime = string.IsNullOrEmpty(start) ? string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 8, 0, 0)) : start.Replace("_", ":");
+                ViewBag.EndTime = string.IsNullOrEmpty(end) ? string.Format("{0:HH:mm}", new DateTime(1970, 1, 1, 12, 0, 0)) : end.Replace("_", ":");
                 return View();
             }
         }
@@ -448,7 +452,7 @@ namespace iSpeak.Controllers
                 db.TutorStudentSchedules.Add(tutorSchedulesModels);
                 await db.SaveChangesAsync();
 
-                return RedirectToAction("StudentCreate", new { id = tutorSchedulesModels.Student_UserAccounts_Id });
+                return RedirectToAction("StudentCreate", new { id = tutorSchedulesModels.Student_UserAccounts_Id, dow = (int)tutorSchedulesModels.DayOfWeek, start = string.Format("{0:HH_mm}", start), end = string.Format("{0:HH_mm}", end) });
                 //return RedirectToAction("StudentIndex");
             }
 
@@ -573,6 +577,23 @@ namespace iSpeak.Controllers
         }
         #endregion
 
+        public async Task<JsonResult> DeleteSchedule(Guid id, string key)
+        {
+            if (key == "tutor")
+            {
+                var schedule = await db.TutorSchedules.FindAsync(id);
+                db.TutorSchedules.Remove(schedule);
+            }
+            else
+            {
+                var schedule = await db.TutorStudentSchedules.FindAsync(id);
+                db.TutorStudentSchedules.Remove(schedule);
+            }
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+
         private void AddHeaderTable(DateTime timeStart, DateTime timeEnd, List<string> list)
         {
             if (timeStart <= timeEnd)
@@ -591,7 +612,7 @@ namespace iSpeak.Controllers
             }
         }
 
-        public async Task<JsonResult> GetAvailableSchedule(string language_id, DayOfWeekEnum dow, DateTime start, DateTime end)
+        public async Task<JsonResult> GetAvailableSchedule(string tutor_id, string language_id, DayOfWeekEnum dow, DateTime start, DateTime end)
         {
             string table_html = "";
             table_html += @"
@@ -615,11 +636,17 @@ namespace iSpeak.Controllers
                     </thead>
                 </thead>";
 
-            var items = await (from u in db.User
-                               join ts in db.TutorSchedules on u.Id equals ts.Tutor_UserAccounts_Id
-                               where ts.DayOfWeek == dow && ts.IsActive == true && (u.Interest != null || u.Interest != "")
-                               orderby u.Firstname ascending
-                               select new { u, ts }).ToListAsync();
+            var items = string.IsNullOrEmpty(tutor_id)
+                ? await (from u in db.User
+                         join ts in db.TutorSchedules on u.Id equals ts.Tutor_UserAccounts_Id
+                         where ts.DayOfWeek == dow && ts.IsActive == true && (u.Interest != null || u.Interest != "")
+                         orderby u.Firstname ascending
+                         select new { u, ts }).ToListAsync()
+                : await (from u in db.User
+                         join ts in db.TutorSchedules on u.Id equals ts.Tutor_UserAccounts_Id
+                         where ts.Tutor_UserAccounts_Id == tutor_id && ts.DayOfWeek == dow && ts.IsActive == true && (u.Interest != null || u.Interest != "")
+                         orderby u.Firstname ascending
+                         select new { u, ts }).ToListAsync();
             table_html += "<tbody>";
             
             foreach (var item in items)
@@ -634,12 +661,15 @@ namespace iSpeak.Controllers
                 if (isLanguage)
                 {
                     List<string> list_booked = new List<string>();
+                    List<string> list_expired = new List<string>();
                     var bookings = await db.TutorStudentSchedules.Where(x => x.Tutor_UserAccounts_Id == item.u.Id && x.DayOfWeek == dow && x.IsActive == true).OrderBy(x => x.StartTime).ToListAsync();
                     foreach (var booking in bookings)
                     {
+                        decimal hours_remaining = db.SaleInvoiceItems.Find(booking.InvoiceItems_Id).SessionHours_Remaining.Value;
                         DateTime book_start = booking.StartTime;
                         DateTime book_end = booking.EndTime;
-                        AddBookedTime(book_start, book_end, list_booked);
+                        if (hours_remaining > 0) { AddBookedTime(book_start, book_end, list_booked); }
+                        else { AddBookedTime(book_start, book_end, list_expired); }
                     }
 
                     table_html += "<tr><td>" + string.Format("{0}", item.u.Firstname) + "</td>";
@@ -649,13 +679,17 @@ namespace iSpeak.Controllers
                         {
                             table_html += "<td><span class='badge badge-danger d-block'>Booked</span></td>";
                         }
+                        else if (list_expired.Contains(t))
+                        {
+                            table_html += "<td><span class='badge bg-orange d-block'>Expired</span></td>";
+                        }
                         else
                         {
                             string[] splitTime = t.Split(':');
                             DateTime timeHeader = new DateTime(1970, 1, 1, int.Parse(splitTime[0]), int.Parse(splitTime[1]), 0);
                             if (timeHeader >= item.ts.StartTime && timeHeader <= item.ts.EndTime)
                             {
-                                table_html += "<td><a target='_blank' href='" + Url.Action("StudentCreate", "Schedules", new { book = t.Replace(":", "_"), tutorid = item.u.Id }) + "'><span class='badge badge-success d-block'>Free</span></a></td>";
+                                table_html += "<td><a target='_blank' href='" + Url.Action("StudentCreate", "Schedules", new { dow = (int)dow, start = t.Replace(":", "_"), tutorid = item.u.Id }) + "'><span class='badge badge-success d-block'>Free</span></a></td>";
                             }
                             else
                             {

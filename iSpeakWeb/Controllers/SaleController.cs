@@ -57,6 +57,9 @@ namespace iSpeak.Controllers
         #region Get Item
         public JsonResult GetItem(Guid id)
         {
+            Permission p = new Permission();
+            bool show_tutor_cost = p.IsGranted(User.Identity.Name, "lessonsessions_showtravelcost");
+
             var list = db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == id).OrderBy(x => x.RowNo).ToList();
             string message = @"<div class='table-responsive'>
                                     <table class='table table-striped table-bordered'>
@@ -65,7 +68,11 @@ namespace iSpeak.Controllers
                                                 <th>Description</th>
                                                 <th>Qty</th>
                                                 <th>Price</th>
-                                                <th>Travel</th>
+                                                <th>Travel</th>";
+
+            message += show_tutor_cost ? "<th>Tutor Travel</th>" : "";
+
+            message += @"
                                                 <th>Discount</th>
                                                 <th>Voucher</th>
                                                 <th>Subtotal</th>
@@ -81,7 +88,11 @@ namespace iSpeak.Controllers
                                 <td>" + item.Description + "<br/>" + item.Notes + @"</td>
                                 <td>" + item.Qty + @"</td>
                                 <td>" + item.Price.ToString("#,##0") + @"</td>
-                                <td>" + item.TravelCost.ToString("#,##0") + @"</td>
+                                <td>" + item.TravelCost.ToString("#,##0") + @"</td>";
+
+                message += show_tutor_cost ? "<td>" + item.TutorTravelCost.ToString("#,##0") + "</td>" : "";
+
+                message += @"
                                 <td>" + item.DiscountAmount.ToString("#,##0") + @"</td>
                                 <td>" + voucher.ToString("#,##0") + @"</td>
                                 <td>" + subtotal.ToString("#,##0") + @"</td>
@@ -183,6 +194,17 @@ namespace iSpeak.Controllers
             sale_invoice.Cancelled = true;
             sale_invoice.Notes = notes;
             db.Entry(sale_invoice).State = EntityState.Modified;
+
+            var lesson_invoice_items = await db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == id && x.LessonPackages_Id != null).ToListAsync();
+            if (lesson_invoice_items.Count > 0)
+            {
+                foreach (var item in lesson_invoice_items)
+                {
+                    var lesson_item = await db.SaleInvoiceItems.FindAsync(item.Id);
+                    lesson_item.SessionHours_Remaining = 0;
+                    db.Entry(lesson_item).State = EntityState.Modified;
+                }
+            }
 
             var sale_invoice_items = await db.SaleInvoiceItems.Where(x => x.SaleInvoices_Id == id && x.Products_Id != null).ToListAsync();
             if (sale_invoice_items.Count > 0)

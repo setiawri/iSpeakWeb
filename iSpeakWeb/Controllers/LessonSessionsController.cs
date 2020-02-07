@@ -104,13 +104,13 @@ namespace iSpeak.Controllers
                         join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
                         where si.Due == 0 && si.Customer_UserAccounts_Id == student_id && sii.SessionHours_Remaining > 0
                         orderby sii.Description ascending
-                        select new { sii }).ToList();
+                        select new { si, sii }).ToList();
             foreach (var item in data)
             {
                 newList.Add(new
                 {
                     Id = item.sii.Id,
-                    Name = item.sii.Description + " [Qty: " + item.sii.Qty + ", Avail. Hours: " + item.sii.SessionHours_Remaining + " hrs]"
+                    Name = item.si.No + " " + item.sii.Description + " [Qty: " + item.sii.Qty + ", Avail. Hours: " + item.sii.SessionHours_Remaining + " hrs]"
                 });
             }
             var ddl = new SelectList(newList, "Id", "Name");
@@ -194,14 +194,27 @@ namespace iSpeak.Controllers
                                                 <th>Lesson</th>
                                                 <th>Student</th>
                                                 <th>Tutor</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>";
+
+            string status = "";
+            if (data.IsScheduleChange)
+            {
+                status += "<span class='badge badge-info d-block'>Change Schedule</span>";
+            }
+            if (data.IsWaiveTutorFee)
+            {
+                status += "<span class='badge badge-danger d-block'>Waive Tutor Fee</span>";
+            }
+
             message += @"<tr>
                             <td>" + string.Format("{0:yyyy/MM/dd HH:mm}", data.Timestamp) + @"</td>
                             <td>" + lesson + @"</td>
                             <td>" + student + @"</td>
                             <td>" + tutor + @"</td>
+                            <td>" + status + @"</td>
                         </tr>";
             message += "</tbody></table></div><br />";
             message += @"<div class='row'>
@@ -266,6 +279,7 @@ namespace iSpeak.Controllers
                 ViewBag.TanggalUtc = string.Format("{0:yyyy/MM/dd HH:mm}", DateTime.UtcNow);
 
                 ViewBag.IsShowHourlyRate = p.IsGranted(User.Identity.Name, "lessonsessions_showhourlyrate");
+                ViewBag.IsShowTravelCost = p.IsGranted(User.Identity.Name, "lessonsessions_showtravelcost");
                 ViewBag.Cancel = p.IsGranted(User.Identity.Name, "lessonsessions_cancel");
                 ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View();
@@ -323,6 +337,57 @@ namespace iSpeak.Controllers
             {
                 var hourly_rate = db.HourlyRates.Where(x => x.UserAccounts_Id == lessonSessionsModels.Tutor_UserAccounts_Id).ToList();
                 Guid ppi_id = Guid.NewGuid();
+                int tutor_travel_cost = 0;
+                
+                #region Lesson Sessions Add
+                List<LessonSessionsDetails> details = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
+                foreach (var item in details)
+                {
+                    var sale_invoice_item = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault();
+                    LessonSessionsModels model = new LessonSessionsModels
+                    {
+                        Id = Guid.NewGuid(),
+                        Branches_Id = lessonSessionsModels.Branches_Id.Value,
+                        Timestamp = lessonSessionsModels.Timestamp, //TimeZoneInfo.ConvertTimeToUtc(lessonSessionsModels.Timestamp),
+                        SaleInvoiceItems_Id = item.sale_invoice_item_id,
+                        SessionHours = lessonSessionsModels.SessionHours,
+                        Review = item.review, //lessonSessionsModels.Review;
+                        InternalNotes = item.internal_notes, //lessonSessionsModels.InternalNotes;
+                        Deleted = false,
+                        Tutor_UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id,
+                        TravelCost = ChangeSchedule ? 0 : (int)Math.Ceiling((sale_invoice_item.TravelCost / sale_invoice_item.SessionHours.Value) * lessonSessionsModels.SessionHours),
+                        TutorTravelCost = ChangeSchedule ? 0 : (int)Math.Ceiling((sale_invoice_item.TutorTravelCost / sale_invoice_item.SessionHours.Value) * lessonSessionsModels.SessionHours),
+                        Adjustment = 0,
+                        PayrollPaymentItems_Id = ChangeSchedule ? (Guid?)null : ppi_id,
+                        IsScheduleChange = ChangeSchedule,
+                        IsWaiveTutorFee = Waive
+                    };
+
+                    if (hourly_rate.Count == 0)
+                    {
+                        model.HourlyRates_Rate = 0; //this tutor not found in hourly rate
+                    }
+                    else
+                    {
+                        foreach (var subitem in hourly_rate)
+                        {
+                            model.HourlyRates_Rate = subitem.Rate / details.Count; //use tutor rate with null package
+                            if (subitem.LessonPackages_Id == sale_invoice_item.LessonPackages_Id.Value) //found tutor with exact package
+                            {
+                                model.HourlyRates_Rate = subitem.Rate / details.Count;
+                                break;
+                            }
+                        }
+                    }
+                    db.LessonSessions.Add(model);
+
+                    sale_invoice_item.SessionHours_Remaining = sale_invoice_item.SessionHours_Remaining.Value - lessonSessionsModels.SessionHours;
+                    db.Entry(sale_invoice_item).State = EntityState.Modified;
+
+                    tutor_travel_cost = model.TutorTravelCost;
+                }
+                #endregion
+
                 if (ChangeSchedule)
                 {
                     lessonSessionsModels.SessionHours = 0; //Change Schedule checked, set hours = 0
@@ -358,55 +423,11 @@ namespace iSpeak.Controllers
 
                     if (Waive) { payrollPaymentItemsModels.Hour = 0; } //if Waives Tutor Fee checked, Payment Hour set to 0
 
-                    payrollPaymentItemsModels.Amount = payrollPaymentItemsModels.Hour * payrollPaymentItemsModels.HourlyRate;
+                    payrollPaymentItemsModels.TutorTravelCost = tutor_travel_cost;
+                    payrollPaymentItemsModels.Amount = (payrollPaymentItemsModels.Hour * payrollPaymentItemsModels.HourlyRate) + tutor_travel_cost;
                     db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
                     #endregion
                 }
-                #region Lesson Sessions Add
-                List<LessonSessionsDetails> details = JsonConvert.DeserializeObject<List<LessonSessionsDetails>>(Items);
-                foreach (var item in details)
-                {
-                    var sale_invoice_item = db.SaleInvoiceItems.Where(x => x.Id == item.sale_invoice_item_id).FirstOrDefault();
-
-                    LessonSessionsModels model = new LessonSessionsModels
-                    {
-                        Id = Guid.NewGuid(),
-                        Branches_Id = lessonSessionsModels.Branches_Id.Value,
-                        Timestamp = lessonSessionsModels.Timestamp, //TimeZoneInfo.ConvertTimeToUtc(lessonSessionsModels.Timestamp),
-                        SaleInvoiceItems_Id = item.sale_invoice_item_id,
-                        SessionHours = lessonSessionsModels.SessionHours,
-                        Review = item.review, //lessonSessionsModels.Review;
-                        InternalNotes = item.internal_notes, //lessonSessionsModels.InternalNotes;
-                        Deleted = false,
-                        Tutor_UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id,
-                        TravelCost = ChangeSchedule ? 0 : sale_invoice_item.TravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
-                        TutorTravelCost = ChangeSchedule ? 0 : sale_invoice_item.TutorTravelCost / (int)Math.Ceiling(sale_invoice_item.SessionHours.Value * lessonSessionsModels.SessionHours),
-                        Adjustment = 0,
-                        PayrollPaymentItems_Id = ChangeSchedule ? (Guid?)null : ppi_id
-                    };
-
-                    if (hourly_rate.Count == 0)
-                    {
-                        model.HourlyRates_Rate = 0; //this tutor not found in hourly rate
-                    }
-                    else
-                    {
-                        foreach (var subitem in hourly_rate)
-                        {
-                            model.HourlyRates_Rate = subitem.Rate / details.Count; //use tutor rate with null package
-                            if (subitem.LessonPackages_Id == sale_invoice_item.LessonPackages_Id.Value) //found tutor with exact package
-                            {
-                                model.HourlyRates_Rate = subitem.Rate / details.Count;
-                                break;
-                            }
-                        }
-                    }
-                    db.LessonSessions.Add(model);
-
-                    sale_invoice_item.SessionHours_Remaining = sale_invoice_item.SessionHours_Remaining.Value - lessonSessionsModels.SessionHours;
-                    db.Entry(sale_invoice_item).State = EntityState.Modified;
-                }
-                #endregion
 
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -472,6 +493,15 @@ namespace iSpeak.Controllers
                 current_data.Review = lessonSessionsModels.Review;
                 current_data.InternalNotes = lessonSessionsModels.InternalNotes;
                 db.Entry(current_data).State = EntityState.Modified;
+
+                if (current_data.PayrollPaymentItems_Id.HasValue)
+                {
+                    var ppi = await db.PayrollPaymentItems.FindAsync(current_data.PayrollPaymentItems_Id);
+                    ppi.HourlyRate = lessonSessionsModels.HourlyRates_Rate;
+                    ppi.Amount = (ppi.Hour * lessonSessionsModels.HourlyRates_Rate) + ppi.TutorTravelCost;
+                    db.Entry(ppi).State = EntityState.Modified;
+                }
+
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }

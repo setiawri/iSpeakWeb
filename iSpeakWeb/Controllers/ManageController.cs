@@ -57,7 +57,9 @@ namespace iSpeak.Controllers
             {
                 await UserManager.RemovePasswordAsync(user_id);
             }
-            var result = await UserManager.AddPasswordAsync(user_id, "qwerty");
+            iSpeakContext db = new iSpeakContext();
+            var password_for_reset = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
+            var result = await UserManager.AddPasswordAsync(user_id, password_for_reset.Value_String);
             if (result.Succeeded)
             {
                 return Json(new { Error = "" });

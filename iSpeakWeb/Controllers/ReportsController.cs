@@ -128,7 +128,7 @@ namespace iSpeak.Controllers
                         Name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname,
                         TotalHours = string.Format("{0:N2}", tot_hours),
                         TotalPayable = string.Format("{0:N2}", tot_payable),
-                        Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
+                        Details = "<a href='javascript:void(0)' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
                     });
                 }
                 else
@@ -188,7 +188,8 @@ namespace iSpeak.Controllers
                     Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", payroll.LessonSession.Select(x => x.Timestamp).FirstOrDefault()), //string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(payroll.LessonSession.Select(x => x.Timestamp).FirstOrDefault(), TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                     Description = students,
                     SessionHours = string.Format("{0:N2}", ppi.Hour),
-                    HourlyRate = string.Format("{0:N2}", ppi.HourlyRate),
+                    HourlyRate = ppi.PayrollPayments_Id == null ? "<a href='javascript:void(0)' data-toggle='modal' data-target='#modal_edit' onclick='EditPayrate(\"" + payroll.PayrollPaymentItems_Id.Value + "\",\"" + string.Format("{0:N2}", ppi.Hour) + "\",\"" + string.Format("{0:N2}", ppi.HourlyRate) + "\",\"" + string.Format("{0:N0}", ppi.TutorTravelCost) + "\")'>" + string.Format("{0:N2}", ppi.HourlyRate) + "</a>" : string.Format("{0:N2}", ppi.HourlyRate),
+                    TravelCost = string.Format("{0:N0}", ppi.TutorTravelCost),
                     Amount = string.Format("{0:N0}", ppi.Amount),
                     Paid = ppi.PayrollPayments_Id == null ? "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>" : "<span class='text-primary'><i class='icon-checkmark'></i></span>"
                 });
@@ -209,6 +210,7 @@ namespace iSpeak.Controllers
                     Description = payroll.Description,
                     SessionHours = string.Empty,
                     HourlyRate = string.Empty,
+                    TravelCost = string.Empty,
                     Amount = string.Format("{0:N0}", payroll.Amount),
                     Paid = payroll.PayrollPayments_Id == null ? "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>" : "<span class='text-primary'><i class='icon-checkmark'></i></span>"
                 });
@@ -243,6 +245,32 @@ namespace iSpeak.Controllers
                 description,
                 amount = string.Format("{0:N0}", payrollPaymentItemsModels.Amount),
                 total = string.Format("{0:N0}", payroll_total + payrollPaymentItemsModels.Amount),
+                paid = "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>"
+            }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region EditPayrate
+        public async Task<JsonResult> EditPayrate(Guid id, decimal hour, decimal rate, int travel, decimal payroll_total)
+        {
+            var ppi = await db.PayrollPaymentItems.FindAsync(id);
+            decimal amount_before = ppi.Amount;
+            ppi.Hour = hour;
+            ppi.HourlyRate = rate;
+            ppi.TutorTravelCost = travel;
+            ppi.Amount = (hour * rate) + travel;
+            db.Entry(ppi).State = EntityState.Modified;
+            
+            await db.SaveChangesAsync();
+            return Json(new
+            {
+                status = "200",
+                timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", ppi.Timestamp),
+                description = ppi.Description,
+                session_hour = string.Format("{0:N2}", ppi.Hour),
+                hourly_rate = string.Format("{0:N2}", ppi.HourlyRate),
+                tutor_travel = string.Format("{0:N0}", ppi.TutorTravelCost),
+                amount = string.Format("{0:N0}", ppi.Amount),
+                total = string.Format("{0:N0}", payroll_total - amount_before + ppi.Amount),
                 paid = "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>"
             }, JsonRequestBehavior.AllowGet);
         }

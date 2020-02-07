@@ -10,11 +10,22 @@ namespace iSpeak.Models
     {
         [Display(Name = "Auto Entry for Cash Payments")]
         public Guid AutoEntryForCashPayments { get; set; }
+        public string AutoEntryForCashPayments_Notes { get; set; }
+
         [Display(Name = "User Set Roles Access when Disabled shows only this role")]
         public Guid UserSetRoleAllowed { get; set; }
+        public string UserSetRoleAllowed_Notes { get; set; }
+
         [Display(Name = "Role Access for Reminders")]
         public List<string> RoleAccessForReminders { get; set; }
+        public string RoleAccessForReminders_Notes { get; set; }
+
         [Display(Name = "Full Access for Tutor Schedules")]
         public List<string> FullAccessForTutorSchedules { get; set; }
+        public string FullAccessForTutorSchedules_Notes { get; set; }
+
+        [Display(Name = "Reset Password")]
+        public string ResetPassword { get; set; }
+        public string ResetPassword_Notes { get; set; }
     }
 }
