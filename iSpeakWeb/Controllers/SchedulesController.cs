@@ -313,26 +313,45 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region STUDENT
-        public async Task<JsonResult> GetStudentSchedule(string student_id)
+        public async Task<JsonResult> GetStudentSchedule(string student_id, string tutor_id)
         {
-            var items = await (from tss in db.TutorStudentSchedules
-                               join s in db.User on tss.Student_UserAccounts_Id equals s.Id
-                               join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
-                               join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
-                               where tss.Student_UserAccounts_Id == student_id
-                               orderby tss.DayOfWeek, tss.StartTime
-                               select new TutorStudentSchedulesViewModels
-                               {
-                                   Id = tss.Id,
-                                   Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
-                                   Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
-                                   DayOfWeek = tss.DayOfWeek,
-                                   StartTime = tss.StartTime,
-                                   EndTime = tss.EndTime,
-                                   Invoice = sii.Description,
-                                   IsActive = tss.IsActive,
-                                   Notes = tss.Notes
-                               }).ToListAsync();
+            var items = string.IsNullOrEmpty(tutor_id)
+                ? await (from tss in db.TutorStudentSchedules
+                         join s in db.User on tss.Student_UserAccounts_Id equals s.Id
+                         join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
+                         join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
+                         where tss.Student_UserAccounts_Id == student_id
+                         orderby tss.DayOfWeek, tss.StartTime
+                         select new TutorStudentSchedulesViewModels
+                         {
+                             Id = tss.Id,
+                             Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
+                             Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                             DayOfWeek = tss.DayOfWeek,
+                             StartTime = tss.StartTime,
+                             EndTime = tss.EndTime,
+                             Invoice = sii.Description,
+                             IsActive = tss.IsActive,
+                             Notes = tss.Notes
+                         }).ToListAsync()
+                : await (from tss in db.TutorStudentSchedules
+                         join s in db.User on tss.Student_UserAccounts_Id equals s.Id
+                         join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
+                         join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
+                         where tss.Student_UserAccounts_Id == student_id && tss.Tutor_UserAccounts_Id == tutor_id
+                         orderby tss.DayOfWeek, tss.StartTime
+                         select new TutorStudentSchedulesViewModels
+                         {
+                             Id = tss.Id,
+                             Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
+                             Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                             DayOfWeek = tss.DayOfWeek,
+                             StartTime = tss.StartTime,
+                             EndTime = tss.EndTime,
+                             Invoice = sii.Description,
+                             IsActive = tss.IsActive,
+                             Notes = tss.Notes
+                         }).ToListAsync();
 
             string content = "";
             foreach (var item in items)
@@ -350,29 +369,47 @@ namespace iSpeak.Controllers
             return Json(new { body = content }, JsonRequestBehavior.AllowGet);
         }
 
-        public async Task<ActionResult> StudentIndex()
+        public async Task<ActionResult> StudentIndex(string tutorid, int? dow)
         {
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
-                var list = await (from tss in db.TutorStudentSchedules
-                                  join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
-                                  join s in db.User on tss.Student_UserAccounts_Id equals s.Id
-                                  join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
-                                  select new TutorStudentSchedulesViewModels
-                                  {
-                                      Id = tss.Id,
-                                      Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
-                                      Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
-                                      DayOfWeek = tss.DayOfWeek,
-                                      StartTime = tss.StartTime,
-                                      EndTime = tss.EndTime,
-                                      Invoice = sii.Description,
-                                      IsActive = tss.IsActive,
-                                      Notes = tss.Notes
-                                  }).ToListAsync();
+                var list = string.IsNullOrEmpty(tutorid)
+                    ? await (from tss in db.TutorStudentSchedules
+                             join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
+                             join s in db.User on tss.Student_UserAccounts_Id equals s.Id
+                             join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
+                             select new TutorStudentSchedulesViewModels
+                             {
+                                 Id = tss.Id,
+                                 Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
+                                 Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                                 DayOfWeek = tss.DayOfWeek,
+                                 StartTime = tss.StartTime,
+                                 EndTime = tss.EndTime,
+                                 Invoice = sii.Description,
+                                 IsActive = tss.IsActive,
+                                 Notes = tss.Notes
+                             }).ToListAsync()
+                    : await (from tss in db.TutorStudentSchedules
+                             join t in db.User on tss.Tutor_UserAccounts_Id equals t.Id
+                             join s in db.User on tss.Student_UserAccounts_Id equals s.Id
+                             join sii in db.SaleInvoiceItems on tss.InvoiceItems_Id equals sii.Id
+                             where tss.Tutor_UserAccounts_Id == tutorid && (int)tss.DayOfWeek == dow
+                             select new TutorStudentSchedulesViewModels
+                             {
+                                 Id = tss.Id,
+                                 Tutor = t.Firstname + " " + t.Middlename + " " + t.Lastname,
+                                 Student = s.Firstname + " " + s.Middlename + " " + s.Lastname,
+                                 DayOfWeek = tss.DayOfWeek,
+                                 StartTime = tss.StartTime,
+                                 EndTime = tss.EndTime,
+                                 Invoice = sii.Description,
+                                 IsActive = tss.IsActive,
+                                 Notes = tss.Notes
+                             }).ToListAsync();
 
                 //ViewBag.Log = p.IsGranted(User.Identity.Name, "logs_view");
                 return View(list);
@@ -677,11 +714,11 @@ namespace iSpeak.Controllers
                     {
                         if (list_booked.Contains(t))
                         {
-                            table_html += "<td><span class='badge badge-danger d-block'>Booked</span></td>";
+                            table_html += "<td><a target='_blank' href='" + Url.Action("StudentIndex", "Schedules", new { dow = (int)dow, tutorid = item.u.Id }) + "'><span class='badge badge-danger d-block'>Booked</span></a></td>";
                         }
                         else if (list_expired.Contains(t))
                         {
-                            table_html += "<td><span class='badge bg-orange d-block'>Expired</span></td>";
+                            table_html += "<td><a target='_blank' href='" + Url.Action("StudentIndex", "Schedules", new { dow = (int)dow, tutorid = item.u.Id }) + "'><span class='badge bg-orange d-block'>Expired</span></a></td>";
                         }
                         else
                         {

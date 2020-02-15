@@ -151,7 +151,8 @@
                 type: "POST",
                 url: '@Url.Action("GetStudentSchedule", "Schedules")',
                 data: {
-                    student_id: $('#Student_UserAccounts_Id').val()
+                    student_id: $('#Student_UserAccounts_Id').val(),
+                    tutor_id: $('#Tutor_UserAccounts_Id').val()
                 },
                 async: false,
                 error: function (result) {
@@ -244,6 +245,10 @@
         });
 
         $('#Student_UserAccounts_Id').change(function () {
+            GetStudentSchedule();
+        });
+
+        $('#Tutor_UserAccounts_Id').change(function () {
             GetStudentSchedule();
         });
 

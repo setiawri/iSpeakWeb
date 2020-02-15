@@ -217,7 +217,7 @@
             {
                 data: 'Action', name: 'Action', render: function (data, type, row) {
                     var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '/Print&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.No + '" target="_blank">Log</a>';
-                    return '<a href="@Url.Content("~")' + 'Payments/Print/' + row.Id + '">Print</a>' + link_log;
+                    return '<a href="@Url.Content("~")' + 'Payments/Print/' + row.Id + '" target="_blank">Print</a>' + link_log;
                 }
             },
         ],

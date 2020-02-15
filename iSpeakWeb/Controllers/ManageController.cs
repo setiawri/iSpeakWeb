@@ -62,6 +62,19 @@ namespace iSpeak.Controllers
             var result = await UserManager.AddPasswordAsync(user_id, password_for_reset.Value_String);
             if (result.Succeeded)
             {
+                LogsModels logsModels = new LogsModels
+                {
+                    Id = Guid.NewGuid(),
+                    Timestamp = DateTime.UtcNow,
+                    TableName = "AspNetUsers",
+                    RefId = new Guid(user_id),
+                    Action = "Modified",
+                    ColumnName = "Password",
+                    Description = "Reset Password",
+                    UserAccounts_Id = User.Identity.GetUserId()
+                };
+                db.Logs.Add(logsModels);
+                await db.SaveChangesAsync();
                 return Json(new { Error = "" });
             }
             return Json(new { Error = "Error" });
