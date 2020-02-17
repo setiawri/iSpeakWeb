@@ -1,0 +1,26 @@
+﻿
+=======================
+APPROVAL & CANCELLATION
+=======================
+
+- Invoices
+	> bisa approve hanya kalau sudah completed payment nya. Aman, karena kita cuma mau kontrol payment yang sudah diterima utk menghindari korupsi.
+	> hanya bisa cancel kalau semua payments sudah di cancel
+
+- Payments
+	> hanya bisa cancel kalau semua lesson sessions sudah di cancel
+
+- Lesson Sessions
+	> tidak perlu approval karena kalau ada masalah dengan payroll guru, nanti di telusuri saat guru complain kekurangan pembayaran
+****** CEK ******* kalau guru sudah dibayar utk sesi ini, tidak bisa lagi di cancel? atau di payroll guru ditandai kalau di cancel.
+
+- Petty Cash
+
+===============
+LESSON SESSIONS
+===============
+- normal (tanpa change schedule dan tanpa waive fee): data ke insert di table lessonsessions dan payrollpaymentitems
+- change schedule: data ke insert hanya di table lessonsessions (hours 0 => tidak mengurangi available hours), tutor fee = 0
+- waive fee: data ke insert di table lessonsessions (hours tidak 0 => mengurangi available hours, tapi di payroll jadi 0) 
+	dan payrollpaymentitems (nilai amount payroll pasti 0 => hours dibuat 0)
+

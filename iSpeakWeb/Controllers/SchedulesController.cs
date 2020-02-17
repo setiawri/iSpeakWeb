@@ -390,6 +390,7 @@ namespace iSpeak.Controllers
                                  StartTime = tss.StartTime,
                                  EndTime = tss.EndTime,
                                  Invoice = sii.Description,
+                                 RemainingHours = (decimal)sii.SessionHours_Remaining,
                                  IsActive = tss.IsActive,
                                  Notes = tss.Notes
                              }).ToListAsync()
@@ -407,6 +408,7 @@ namespace iSpeak.Controllers
                                  StartTime = tss.StartTime,
                                  EndTime = tss.EndTime,
                                  Invoice = sii.Description,
+                                 RemainingHours = (decimal)sii.SessionHours_Remaining,
                                  IsActive = tss.IsActive,
                                  Notes = tss.Notes
                              }).ToListAsync();

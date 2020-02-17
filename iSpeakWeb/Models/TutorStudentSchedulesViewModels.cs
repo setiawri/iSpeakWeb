@@ -21,6 +21,8 @@ namespace iSpeak.Models
         public DateTime EndTime { get; set; }
         [Display(Name = "Lesson")]
         public string Invoice { get; set; }
+        [Display(Name = "Remaining")]
+        public decimal RemainingHours { get; set; }
         [Display(Name = "Status")]
         public bool IsActive { get; set; }
         public string Notes { get; set; }
