@@ -18,14 +18,43 @@ namespace iSpeak.Controllers.API
         [Route("api/session")]
         public HttpResponseMessage Sessions(CommonRequestModels model)
         {
-            var sessions = (from ls in db.LessonSessions
-                            join t in db.User on ls.Tutor_UserAccounts_Id equals t.Id
-                            join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                            join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                            join s in db.User on si.Customer_UserAccounts_Id equals s.Id
-                            join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                            where s.UserName == model.Username
-                            select new { ls, t, sii, si, s, lp }).ToList();
+            var roles = (from u in db.User
+                         join ur in db.UserRole on u.Id equals ur.UserId
+                         join r in db.Role on ur.RoleId equals r.Id
+                         where u.UserName == model.Username
+                         select new { u, r }).ToList();
+            string role = "";
+            if (roles.Count == 1)
+            {
+                foreach(var r in roles)
+                {
+                    if (r.r.Name.ToLower() == "student" || r.r.Name.ToLower() == "tutor")
+                    {
+                        role = r.r.Name;
+                    }
+                }
+            }
+
+            var sessions =
+                (role.ToLower() == "student")
+                ? (from ls in db.LessonSessions
+                   join t in db.User on ls.Tutor_UserAccounts_Id equals t.Id
+                   join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                   join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                   join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                   join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                   where s.UserName == model.Username
+                   select new { ls, t, sii, si, s, lp }).ToList()
+                : (role.ToLower() == "tutor")
+                    ? (from ls in db.LessonSessions
+                       join t in db.User on ls.Tutor_UserAccounts_Id equals t.Id
+                       join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                       join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                       join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                       join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                       where t.UserName == model.Username
+                       select new { ls, t, sii, si, s, lp }).ToList()
+                   : null;
             List<SessionApiModels> list = new List<SessionApiModels>();
             if (sessions.Count > 0)
             {
@@ -38,6 +67,7 @@ namespace iSpeak.Controllers.API
                         Lesson = session.lp.Name,
                         Hour = session.ls.SessionHours,
                         Tutor = session.t.Firstname + " " + session.t.Middlename + " " + session.t.Lastname,
+                        Student = session.s.Firstname + " " + session.s.Middlename + " " + session.s.Lastname,
                         Review = session.ls.Review
                     });
                 }

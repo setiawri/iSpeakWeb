@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Return")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.ReturnCreate)
+                {
+                    <a href="@Url.Action("Create", "Return")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -36,30 +39,30 @@
                         </thead>
                         <tbody>
                             @*@foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.No)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Notes)</td>
-                                    <td>
-                                        @if (item.Approved)
-                                        {
-                                            <a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id')">Approved</span></a>
-                                        }
-                                        else
-                                        {
-                                            <a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve('@item.Id')">None</span></a>
-                                        }
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" onclick="View_Item('@item.Id', '@item.No')">View</a>
-                                        @if (ViewBag.Log == true)
-                                        {
-                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.No }, new { target = "_blank" })
-                                        }
-                                    </td>
-                                </tr>
-                            }*@
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                            <td>@Html.DisplayFor(modelItem => item.No)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                            <td>
+                                @if (item.Approved)
+                                {
+                                    <a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id')">Approved</span></a>
+                                }
+                                else
+                                {
+                                    <a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve('@item.Id')">None</span></a>
+                                }
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" onclick="View_Item('@item.Id', '@item.No')">View</a>
+                                @if (ViewBag.Log == true)
+                                {
+                                    @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.No }, new { target = "_blank" })
+                                }
+                            </td>
+                        </tr>
+                    }*@
                         </tbody>
                     </table>
                 </div>

@@ -736,8 +736,14 @@ namespace iSpeak.Controllers
 
         public ActionResult SendEmails()
         {
-            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View();
+            }
         }
 
         [HttpPost]

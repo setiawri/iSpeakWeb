@@ -22,8 +22,14 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Inventory")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
-                <a href="@Url.Action("Stock", "Inventory")" class="btn btn-sm btn-primary">Stock On Hand <i class="icon-bookmark ml-2"></i></a>
+                @if (ViewBag.InventoryCreate)
+                {
+                    <a href="@Url.Action("Create", "Inventory")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
+                @if (ViewBag.InventoryStock)
+                {
+                    <a href="@Url.Action("Stock", "Inventory")" class="btn btn-sm btn-primary">Stock On Hand <i class="icon-bookmark ml-2"></i></a>
+                }
                 @*<a href="#" class="btn btn-sm btn-primary" onclick="View_SOH()">Stock On Hand <i class="icon-bookmark ml-2"></i></a>*@
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -51,8 +57,11 @@
                                     <td>@Html.DisplayFor(modelItem => item.Unit)</td>
                                     <td>@Html.DisplayFor(modelItem => item.BuyPrice)</td>
                                     <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
                                         <a href="javascript:void(0)" onclick="View_Info('@item.Id', '@item.BuyQty')">Info</a>
+                                        @if (ViewBag.InventoryEdit)
+                                        {
+                                            @:| @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        }
                                         @if (ViewBag.Log == true)
                                         {
                                             @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Product }, new { target = "_blank" })

@@ -135,10 +135,19 @@
             //minimumInputLength: 2
         });
 
-        var $newOption = $("<option selected='selected'></option>").val('@Model.Tutor_UserAccounts_Id').text('@ViewBag.TutorName');
-        $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
-
         $('#StartTime').val('@string.Format("{0:HH:mm}", Model.StartTime)');
         $('#EndTime').val('@string.Format("{0:HH:mm}", Model.EndTime)');
+        
+        if ('@ViewBag.FullAccess' == 'False') {
+            if ('@ViewBag.Error' == '') {
+                var $newOption = $("<option selected='selected'></option>").val('@ViewBag.LoginId').text('@ViewBag.LoginFullName');
+                $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
+            }
+            document.getElementById('Tutor_UserAccounts_Id').disabled = true;
+        }
+        else {
+            var $newOption = $("<option selected='selected'></option>").val('@Model.Tutor_UserAccounts_Id').text('@ViewBag.TutorName');
+            $("#Tutor_UserAccounts_Id").append($newOption).trigger('change');
+        }
     });
 </script>

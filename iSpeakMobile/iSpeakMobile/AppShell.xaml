@@ -12,7 +12,7 @@
         <views:HeaderView />
     </Shell.FlyoutHeader>
 
-    <FlyoutItem Route="ispeak" Title="iSpeak" Shell.TabBarIsVisible="True" FlyoutDisplayOptions="AsMultipleItems">
+    <FlyoutItem x:Name="MainMenu" Route="ispeak" Title="iSpeak" Shell.TabBarIsVisible="True" FlyoutDisplayOptions="AsMultipleItems">
         <ShellContent Route="home" Title="Home" ContentTemplate="{DataTemplate views:HomePage}">
             <ShellContent.Icon>
                 <FontImageSource

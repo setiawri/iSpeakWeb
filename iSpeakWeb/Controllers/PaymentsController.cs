@@ -45,69 +45,80 @@ namespace iSpeak.Controllers
         #region Get Data
         public async Task<JsonResult> GetData()
         {
-            Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+            var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
             List<PaymentsIndexModels> list = new List<PaymentsIndexModels>();
-            foreach (var item in db.Payments.ToList())
+            foreach (var item in await db.Payments.ToListAsync())
             {
-                var check_session = await(from pi in db.PaymentItems
-                                          join si in db.SaleInvoices on pi.ReferenceId equals si.Id
-                                          join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                                          where pi.Payments_Id == item.Id && sii.SessionHours > sii.SessionHours_Remaining
-                                          select new { pi, si, sii }).ToListAsync();
-
-                PaymentsIndexModels pim = new PaymentsIndexModels
+                var results = await (from pi in db.PaymentItems
+                                     join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                     join b in db.Branches on si.Branches_Id equals b.Id
+                                     where pi.Payments_Id == item.Id
+                                     select new { si, b }).FirstOrDefaultAsync();
+                if (user_login.Branches_Id == results.si.Branches_Id)
                 {
-                    Id = item.Id,
-                    No = item.No,
-                    Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
-                    CashAmount = item.CashAmount,
-                    DebitAmount = item.DebitAmount,
-                    ConsignmentAmount = item.ConsignmentAmount,
-                    Cancelled = item.Cancelled,
-                    Confirmed = item.Confirmed,
-                    Notes_Cancel = item.Notes_Cancel,
-                    HasSession = check_session.Count > 0 ? true : false
-                    //Action = item.Notes_Cancel
-                };
-                Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
-                Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
-                pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
-                if (branch_id == user_branch)
+
+                    var check_session = await (from pi in db.PaymentItems
+                                               join si in db.SaleInvoices on pi.ReferenceId equals si.Id
+                                               join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                               where pi.Payments_Id == item.Id && sii.SessionHours > sii.SessionHours_Remaining
+                                               select new { pi }).ToListAsync();
+
+                    PaymentsIndexModels pim = new PaymentsIndexModels
+                    {
+                        Id = item.Id,
+                        Branch = results.b.Name,
+                        No = item.No,
+                        Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(item.Timestamp, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
+                        CashAmount = item.CashAmount,
+                        DebitAmount = item.DebitAmount,
+                        ConsignmentAmount = item.ConsignmentAmount,
+                        Cancelled = item.Cancelled,
+                        Confirmed = item.Confirmed,
+                        Notes_Cancel = item.Notes_Cancel,
+                        HasSession = check_session.Count > 0 ? true : false
+                        //Action = item.Notes_Cancel
+                    };
                     list.Add(pim);
+                }
+                //Guid sales_invoice_id = db.PaymentItems.Where(x => x.Payments_Id == item.Id).FirstOrDefault().ReferenceId;
+                //Guid branch_id = db.SaleInvoices.Where(x => x.Id == sales_invoice_id).FirstOrDefault().Branches_Id;
+                //pim.Branch = db.Branches.Where(x => x.Id == branch_id).FirstOrDefault().Name;
+                //if (branch_id == user_branch)
+                //    list.Add(pim);
             }
 
-            int totalRows = list.Count;
+            //int totalRows = list.Count;
 
-            //Server Side Parameters
-            int start = Convert.ToInt32(Request["start"]);
-            int length = Convert.ToInt32(Request["length"]);
-            string searchValue = Request["search[value]"];
-            string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][name]"];
-            string sortDirection = Request["order[0][dir]"];
+            ////Server Side Parameters
+            //int start = Convert.ToInt32(Request["start"]);
+            //int length = Convert.ToInt32(Request["length"]);
+            //string searchValue = Request["search[value]"];
+            //string sortColumnName = Request["columns[" + Request["order[0][column]"] + "][name]"];
+            //string sortDirection = Request["order[0][dir]"];
 
-            //Filtering
-            if (!string.IsNullOrEmpty(searchValue))
-            {
-                list = list
-                    .Where(x => x.Branch.ToLower().Contains(searchValue.ToLower())
-                        || x.Timestamp.ToLower().Contains(searchValue.ToLower())
-                        || x.No.ToLower().Contains(searchValue.ToLower())
-                        || x.CashAmount.ToString().Contains(searchValue.ToLower())
-                        || x.DebitAmount.ToString().Contains(searchValue.ToLower())
-                        || x.ConsignmentAmount.ToString().Contains(searchValue.ToLower())
-                    ).ToList();
-            }
-            int totalRowsFiltered = list.Count;
+            ////Filtering
+            //if (!string.IsNullOrEmpty(searchValue))
+            //{
+            //    list = list
+            //        .Where(x => x.Branch.ToLower().Contains(searchValue.ToLower())
+            //            || x.Timestamp.ToLower().Contains(searchValue.ToLower())
+            //            || x.No.ToLower().Contains(searchValue.ToLower())
+            //            || x.CashAmount.ToString().Contains(searchValue.ToLower())
+            //            || x.DebitAmount.ToString().Contains(searchValue.ToLower())
+            //            || x.ConsignmentAmount.ToString().Contains(searchValue.ToLower())
+            //        ).ToList();
+            //}
+            //int totalRowsFiltered = list.Count;
 
-            //Sorting
-            list = list.OrderBy(sortColumnName + " " + sortDirection).ToList();
+            ////Sorting
+            //list = list.OrderBy(sortColumnName + " " + sortDirection).ToList();
 
-            //Paging
-            list = list.Skip(start).Take(length).ToList();
+            ////Paging
+            //list = list.Skip(start).Take(length).ToList();
 
-            return Json(new { data = list, draw = Request["draw"], recordsTotal = totalRows, recordsFiltered = totalRowsFiltered }, JsonRequestBehavior.AllowGet);
+            //return Json(new { data = list, draw = Request["draw"], recordsTotal = totalRows, recordsFiltered = totalRowsFiltered }, JsonRequestBehavior.AllowGet);
 
-            //return Json(new { data = list }, JsonRequestBehavior.AllowGet);
+            return Json(new { data = list }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Get Payment

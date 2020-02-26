@@ -9,6 +9,7 @@ namespace iSpeakMobile
 {
     public partial class AppShell : Xamarin.Forms.Shell
     {
+        private readonly Services.WebApiService webApiService = new Services.WebApiService();
         readonly Dictionary<string, Type> routes = new Dictionary<string, Type>();
         public Dictionary<string, Type> Routes { get { return routes; } }
 
@@ -29,6 +30,7 @@ namespace iSpeakMobile
         {
             InitializeComponent();
             RegisterRoutes();
+            MockUI();
             BindingContext = this;
         }
 
@@ -44,6 +46,15 @@ namespace iSpeakMobile
             foreach (var item in routes)
             {
                 Routing.RegisterRoute(item.Key, item.Value);
+            }
+        }
+
+        async void MockUI()
+        {
+            var user_login = await webApiService.UserLoginApi(Settings.LoginUser);
+            if (user_login.Role.ToLower() == "tutor")
+            {
+                MainMenu.Items.RemoveAt(1); //Remove Payment Menu
             }
         }
 

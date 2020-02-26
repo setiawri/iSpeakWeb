@@ -33,7 +33,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "LessonSessions")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.LessonSessionsCreate)
+                {
+                    <a href="@Url.Action("Create", "LessonSessions")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -44,12 +47,12 @@
                                 <th>@Html.DisplayNameFor(model => model.Tutor)</th>
                                 <th>@Html.DisplayNameFor(model => model.SessionHours)</th>
                                 @*@if (ViewBag.IsShowHourlyRate == true)
-                                {
-                                    <th>@Html.DisplayNameFor(model => model.HourlyRates_Rate)</th>
-                                }
-                                <th>@Html.DisplayNameFor(model => model.TravelCost)</th>
-                                <th>@Html.DisplayNameFor(model => model.TutorTravelCost)</th>
-                                <th>@Html.DisplayNameFor(model => model.Deleted)</th>*@
+                        {
+                            <th>@Html.DisplayNameFor(model => model.HourlyRates_Rate)</th>
+                        }
+                        <th>@Html.DisplayNameFor(model => model.TravelCost)</th>
+                        <th>@Html.DisplayNameFor(model => model.TutorTravelCost)</th>
+                        <th>@Html.DisplayNameFor(model => model.Deleted)</th>*@
                                 <th>Travel (For Tutor)</th>
                                 <th>Cancelled</th>
                                 <th>Action</th>
@@ -57,49 +60,49 @@
                         </thead>
                         <tbody>
                             @*@foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Lesson)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Student)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
+                            <td>@Html.DisplayFor(modelItem => item.SessionHours)</td>
+                            @if (ViewBag.IsShowHourlyRate)
                             {
-                                <tr>
-                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Lesson)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Student)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Tutor)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.SessionHours)</td>
-                                    @if (ViewBag.IsShowHourlyRate)
-                                    {
-                                        <td>@Html.DisplayFor(modelItem => item.HourlyRates_Rate)</td>
-                                    }
-                                    <td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
-                                    <td>
-                                        @if (item.Deleted == false)
-                                        {
-                                            <span class="badge badge-dark d-block">NO</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-danger d-block">YES</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (item.Deleted == false)
-                                        {
-                                            <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.Timestamp.ToString("yyyy/MM/dd HH:mm")', '@item.Lesson', '@item.Student', '@item.Tutor', '@item.SessionHours')">Cancel</span></a>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes_Cancel</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
-                                        @if (ViewBag.Log == true)
-                                        {
-                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Student }, null)
-                                        }
-                                    </td>
-                                </tr>
-                            }*@
+                                <td>@Html.DisplayFor(modelItem => item.HourlyRates_Rate)</td>
+                            }
+                            <td>@Html.DisplayFor(modelItem => item.TravelCost)</td>
+                            <td>@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
+                            <td>
+                                @if (item.Deleted == false)
+                                {
+                                    <span class="badge badge-dark d-block">NO</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-danger d-block">YES</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Deleted == false)
+                                {
+                                    <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.Timestamp.ToString("yyyy/MM/dd HH:mm")', '@item.Lesson', '@item.Student', '@item.Tutor', '@item.SessionHours')">Cancel</span></a>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes_Cancel</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" onclick="View('@item.Id', '@item.Lesson', '@item.Student', '@item.Tutor')">View</a> |
+                                @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                @if (ViewBag.Log == true)
+                                {
+                                    @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Student }, null)
+                                }
+                            </td>
+                        </tr>
+                    }*@
                         </tbody>
                     </table>
                 </div>
@@ -230,8 +233,9 @@
             },
             {
                 data: 'Action', name: 'Action', orderable: false, render: function (data, type, row) {
+                    var link_edit = '@ViewBag.LessonSessionsEdit' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'LessonSessions/Edit/' + row.Id + '" target="_blank">Edit</a>';
                     var link_log = '@ViewBag.Log' == 'False' ? '' : ' | <a href="' + '@Url.Content("~")' + 'Logs/Index/' + row.Id + '?ctrl=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&table=' + '@(this.ViewContext.RouteData.Values["controller"].ToString())' + '&header=' + row.Student + '" target="_blank">Log</a>';
-                    return '<a href="javascript:void(0)" onclick="View(' + "'" + row.Id + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ')">View</a> | <a href="' + '@Url.Content("~")' + 'LessonSessions/Edit/' + row.Id + '" target="_blank">Edit</a>' + link_log;
+                    return '<a href="javascript:void(0)" onclick="View(' + "'" + row.Id + "'" + ', ' + "'" + row.Lesson + "'" + ', ' + "'" + row.Student + "'" + ', ' + "'" + row.Tutor + "'" + ')">View</a>' + link_edit + link_log;
                 }
             },
         ],

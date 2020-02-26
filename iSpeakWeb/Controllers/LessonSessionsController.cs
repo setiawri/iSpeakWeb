@@ -21,32 +21,62 @@ namespace iSpeak.Controllers
         #region GetData
         public async Task<JsonResult> GetData()
         {
-            Guid user_branch = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Branches_Id;
+            var user_data = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault();
+
+            #region CHECK TUTOR ROLE
+            var roles = await (from u in db.User
+                               join ur in db.UserRole on u.Id equals ur.UserId
+                               join r in db.Role on ur.RoleId equals r.Id
+                               where u.UserName == User.Identity.Name
+                               select new { r }).ToListAsync();
+            bool isTutorOnly = false;
+            if (roles.Count == 1)
+            {
+                foreach (var role in roles)
+                {
+                    if (role.r.Name.ToLower() == "tutor") { isTutorOnly = true; }
+                }
+            }
+            #endregion
+            #region CHECK STUDENT ROLE
             var is_student = await (from u in db.User
                                     join ur in db.UserRole on u.Id equals ur.UserId
                                     join r in db.Role on ur.RoleId equals r.Id
                                     where r.Name.ToLower() == "student" && u.UserName == User.Identity.Name
                                     select new { u }).FirstOrDefaultAsync();
+            #endregion
 
             List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
 
-            var sessions = (is_student == null)
+            var sessions = (isTutorOnly)
+                //Tutor Only
                 ? await (from ls in db.LessonSessions
                          join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
                          join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                          join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
                          join s in db.User on si.Customer_UserAccounts_Id equals s.Id
                          join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                         where ls.Branches_Id == user_branch
+                         where ls.Branches_Id == user_data.Branches_Id && ls.Tutor_UserAccounts_Id == user_data.Id
                          select new { ls, u, sii, si, s, lp }).ToListAsync()
-                : await (from ls in db.LessonSessions
-                         join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
-                         join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                         join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                         join s in db.User on si.Customer_UserAccounts_Id equals s.Id
-                         join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
-                         where ls.Branches_Id == user_branch && s.UserName == User.Identity.Name
-                         select new { ls, u, sii, si, s, lp }).ToListAsync();
+                : (is_student != null)
+                    //Student
+                    ? await (from ls in db.LessonSessions
+                             join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                             join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                             join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                             join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                             join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                             where ls.Branches_Id == user_data.Branches_Id && s.UserName == User.Identity.Name
+                             select new { ls, u, sii, si, s, lp }).ToListAsync()
+                    //All
+                    : await (from ls in db.LessonSessions
+                             join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id
+                             join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                             join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                             join s in db.User on si.Customer_UserAccounts_Id equals s.Id
+                             join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
+                             where ls.Branches_Id == user_data.Branches_Id
+                             select new { ls, u, sii, si, s, lp }).ToListAsync();
 
             foreach (var session in sessions)
             {

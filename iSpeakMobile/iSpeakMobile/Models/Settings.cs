@@ -9,5 +9,6 @@ namespace iSpeakMobile.Models
         public static string LoginUser { get; set; }
         public static string AccessToken { get; set; }
         public static DateTime ExpirationToken { get; set; }
+        public static string RoleUser { get; set; }
     }
 }

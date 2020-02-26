@@ -261,8 +261,53 @@ namespace iSpeak.Controllers
                     return HttpNotFound();
                 }
 
+                #region CHECK FULL ACCESS
+                var setting_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+                List<string> role_for_tutor_schedule = new List<string>();
+                if (!string.IsNullOrEmpty(setting_fafts.Value_String))
+                {
+                    string[] ids = setting_fafts.Value_String.Split(',');
+                    foreach (var _id in ids)
+                    {
+                        role_for_tutor_schedule.Add(_id);
+                    }
+                }
+
+                var user_role = await (from u in db.User
+                                       join ur in db.UserRole on u.Id equals ur.UserId
+                                       join r in db.Role on ur.RoleId equals r.Id
+                                       where u.UserName == User.Identity.Name
+                                       select new { r }).ToListAsync();
+                bool isFullAccess = false;
+                if (role_for_tutor_schedule.Count > 0)
+                {
+                    foreach (var role in user_role)
+                    {
+                        if (isFullAccess) { break; }
+                        else
+                        {
+                            foreach (var a in role_for_tutor_schedule)
+                            {
+                                if (a == role.r.Id)
+                                {
+                                    isFullAccess = true; break;
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                if (!isFullAccess)
+                {
+                    var user_login = await db.User.Where(x => x.UserName.ToLower() == User.Identity.Name.ToLower()).FirstOrDefaultAsync();
+                    ViewBag.LoginId = user_login.Id;
+                    ViewBag.LoginFullName = user_login.Firstname + " " + user_login.Middlename + " " + user_login.Lastname;
+                }
+
                 var tutor = await db.User.FindAsync(tutorSchedulesModels.Tutor_UserAccounts_Id);
                 ViewBag.TutorName = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname;
+                ViewBag.FullAccess = isFullAccess;
                 return View(tutorSchedulesModels);
             }
         }
@@ -747,8 +792,14 @@ namespace iSpeak.Controllers
 
         public ActionResult Search()
         {
-            ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            return View();
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
+            {
+                ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                return View();
+            }
         }
     }
 }

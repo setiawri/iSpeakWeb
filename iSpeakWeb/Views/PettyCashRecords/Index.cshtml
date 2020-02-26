@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "PettyCashRecords")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.PettyCashRecordsCreate)
+                {
+                    <a href="@Url.Action("Create", "PettyCashRecords")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="row mt-2">
                     <div class="col-lg-2">
                         <div class="form-group">

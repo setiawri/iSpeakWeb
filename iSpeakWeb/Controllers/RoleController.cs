@@ -156,6 +156,7 @@ namespace iSpeak.Controllers
                              .Where(x => x.RoleId == id)
                          on m.WebMenuAccess equals a.WebMenuAccess into joined
                          from access in joined.DefaultIfEmpty()
+                         where m.ParentOrder > 0 // nav menu not loaded
                          orderby m.ParentOrder, m.MenuOrder
                          select new AccessViewModels
                          {

@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("StudentCreate", "Schedules")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.SchedulesStudentCreate)
+                {
+                    <a href="@Url.Action("StudentCreate", "Schedules")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -60,8 +63,14 @@
                                         }
                                     </td>
                                     <td>
-                                        @Html.ActionLink("Edit", "StudentEdit", new { id = item.Id }) |
-                                        <a href="javascript:void(0)" onclick="DeleteSchedule('@item.Id', '@item.Student', '@item.DayOfWeek', '@string.Format("{0:HH:mm}", item.StartTime)', '@string.Format("{0:HH:mm}", item.EndTime)')">Delete</a>
+                                        @if (ViewBag.SchedulesStudentEdit)
+                                        {
+                                            @Html.ActionLink("Edit", "StudentEdit", new { id = item.Id })
+                                        }
+                                        @if (ViewBag.SchedulesStudentDelete)
+                                        {
+                                            @:| <a href="javascript:void(0)" onclick="DeleteSchedule('@item.Id', '@item.Student', '@item.DayOfWeek', '@string.Format("{0:HH:mm}", item.StartTime)', '@string.Format("{0:HH:mm}", item.EndTime)')">Delete</a>
+                                        }
                                         @if (ViewBag.Log == true)
                                         {
                                             @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Student }, new { target = "_blank" })
@@ -87,7 +96,7 @@
         columnDefs: [{
             orderable: false,
             width: 120,
-            targets: [7]
+            targets: [9]
         }],
         dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
         language: {

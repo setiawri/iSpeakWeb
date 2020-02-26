@@ -220,6 +220,17 @@ namespace iSpeak.Controllers
             };
             db.Reminders.Add(remindersModels);
 
+            ActivityLogsModels activityLogsModels = new ActivityLogsModels
+            {
+                Id = Guid.NewGuid(),
+                Timestamp = DateTime.UtcNow,
+                TableName = "Reminders",
+                RefId = remindersModels.Id,
+                Description = "[New] " + description,
+                UserAccounts_Id = user_login.Id
+            };
+            db.ActivityLogs.Add(activityLogsModels);
+
             await db.SaveChangesAsync();
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }

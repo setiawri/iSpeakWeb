@@ -23,7 +23,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Register", "Account")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.AccountRegister)
+                {
+                    <a href="@Url.Action("Register", "Account")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="form-check mb-1" style="float: right">
                     @Html.DropDownList("listRole", ViewBag.listRole as SelectList, "All Roles", new { @class = "form-control select2" })
                 </div>
@@ -51,31 +54,34 @@
                                         {
                                             <span class="badge badge-flat border-danger text-danger-600">@role</span>
                                         }
-                                </td>
-                                <td>
-                                    @if (item.Active == true)
-                                    {
-                                        <span class="badge badge-primary d-block">Enabled</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-dark d-block">Disabled</span>
-                                    }
-                                </td>
-                                <td>
-                                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                                    @Html.ActionLink("Info", "Info", new { id = item.Id })
-                                    @if (ViewBag.Reset == true)
-                                    {
-                                        @:| <a href="javascript:void(0)" onclick="Reset('@item.Id')">Reset Password</a>
-                                    }
-                                    @if (ViewBag.Log == true)
-                                    {
-                                        @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = "AspNetUsers", header = item.Fullname }, new { target = "_blank" })
-                                    }
-                                </td>
-                            </tr>
-                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Active == true)
+                                        {
+                                            <span class="badge badge-primary d-block">Enabled</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-dark d-block">Disabled</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @Html.ActionLink("Info", "Info", new { id = item.Id })
+                                        @if (ViewBag.UserEdit)
+                                        {
+                                            @:| @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        }
+                                        @if (ViewBag.Reset == true)
+                                        {
+                                            @:| <a href="javascript:void(0)" onclick="Reset('@item.Id')">Reset Password</a>
+                                        }
+                                        @if (ViewBag.Log == true)
+                                        {
+                                            @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = "AspNetUsers", header = item.Fullname }, new { target = "_blank" })
+                                        }
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>

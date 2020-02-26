@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Files")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.FilesCreate)
+                {
+                    <a href="@Url.Action("Create", "Files")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -41,8 +44,11 @@
                                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
                                     <td><a href="@Url.Action("Download", "Files", new { id = item.Id })">@item.Filename</a></td>
                                     <td>
-                                        @Html.ActionLink("Update", "Update", new { id = item.Id }) |
-                                        <a href="#" onclick="View_Olders('@item.Description')">Olders</a>
+                                        <a href="javascript:void(0)" onclick="View_Olders('@item.Description')">Olders</a>
+                                        @if (ViewBag.FilesUpdate)
+                                        {
+                                            @:| @Html.ActionLink("Update", "Update", new { id = item.Id })
+                                        }
                                     </td>
                                 </tr>
                             }

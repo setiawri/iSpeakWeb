@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Role")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.RoleCreate)
+                {
+                    <a href="@Url.Action("Create", "Role")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -37,8 +40,14 @@
                                 <tr>
                                     <td>@Html.DisplayFor(modelItem => item.Name)</td>
                                     <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                                        @Html.ActionLink("Manage", "Manage", new { id = item.Id })
+                                        @if (ViewBag.RoleEdit)
+                                        {
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        }
+                                        @if (ViewBag.RoleManage)
+                                        {
+                                            @:| @Html.ActionLink("Manage", "Manage", new { id = item.Id })
+                                        }
                                         @if (ViewBag.Log == true)
                                         {
                                             @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = "AspNetRoles", header = item.Name }, new { target = "_blank" })

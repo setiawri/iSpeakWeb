@@ -11,7 +11,7 @@ namespace iSpeakMobile.Services
     public class WebApiService
     {
         private readonly string baseurl = "http://ispeakgroup.com/";
-        //private readonly string baseurl = "http://devkredit.amartahonda.com/";
+        //private readonly string baseurl = "https://soistio.com/";
 
         public async Task<TokenIdentity> LoginIdentityApi(string username, string password)
         {
@@ -101,6 +101,7 @@ namespace iSpeakMobile.Services
                         Lesson = r.Lesson,
                         Hour = r.Hour,
                         Tutor = r.Tutor,
+                        Student = r.Student,
                         Review = r.Review.Replace("\n", Environment.NewLine)
                     });
                 }

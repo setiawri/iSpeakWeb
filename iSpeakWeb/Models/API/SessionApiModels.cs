@@ -9,6 +9,7 @@ namespace iSpeak.Models.API
         public string Lesson { get; set; }
         public decimal Hour { get; set; }
         public string Tutor { get; set; }
+        public string Student { get; set; }
         public string Review { get; set; }
     }
 }

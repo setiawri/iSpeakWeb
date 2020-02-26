@@ -20,6 +20,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
@@ -64,11 +65,21 @@
                                 TextColor="{StaticResource TextColor}"
                                 FontFamily="{StaticResource Exo2RegularCondensed}"/>
                         <Label Grid.Column="0" Grid.Row="4" 
-                                Text="Review"
+                                Text="Student"
                                 FontSize="14"
                                 TextColor="{StaticResource TextColor}"
                                 FontFamily="{StaticResource Exo2RegularCondensed}"/>
                         <Label Grid.Column="1" Grid.Row="4" 
+                                Text="{Binding Student}"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                        <Label Grid.Column="0" Grid.Row="5" 
+                                Text="Review"
+                                FontSize="14"
+                                TextColor="{StaticResource TextColor}"
+                                FontFamily="{StaticResource Exo2RegularCondensed}"/>
+                        <Label Grid.Column="1" Grid.Row="5" 
                                 Text="{Binding Review}"
                                 FontSize="14"
                                 TextColor="{StaticResource TextColor}"

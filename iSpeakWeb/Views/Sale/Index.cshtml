@@ -32,8 +32,14 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success mb-1">Create Invoice <i class="icon-plus22 ml-2"></i></a>
-                <button type="button" class="btn btn-sm btn-primary mb-1" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
+                @if (ViewBag.SaleCreate)
+                {
+                    <a href="@Url.Action("Create", "Sale")" class="btn btn-sm btn-success mb-1">Create Invoice <i class="icon-plus22 ml-2"></i></a>
+                }
+                @if (ViewBag.PaymentsCreate)
+                {
+                    <button type="button" class="btn btn-sm btn-primary mb-1" id="btnCreate">Create Payment<i class="icon-plus22 ml-2"></i></button>
+                }
                 <div class="form-check mb-1" style="float: right">
                     @Html.DropDownList("listStatus", new List<SelectListItem>
                     {
@@ -44,11 +50,11 @@
                     }, new { @class = "form-control select2" })
                 </div>
                 @*<div class="form-check mb-1" style="float: right">
-                    <label class="form-check-label">
-                        <input type="checkbox" id="chkHide" class="check-styled-primary" data-fouc>
-                        Show Completed Payment
-                    </label>
-                </div>*@
+            <label class="form-check-label">
+                <input type="checkbox" id="chkHide" class="check-styled-primary" data-fouc>
+                Show Completed Payment
+            </label>
+        </div>*@
 
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -69,80 +75,80 @@
                         </thead>
                         <tbody id="data-body">
                             @*@foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        @if (item.Due > 0)
-                                        {
-                                            if (item.Cancelled == true)
-                                            {
-                                                <span class="text-danger"><i class="icon-cancel-square2"></i></span>
-                                            }
-                                            else
-                                            {
-                                                <input type="checkbox" id="@item.Id" class="check-styled" />
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="text-primary"><i class="icon-checkmark"></i></span>
-                                        }
-                                    </td>
-                                    <td>@Html.DisplayFor(modelItem => item.Branches)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.No)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Customer)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Amount)</td>
-                                    <td>@Html.DisplayFor(modelItem => item.Due)</td>
-                                    <td>
-                                        @if (item.Due > 0)
-                                        {
-                                            if (item.Cancelled == true)
-                                            {
-                                                <span class="badge badge-dark d-block">Cancelled</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge badge-warning d-block">Waiting Payment</span>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-primary d-block">Completed</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (item.Cancelled == false) //blm ada pembayaran (bisa cancel)
-                                        {
-                                            if (item.Amount == item.Due)
-                                            {
-                                                <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No')">Cancel</span></a>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (item.IsChecked)
-                                        {
-                                            <a href="#"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id', '@item.No')">Approved</span></a>
-                                        }
-                                        else
-                                        {
-                                            if (item.Due == 0)
-                                            {
-                                                <a href="#"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
-                                            }
-                                        }
-                                    </td>
-                                    <td>
-                                        <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> |
-                                        <a href="#" onclick="View_Log('@item.Id')">Log</a>
-                                    </td>
-                                </tr>
-                            }*@
+                    {
+                        <tr>
+                            <td>
+                                @if (item.Due > 0)
+                                {
+                                    if (item.Cancelled == true)
+                                    {
+                                        <span class="text-danger"><i class="icon-cancel-square2"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" id="@item.Id" class="check-styled" />
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-primary"><i class="icon-checkmark"></i></span>
+                                }
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.Branches)</td>
+                            <td>@Html.DisplayFor(modelItem => item.No)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Customer)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Amount)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Due)</td>
+                            <td>
+                                @if (item.Due > 0)
+                                {
+                                    if (item.Cancelled == true)
+                                    {
+                                        <span class="badge badge-dark d-block">Cancelled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning d-block">Waiting Payment</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge badge-primary d-block">Completed</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.Cancelled == false) //blm ada pembayaran (bisa cancel)
+                                {
+                                    if (item.Amount == item.Due)
+                                    {
+                                        <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No')">Cancel</span></a>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge badge-flat border-danger d-block text-danger-600">@item.Notes</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.IsChecked)
+                                {
+                                    <a href="#"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id', '@item.No')">Approved</span></a>
+                                }
+                                else
+                                {
+                                    if (item.Due == 0)
+                                    {
+                                        <a href="#"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <a href="#" onclick="View_Item('@item.Id', '@item.No')">View</a> |
+                                <a href="#" onclick="View_Log('@item.Id')">Log</a>
+                            </td>
+                        </tr>
+                    }*@
                         </tbody>
                     </table>
                 </div>

@@ -1,4 +1,5 @@
-﻿using iSpeak.Models;
+﻿using iSpeak.Common;
+using iSpeak.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -17,50 +18,56 @@ namespace iSpeak.Controllers
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            var settings_aefcp = await db.Settings.FindAsync(SettingsValue.GUID_AutoEntryForCashPayments);
-            var settings_usra = await db.Settings.FindAsync(SettingsValue.GUID_UserSetRoleAllowed);
-            var settings_rafr = await db.Settings.FindAsync(SettingsValue.GUID_RoleAccessForReminders);
-            var settings_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
-            var settings_resetpass = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
-
-            List<string> role_for_reminder = new List<string>();
-            if (!string.IsNullOrEmpty(settings_rafr.Value_String))
+            Permission p = new Permission();
+            bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
+            if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
+            else
             {
-                string[] ids = settings_rafr.Value_String.Split(',');
-                foreach (var id in ids)
+                var settings_aefcp = await db.Settings.FindAsync(SettingsValue.GUID_AutoEntryForCashPayments);
+                var settings_usra = await db.Settings.FindAsync(SettingsValue.GUID_UserSetRoleAllowed);
+                var settings_rafr = await db.Settings.FindAsync(SettingsValue.GUID_RoleAccessForReminders);
+                var settings_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+                var settings_resetpass = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
+
+                List<string> role_for_reminder = new List<string>();
+                if (!string.IsNullOrEmpty(settings_rafr.Value_String))
                 {
-                    role_for_reminder.Add(id);
+                    string[] ids = settings_rafr.Value_String.Split(',');
+                    foreach (var id in ids)
+                    {
+                        role_for_reminder.Add(id);
+                    }
                 }
-            }
 
-            List<string> role_for_tutor_schedule = new List<string>();
-            if (!string.IsNullOrEmpty(settings_fafts.Value_String))
-            {
-                string[] ids = settings_fafts.Value_String.Split(',');
-                foreach (var id in ids)
+                List<string> role_for_tutor_schedule = new List<string>();
+                if (!string.IsNullOrEmpty(settings_fafts.Value_String))
                 {
-                    role_for_tutor_schedule.Add(id);
+                    string[] ids = settings_fafts.Value_String.Split(',');
+                    foreach (var id in ids)
+                    {
+                        role_for_tutor_schedule.Add(id);
+                    }
                 }
+
+                SettingsViewModels settingsViewModels = new SettingsViewModels()
+                {
+                    AutoEntryForCashPayments = settings_aefcp.Value_Guid ?? Guid.Empty,
+                    AutoEntryForCashPayments_Notes = settings_aefcp.Notes,
+                    UserSetRoleAllowed = settings_usra.Value_Guid ?? Guid.Empty,
+                    UserSetRoleAllowed_Notes = settings_usra.Notes,
+                    RoleAccessForReminders = role_for_reminder,
+                    RoleAccessForReminders_Notes = settings_rafr.Notes,
+                    FullAccessForTutorSchedules = role_for_tutor_schedule,
+                    FullAccessForTutorSchedules_Notes = settings_fafts.Notes,
+                    ResetPassword = settings_resetpass.Value_String,
+                    ResetPassword_Notes = settings_resetpass.Notes
+                };
+
+                ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
+                ViewBag.password = settings_resetpass.Value_String;
+                return View(settingsViewModels);
             }
-
-            SettingsViewModels settingsViewModels = new SettingsViewModels()
-            {
-                AutoEntryForCashPayments = settings_aefcp.Value_Guid ?? Guid.Empty,
-                AutoEntryForCashPayments_Notes = settings_aefcp.Notes,
-                UserSetRoleAllowed = settings_usra.Value_Guid ?? Guid.Empty,
-                UserSetRoleAllowed_Notes = settings_usra.Notes,
-                RoleAccessForReminders = role_for_reminder,
-                RoleAccessForReminders_Notes = settings_rafr.Notes,
-                FullAccessForTutorSchedules = role_for_tutor_schedule,
-                FullAccessForTutorSchedules_Notes = settings_fafts.Notes,
-                ResetPassword = settings_resetpass.Value_String,
-                ResetPassword_Notes = settings_resetpass.Notes
-            };
-
-            ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.listRole = new SelectList(db.Role.OrderBy(x => x.Name).ToList(), "Id", "Name");
-            ViewBag.password = settings_resetpass.Value_String;
-            return View(settingsViewModels);
         }
 
         [HttpPost]

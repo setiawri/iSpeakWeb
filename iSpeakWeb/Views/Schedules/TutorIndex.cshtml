@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("TutorCreate", "Schedules")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.SchedulesTutorCreate)
+                {
+                    <a href="@Url.Action("TutorCreate", "Schedules")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -56,8 +59,14 @@
                                     </td>
                                     <td>@Html.DisplayFor(modelItem => item.Notes)</td>
                                     <td>
-                                        @Html.ActionLink("Edit", "TutorEdit", new { id = item.Id }) |
-                                        <a href="javascript:void(0)" onclick="DeleteSchedule('@item.Id', '@item.Tutor', '@item.DayOfWeek', '@string.Format("{0:HH:mm}", item.StartTime)', '@string.Format("{0:HH:mm}", item.EndTime)')">Delete</a>
+                                        @if (ViewBag.SchedulesTutorEdit)
+                                        {
+                                            @Html.ActionLink("Edit", "TutorEdit", new { id = item.Id })
+                                        }
+                                        @if (ViewBag.SchedulesTutorDelete)
+                                        {
+                                            @:| <a href="javascript:void(0)" onclick="DeleteSchedule('@item.Id', '@item.Tutor', '@item.DayOfWeek', '@string.Format("{0:HH:mm}", item.StartTime)', '@string.Format("{0:HH:mm}", item.EndTime)')">Delete</a>
+                                        }
                                         @if (ViewBag.Log == true)
                                         {
                                             @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Tutor }, new { target = "_blank" })

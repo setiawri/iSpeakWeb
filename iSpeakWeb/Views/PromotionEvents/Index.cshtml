@@ -22,7 +22,10 @@
                 </div>
             </div>
             <div class="card-body">
-                <a href="@Url.Action("Create", "PromotionEvents")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                @if (ViewBag.PromotionEventsCreate)
+                {
+                    <a href="@Url.Action("Create", "PromotionEvents")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -47,7 +50,10 @@
                                     <td>@Html.DisplayFor(modelItem => item.PersonnelCost)</td>
                                     <td>@Html.DisplayFor(modelItem => item.AdditionalCost)</td>
                                     <td>
-                                        @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        @if (ViewBag.PromotionEventsEdit)
+                                        {
+                                            @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+                                        }
                                         @if (ViewBag.Log == true)
                                         {
                                             @:| @Html.ActionLink("Log", "Index", "Logs", new { id = item.Id, ctrl = this.ViewContext.RouteData.Values["controller"].ToString(), table = this.ViewContext.RouteData.Values["controller"].ToString(), header = item.Name }, new { target = "_blank" })
