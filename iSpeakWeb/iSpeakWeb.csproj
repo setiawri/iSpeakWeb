@@ -373,6 +373,7 @@
     <Content Include="assets\css\landingpage\style.css" />
     <Content Include="assets\css\layout.min.css" />
     <Content Include="assets\css\print\invoice-print.css" />
+    <Content Include="assets\email\ToCreateFolderOnPublish.txt" />
     <Content Include="assets\images\happy_bday.jpg" />
     <Content Include="assets\images\landing_page.jpg" />
     <Content Include="assets\images\logo.png" />
@@ -595,7 +596,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="assets\email\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
