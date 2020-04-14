@@ -104,10 +104,10 @@ namespace iSpeak.Controllers
                 }
             }
             var user_role = await (from u in db.User
-                                         join ur in db.UserRole on u.Id equals ur.UserId
-                                         join r in db.Role on ur.RoleId equals r.Id
-                                         where u.UserName == User.Identity.Name
-                                         select new { r }).ToListAsync();
+                                   join ur in db.UserRole on u.Id equals ur.UserId
+                                   join r in db.Role on ur.RoleId equals r.Id
+                                   where u.UserName == User.Identity.Name
+                                   select new { r }).ToListAsync();
             bool isAllowReminders = false;
             if (role_for_reminder.Count > 0)
             {

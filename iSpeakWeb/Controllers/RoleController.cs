@@ -187,7 +187,7 @@ namespace iSpeak.Controllers
                                 <td><input type='checkbox' id='" + menu.WebMenuAccess + "' class='check-styled' " + selected + @"/></td>
                                 <td>" + menu.ParentMenu + @"</td>
                                 <td>" + menu.MenuName + @"</td>
-                                <td><div class='input-group'><input type='text' class='form-control input-sm' value='" + menu.Notes + "' readonly/><span class='input-group-append'><button type='button' class='btn btn-sm btn-light' data-toggle='modal' data-target='#modal_notes' onclick='EditNotes(\"" + menu.WebMenuAccess + "\",\"" + menu.Notes + "\"" + @")'>Edit</button></span></div></td>
+                                <td><div class='input-group'><input type='text' class='form-control input-sm' title='" + menu.Notes + "' value='" + menu.Notes + "' readonly/><span class='input-group-append'><button type='button' class='btn btn-sm btn-light' data-toggle='modal' data-target='#modal_notes' onclick='EditNotes(\"" + menu.WebMenuAccess + "\",\"" + menu.Notes + "\"" + @")'>Edit</button></span></div></td>
                                 <td>" + status_access + @"</td>
                             </tr>";
                 row++;

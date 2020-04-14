@@ -24,6 +24,10 @@ namespace iSpeak.Models
         public List<string> FullAccessForTutorSchedules { get; set; }
         public string FullAccessForTutorSchedules_Notes { get; set; }
 
+        [Display(Name = "Show Only Own User Data")]
+        public List<string> ShowOnlyOwnUserData { get; set; }
+        public string ShowOnlyOwnUserData_Notes { get; set; }
+
         [Display(Name = "Reset Password")]
         public string ResetPassword { get; set; }
         public string ResetPassword_Notes { get; set; }

@@ -841,7 +841,7 @@ namespace iSpeak.Controllers
                     client.Host = "smtp.gmail.com";
                     client.Port = 587;
                     client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
-                    client.EnableSsl = true;
+                    client.EnableSsl = false;
                     client.Send(mail);
                 }
 

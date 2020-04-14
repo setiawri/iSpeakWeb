@@ -23,27 +23,61 @@ namespace iSpeak.Controllers
         {
             var user_data = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault();
 
-            #region CHECK TUTOR ROLE
-            var roles = await (from u in db.User
-                               join ur in db.UserRole on u.Id equals ur.UserId
-                               join r in db.Role on ur.RoleId equals r.Id
-                               where u.UserName == User.Identity.Name
-                               select new { r }).ToListAsync();
-            bool isTutorOnly = false;
-            if (roles.Count == 1)
+            var user_role = await (from u in db.User
+                                   join ur in db.UserRole on u.Id equals ur.UserId
+                                   join r in db.Role on ur.RoleId equals r.Id
+                                   where u.UserName == User.Identity.Name
+                                   select new { r }).ToListAsync();
+
+            var settings_sooud = await db.Settings.FindAsync(SettingsValue.GUID_ShowOnlyOwnUserData);
+            List<string> role_for_own_data = new List<string>();
+            if (!string.IsNullOrEmpty(settings_sooud.Value_String))
             {
-                foreach (var role in roles)
+                string[] ids = settings_sooud.Value_String.Split(',');
+                foreach (var id in ids)
                 {
-                    if (role.r.Name.ToLower() == "tutor") { isTutorOnly = true; }
+                    role_for_own_data.Add(id);
                 }
             }
+
+            bool isTutorOnly = false;
+            bool isStudentOnly = false;
+            if (user_role.Count == 1)
+            {
+                foreach (var role in user_role)
+                {
+                    foreach (var r in role_for_own_data)
+                    {
+                        if (r == role.r.Id)
+                        {
+                            if (role.r.Name.ToLower() == "tutor") { isTutorOnly = true; }
+                            if (role.r.Name.ToLower() == "student") { isStudentOnly = true; }
+                        }
+                    }
+                }
+            }
+
+            #region CHECK TUTOR ROLE
+            //var roles = await (from u in db.User
+            //                   join ur in db.UserRole on u.Id equals ur.UserId
+            //                   join r in db.Role on ur.RoleId equals r.Id
+            //                   where u.UserName == User.Identity.Name
+            //                   select new { r }).ToListAsync();
+            //bool isTutorOnly = false;
+            //if (roles.Count == 1)
+            //{
+            //    foreach (var role in roles)
+            //    {
+            //        if (role.r.Name.ToLower() == "tutor") { isTutorOnly = true; }
+            //    }
+            //}
             #endregion
             #region CHECK STUDENT ROLE
-            var is_student = await (from u in db.User
-                                    join ur in db.UserRole on u.Id equals ur.UserId
-                                    join r in db.Role on ur.RoleId equals r.Id
-                                    where r.Name.ToLower() == "student" && u.UserName == User.Identity.Name
-                                    select new { u }).FirstOrDefaultAsync();
+            //var is_student = await (from u in db.User
+            //                        join ur in db.UserRole on u.Id equals ur.UserId
+            //                        join r in db.Role on ur.RoleId equals r.Id
+            //                        where r.Name.ToLower() == "student" && u.UserName == User.Identity.Name
+            //                        select new { u }).FirstOrDefaultAsync();
             #endregion
 
             List<LessonSessionsViewModels> list = new List<LessonSessionsViewModels>();
@@ -58,7 +92,7 @@ namespace iSpeak.Controllers
                          join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
                          where ls.Branches_Id == user_data.Branches_Id && ls.Tutor_UserAccounts_Id == user_data.Id
                          select new { ls, u, sii, si, s, lp }).ToListAsync()
-                : (is_student != null)
+                : (isStudentOnly)
                     //Student
                     ? await (from ls in db.LessonSessions
                              join u in db.User on ls.Tutor_UserAccounts_Id equals u.Id

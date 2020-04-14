@@ -25,5 +25,6 @@ namespace iSpeak.Models
         public static Guid GUID_RoleAccessForReminders = new Guid("2f8d8208-4464-4a01-b9e1-30e54292b708");
         public static Guid GUID_FullAccessForTutorSchedule = new Guid("9b5ab31f-ce5e-4942-9e07-0fe107058910");
         public static Guid GUID_ResetPassword = new Guid("01f2d64d-f402-4a96-b854-128f9a9ae42f");
+        public static Guid GUID_ShowOnlyOwnUserData = new Guid("70adb944-1917-4cd7-817d-6ca5fa789d5e");
     }
 }

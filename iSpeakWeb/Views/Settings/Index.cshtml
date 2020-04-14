@@ -38,7 +38,7 @@
                                     <span class="input-group-prepend">
                                         <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
                                     </span>
-                                    @Html.EditorFor(model => model.AutoEntryForCashPayments_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                    @Html.EditorFor(model => model.AutoEntryForCashPayments_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.AutoEntryForCashPayments_Notes } })
                                 </div>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                                     <span class="input-group-prepend">
                                         <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
                                     </span>
-                                    @Html.EditorFor(model => model.RoleAccessForReminders_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                    @Html.EditorFor(model => model.RoleAccessForReminders_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.RoleAccessForReminders_Notes } })
                                 </div>
                             </div>
                         </div>
@@ -66,7 +66,21 @@
                                     <span class="input-group-prepend">
                                         <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
                                     </span>
-                                    @Html.EditorFor(model => model.FullAccessForTutorSchedules_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                    @Html.EditorFor(model => model.FullAccessForTutorSchedules_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.FullAccessForTutorSchedules_Notes } })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.ShowOnlyOwnUserData, htmlAttributes: new { @class = "col-form-label col-lg-4" })
+                            <div class="col-lg-4">
+                                @Html.ListBoxFor(model => model.ShowOnlyOwnUserData, ViewBag.listRole as SelectList, new { @class = "form-control select2", @multiple = "multiple" })
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.ShowOnlyOwnUserData_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.ShowOnlyOwnUserData_Notes } })
                                 </div>
                             </div>
                         </div>
@@ -80,7 +94,7 @@
                                     <span class="input-group-prepend">
                                         <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
                                     </span>
-                                    @Html.EditorFor(model => model.UserSetRoleAllowed_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                    @Html.EditorFor(model => model.UserSetRoleAllowed_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.UserSetRoleAllowed_Notes } })
                                 </div>
                             </div>
                         </div>
@@ -99,7 +113,7 @@
                                     <span class="input-group-prepend">
                                         <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
                                     </span>
-                                    @Html.EditorFor(model => model.ResetPassword_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes" } })
+                                    @Html.EditorFor(model => model.ResetPassword_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.ResetPassword_Notes } })
                                 </div>
                             </div>
                         </div>

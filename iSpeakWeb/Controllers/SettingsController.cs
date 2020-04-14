@@ -27,6 +27,7 @@ namespace iSpeak.Controllers
                 var settings_usra = await db.Settings.FindAsync(SettingsValue.GUID_UserSetRoleAllowed);
                 var settings_rafr = await db.Settings.FindAsync(SettingsValue.GUID_RoleAccessForReminders);
                 var settings_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
+                var settings_sooud = await db.Settings.FindAsync(SettingsValue.GUID_ShowOnlyOwnUserData);
                 var settings_resetpass = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
 
                 List<string> role_for_reminder = new List<string>();
@@ -49,6 +50,16 @@ namespace iSpeak.Controllers
                     }
                 }
 
+                List<string> role_for_own_data = new List<string>();
+                if (!string.IsNullOrEmpty(settings_sooud.Value_String))
+                {
+                    string[] ids = settings_sooud.Value_String.Split(',');
+                    foreach (var id in ids)
+                    {
+                        role_for_own_data.Add(id);
+                    }
+                }
+
                 SettingsViewModels settingsViewModels = new SettingsViewModels()
                 {
                     AutoEntryForCashPayments = settings_aefcp.Value_Guid ?? Guid.Empty,
@@ -59,6 +70,8 @@ namespace iSpeak.Controllers
                     RoleAccessForReminders_Notes = settings_rafr.Notes,
                     FullAccessForTutorSchedules = role_for_tutor_schedule,
                     FullAccessForTutorSchedules_Notes = settings_fafts.Notes,
+                    ShowOnlyOwnUserData = role_for_own_data,
+                    ShowOnlyOwnUserData_Notes = settings_sooud.Notes,
                     ResetPassword = settings_resetpass.Value_String,
                     ResetPassword_Notes = settings_resetpass.Notes
                 };
@@ -71,7 +84,7 @@ namespace iSpeak.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Index([Bind(Include = "AutoEntryForCashPayments,AutoEntryForCashPayments_Notes,UserSetRoleAllowed,UserSetRoleAllowed_Notes,RoleAccessForReminders,RoleAccessForReminders_Notes,FullAccessForTutorSchedules,FullAccessForTutorSchedules_Notes,ResetPassword,ResetPassword_Notes")] SettingsViewModels settingsViewModels)
+        public async Task<ActionResult> Index([Bind(Include = "AutoEntryForCashPayments,AutoEntryForCashPayments_Notes,UserSetRoleAllowed,UserSetRoleAllowed_Notes,RoleAccessForReminders,RoleAccessForReminders_Notes,FullAccessForTutorSchedules,FullAccessForTutorSchedules_Notes,ShowOnlyOwnUserData,ShowOnlyOwnUserData_Notes,ResetPassword,ResetPassword_Notes")] SettingsViewModels settingsViewModels)
         {
             if (settingsViewModels.AutoEntryForCashPayments == Guid.Empty || settingsViewModels.AutoEntryForCashPayments == null)
             {
@@ -89,6 +102,11 @@ namespace iSpeak.Controllers
             {
                 //ModelState.AddModelError("FullAccessForTutorSchedules", "The field Role for Tutor Schedule is required.");
                 ModelState.AddModelError("ValidationMessage", "The field Role for Tutor Schedule is required.");
+            }
+
+            if (settingsViewModels.ShowOnlyOwnUserData == null)
+            {
+                ModelState.AddModelError("ValidationMessage", "The field Show Only Own User Data is required.");
             }
 
             if (settingsViewModels.UserSetRoleAllowed == Guid.Empty || settingsViewModels.UserSetRoleAllowed == null)
@@ -130,6 +148,11 @@ namespace iSpeak.Controllers
                 settingsModels_fafts.Value_String = string.Join(",", settingsViewModels.FullAccessForTutorSchedules);
                 settingsModels_fafts.Notes = settingsViewModels.FullAccessForTutorSchedules_Notes;
                 db.Entry(settingsModels_fafts).State = EntityState.Modified;
+
+                SettingsModels settingsModels_sooud = await db.Settings.FindAsync(SettingsValue.GUID_ShowOnlyOwnUserData);
+                settingsModels_sooud.Value_String = string.Join(",", settingsViewModels.ShowOnlyOwnUserData);
+                settingsModels_sooud.Notes = settingsViewModels.ShowOnlyOwnUserData_Notes;
+                db.Entry(settingsModels_sooud).State = EntityState.Modified;
 
                 SettingsModels settingsModels_resetpass = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
                 settingsModels_resetpass.Value_String = settingsViewModels.ResetPassword;
