@@ -13,6 +13,10 @@
         white-space: nowrap;
         text-overflow: ellipsis;
     }
+
+    th, td {
+    	white-space: nowrap;
+	}
 </style>
 
 <div class="content-wrapper">
@@ -43,6 +47,7 @@
                             <tr>
                                 <th>@Html.DisplayNameFor(model => model.Timestamp)</th>
                                 <th>@Html.DisplayNameFor(model => model.Lesson)</th>
+                                <th>@Html.DisplayNameFor(model => model.NoInvoice)</th>
                                 <th>@Html.DisplayNameFor(model => model.Student)</th>
                                 <th>@Html.DisplayNameFor(model => model.Tutor)</th>
                                 <th>@Html.DisplayNameFor(model => model.SessionHours)</th>
@@ -209,6 +214,7 @@
         columns: [
             { data: 'Timestamp', name: 'Timestamp' },
             { data: 'Lesson', name: 'Lesson' },
+            { data: 'NoInvoice', name: 'NoInvoice'},
             { data: 'Student', name: 'Student' },
             { data: 'Tutor', name: 'Tutor' },
             {
@@ -304,16 +310,16 @@
     $(document).ready(function () {
 
         if ('@ViewBag.IsShowTravelCost' == 'False' && '@ViewBag.Cancel' == 'False') {
-            table.column(5).visible(false);
             table.column(6).visible(false);
+            table.column(7).visible(false);
         }
 
         if ('@ViewBag.IsShowTravelCost' == 'False' && '@ViewBag.Cancel' == 'True') {
-            table.column(5).visible(false);
+            table.column(6).visible(false);
         }
 
         if ('@ViewBag.IsShowTravelCost' == 'True' && '@ViewBag.Cancel' == 'False') {
-            table.column(6).visible(false);
+            table.column(7).visible(false);
         }
 
         $('.mdl-btn-submit').click(function () {

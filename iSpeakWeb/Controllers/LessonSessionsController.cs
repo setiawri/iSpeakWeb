@@ -126,7 +126,8 @@ namespace iSpeak.Controllers
                     TravelCost = session.ls.TravelCost,
                     TutorTravelCost = session.ls.TutorTravelCost,
                     Deleted = session.ls.Deleted,
-                    Notes_Cancel = session.ls.Notes_Cancel
+                    Notes_Cancel = session.ls.Notes_Cancel,
+                    NoInvoice = session.si.No
                 });
             }
 
@@ -145,6 +146,7 @@ namespace iSpeak.Controllers
                 list = list
                     .Where(x => x.Timestamp.ToLower().Contains(searchValue.ToLower())
                         || x.Lesson.ToLower().Contains(searchValue.ToLower())
+                        || x.NoInvoice.ToLower().Contains(searchValue.ToLower())
                         || x.Student.ToLower().Contains(searchValue.ToLower())
                         || x.Tutor.ToLower().Contains(searchValue.ToLower())
                     ).ToList();
