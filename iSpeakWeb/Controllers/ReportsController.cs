@@ -838,9 +838,10 @@ namespace iSpeak.Controllers
                     att.ContentDisposition.FileName = namaFile;
                     mail.Attachments.Add(att);
 
-                    client.Host = "smtp.gmail.com";
-                    client.Port = 587;
-                    client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
+                    client.UseDefaultCredentials = false;
+                    client.Host = "relay-hosting.secureserver.net"; //"smtp.gmail.com";
+                    client.Port = 25; //587;
+                    //client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
                     client.EnableSsl = false;
                     client.Send(mail);
                 }
