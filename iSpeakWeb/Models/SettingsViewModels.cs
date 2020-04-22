@@ -31,5 +31,9 @@ namespace iSpeak.Models
         [Display(Name = "Reset Password")]
         public string ResetPassword { get; set; }
         public string ResetPassword_Notes { get; set; }
+
+        [Display(Name = "Fix Session Hours")]
+        public string FixSessionHours { get; set; }
+        public string FixSessionHours_Notes { get; set; }
     }
 }

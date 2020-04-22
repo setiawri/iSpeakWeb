@@ -25,7 +25,7 @@ namespace iSpeak.Models
 
     public class LogsViewModels
     {
-        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm:ss}")]
         public DateTime Timestamp { get; set; }
         [Display(Name = "User Input")]
         public string UserInput { get; set; }

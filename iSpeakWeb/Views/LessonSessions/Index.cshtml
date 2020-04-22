@@ -39,7 +39,9 @@
             <div class="card-body">
                 @if (ViewBag.LessonSessionsCreate)
                 {
-                    <a href="@Url.Action("Create", "LessonSessions")" class="btn btn-sm btn-success">Create New <i class="icon-plus22 ml-2"></i></a>
+                    <div class="div-new" style="display:none;">
+                        <a href="@Url.Action("Create", "LessonSessions")" class="btn btn-sm btn-success" id="btnSessionNew">Create New <i class="icon-plus22 ml-2"></i></a>
+                    </div>
                 }
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
@@ -307,6 +309,26 @@
         }); //end ajax
     }
 
+    function SessionsCheck() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SessionsCheck", "LessonSessions")',
+            data: {
+                temp: 'aaa'
+            },
+            success: function (data) {
+                console.log(data);
+                if (data.count > 0) {
+                    bootbox.alert('Ada ' + data.count + ' invoice ( ' + data.invoices + ' ) yang tidak sesuai. <br>Silakan hubungi Ricky untuk pengecekan lebih lanjut!');
+                }
+                $('.div-new').show();
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
     $(document).ready(function () {
 
         if ('@ViewBag.IsShowTravelCost' == 'False' && '@ViewBag.Cancel' == 'False') {
@@ -322,6 +344,8 @@
             table.column(7).visible(false);
         }
 
+        SessionsCheck();
+
         $('.mdl-btn-submit').click(function () {
             if ($('.mdl-notes').val() == '') {
                 $('.modal-validation').html('The field Notes is required.').show();
@@ -331,6 +355,10 @@
                 Cancelled($('.mdl-id-inv').val(), $('.mdl-notes').val());
             }
         });
+
+        //$('#btnCheck').click(function () {
+            
+        //});
 
         console.log('DateTimeNow: ' + '@ViewBag.TanggalNow' + ', DateTimeUtcNow: ' + '@ViewBag.TanggalUtc');
     });

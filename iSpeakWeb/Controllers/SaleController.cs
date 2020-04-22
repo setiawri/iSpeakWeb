@@ -77,6 +77,7 @@ namespace iSpeak.Controllers
                                                 <th>Voucher</th>
                                                 <th>Subtotal</th>
                                                 <th>Avail. Hours</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>";
@@ -97,6 +98,7 @@ namespace iSpeak.Controllers
                                 <td>" + voucher.ToString("#,##0") + @"</td>
                                 <td>" + subtotal.ToString("#,##0") + @"</td>
                                 <td>" + item.SessionHours_Remaining + @"</td>
+                                <td><a href='" + Url.Content("~") + "Logs/Index/" + item.Id + "?ctrl=Sale&table=SaleInvoiceItems&header=" + item.Description + @"' target='_blank'>Logs</a></td>
                             </tr>";
             }
             message += "</tbody></table></div>";

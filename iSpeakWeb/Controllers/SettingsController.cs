@@ -29,6 +29,7 @@ namespace iSpeak.Controllers
                 var settings_fafts = await db.Settings.FindAsync(SettingsValue.GUID_FullAccessForTutorSchedule);
                 var settings_sooud = await db.Settings.FindAsync(SettingsValue.GUID_ShowOnlyOwnUserData);
                 var settings_resetpass = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
+                var settings_fsh = await db.Settings.FindAsync(SettingsValue.GUID_FixSessionHours);
 
                 List<string> role_for_reminder = new List<string>();
                 if (!string.IsNullOrEmpty(settings_rafr.Value_String))
@@ -73,7 +74,9 @@ namespace iSpeak.Controllers
                     ShowOnlyOwnUserData = role_for_own_data,
                     ShowOnlyOwnUserData_Notes = settings_sooud.Notes,
                     ResetPassword = settings_resetpass.Value_String,
-                    ResetPassword_Notes = settings_resetpass.Notes
+                    ResetPassword_Notes = settings_resetpass.Notes,
+                    FixSessionHours = settings_fsh.Value_String,
+                    FixSessionHours_Notes = settings_fsh.Notes
                 };
 
                 ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");

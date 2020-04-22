@@ -332,6 +332,91 @@ namespace iSpeak.Controllers
             return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+        #region Session Check
+        public async Task<JsonResult> SessionsCheck(string temp)
+        {
+            string invoices = "";
+            List<string> model = new List<string>();
+            var package = await (from si in db.SaleInvoices
+                                 join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                 where si.Cancelled == false && sii.LessonPackages_Id != null
+                                 select new { si, sii }).ToListAsync();
+            foreach (var item in package)
+            {
+                var total_hour_session = (await db.LessonSessions.Where(x => x.SaleInvoiceItems_Id == item.sii.Id && x.Deleted == false).ToListAsync()).Sum(x => x.SessionHours);
+                if (total_hour_session != (item.sii.SessionHours - item.sii.SessionHours_Remaining))
+                {
+                    if (string.IsNullOrEmpty(invoices))
+                    {
+                        invoices = item.si.No;
+                    }
+                    else
+                    {
+                        invoices += ", " + item.si.No;
+                    }
+                    model.Add(item.si.No);
+                }
+            }
+
+            return Json(new { model, count = model.Count, invoices });
+        }
+        #endregion
+        #region Session Check Details
+        public async Task<JsonResult> SessionsCheckDetails(string list)
+        {
+            string message = @"<div class='table-responsive'>
+                                    <table class='table table-striped table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>Invoice</th>
+                                                <th>Description</th>
+                                                <th>Total Hours</th>
+                                                <th>Used Hours</th>
+                                                <th>Avail. Hours</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>"; //<a href='javascript:void(0)' onclick='FixSessionHours(""all"",""0"")'>Fix All</a>
+
+            string[] invoices = list.Split(',');
+            foreach (string invoice in invoices)
+            {
+                var package = await (from si in db.SaleInvoices
+                                     join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+                                     where si.No == invoice.Trim()
+                                     select new { si, sii }).ToListAsync();
+                foreach (var item in package)
+                {
+                    var used_hours = (await db.LessonSessions.Where(x => x.SaleInvoiceItems_Id == item.sii.Id && x.Deleted == false).ToListAsync()).Sum(x => x.SessionHours);
+                    if (used_hours != (item.sii.SessionHours - item.sii.SessionHours_Remaining))
+                    {
+                        message += @"<tr>
+                                        <td>" + item.si.No + @"</td>
+                                        <td>" + item.sii.Description + @"</td>
+                                        <td>" + item.sii.SessionHours + @"</td>
+                                        <td>" + used_hours + @"</td>
+                                        <td>" + item.sii.SessionHours_Remaining + @"</td>
+                                        <td><a href='javascript:void(0)' onclick='FixSessionHours(""" + item.sii.Id + "\",\"" + (item.sii.SessionHours - used_hours) + "\")'>Fix this</a>" + @"</td>
+                                    </tr>";
+                    }
+                }
+            }
+            message += "</tbody></table></div>";
+
+            return Json(new { content = message }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Session Check Fix
+        public async Task<JsonResult> SessionCheckFix(Guid id, decimal remaining)
+        {
+            var sii = await db.SaleInvoiceItems.FindAsync(id);
+            sii.SessionHours_Remaining = remaining;
+            db.Entry(sii).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #endregion
 
         public ActionResult Index()

@@ -5,6 +5,12 @@
     ViewBag.Title = "Index";
 }
 
+<style>
+    th, td {
+        white-space: nowrap;
+    }
+</style>
+
 <div class="content-wrapper">
 
     <!-- Content area -->
@@ -117,6 +123,25 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            @Html.LabelFor(model => model.FixSessionHours, htmlAttributes: new { @class = "col-form-label col-lg-4" })
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    @Html.EditorFor(model => model.FixSessionHours, new { htmlAttributes = new { @class = "form-control", @placeholder = "None of Invoices need to fix", @readonly = "readonly" } })
+                                    <span class="input-group-append">
+                                        <span class="input-group-text showdetails" title="Show Details"><i class="icon icon-unlink"></i></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-prepend">
+                                        <span class="input-group-text bg-info border-info text-white"><i class="icon icon-info22"></i></span>
+                                    </span>
+                                    @Html.EditorFor(model => model.FixSessionHours_Notes, new { htmlAttributes = new { @class = "form-control", @placeholder = "Notes", @title = Model.FixSessionHours_Notes } })
+                                </div>
+                            </div>
+                        </div>
                     </fieldset>
                     <div>
                         <button type="submit" class="btn btn-primary">Save Changes <i class="icon-paperplane ml-2"></i></button>
@@ -131,8 +156,74 @@
 </div>
 
 <script type="text/javascript">
+    function SessionsCheck() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SessionsCheck", "LessonSessions")',
+            data: {
+                temp: 'aaa'
+            },
+            success: function (data) {
+                if (data.count > 0) {
+                    $('#FixSessionHours').val(data.invoices);
+                }
+                else {
+                    $('#FixSessionHours').val('');
+                }
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function View_FixSessionHours(invoices) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SessionsCheckDetails", "LessonSessions")',
+            data: {
+                list: invoices
+            },
+            success: function (data) {
+                var dialog = bootbox.alert({
+                    title: 'Invoices need to fix: ' + invoices,
+                    size: 'large',
+                    message: data.content,
+                    backdrop: true
+                });
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function FixSessionHours(id, remaining) {
+        if (remaining < 0) {
+            bootbox.alert('Total Used Hours is more than Session Hours at this package.<br>Please cancel Lesson Sessions before fix this invoice!');
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SessionCheckFix", "LessonSessions")',
+                data: {
+                    id: id,
+                    remaining: remaining
+                },
+                success: function (data) {
+                    window.location.reload(true);
+                }, //end success
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                } //end error
+            }); //end ajax
+        }
+    }
+
     $(document).ready(function () {
         $('.select2').select2();
+
+        SessionsCheck();
 
         $('#ResetPassword').val('@ViewBag.password');
 
@@ -142,6 +233,15 @@
             $('#ResetPassword').attr('type', 'password');
         }).mouseout(function () {
             $('#ResetPassword').attr('type', 'password');
+        });
+
+        $('.showdetails').click(function () {
+            if ($('#FixSessionHours').val() == '') {
+                bootbox.alert('None of data available.');
+            }
+            else {
+                View_FixSessionHours($('#FixSessionHours').val());
+            }
         });
     })
 </script>
