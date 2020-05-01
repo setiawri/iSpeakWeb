@@ -1,5 +1,6 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using iSpeakWeb.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -333,28 +334,58 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region Session Check
-        public async Task<JsonResult> SessionsCheck(string temp)
+        public JsonResult SessionsCheck(string temp)
         {
             string invoices = "";
             List<string> model = new List<string>();
-            var package = await (from si in db.SaleInvoices
-                                 join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
-                                 where si.Cancelled == false && sii.LessonPackages_Id != null
-                                 select new { si, sii }).ToListAsync();
-            foreach (var item in package)
+            //var package = await (from si in db.SaleInvoices
+            //                     join sii in db.SaleInvoiceItems on si.Id equals sii.SaleInvoices_Id
+            //                     where si.Cancelled == false && sii.LessonPackages_Id != null
+            //                     select new { si, sii }).ToListAsync();
+            //foreach (var item in package)
+            //{
+            //    var total_hour_session = (await db.LessonSessions.Where(x => x.SaleInvoiceItems_Id == item.sii.Id && x.Deleted == false).ToListAsync()).Sum(x => x.SessionHours);
+            //    if (total_hour_session != (item.sii.SessionHours - item.sii.SessionHours_Remaining))
+            //    {
+            //        if (string.IsNullOrEmpty(invoices))
+            //        {
+            //            invoices = item.si.No;
+            //        }
+            //        else
+            //        {
+            //            invoices += ", " + item.si.No;
+            //        }
+            //        model.Add(item.si.No);
+            //    }
+            //}
+
+            List<SessionsCheck> sc = new List<SessionsCheck>();
+            using (var ctx = new iSpeakContext())
             {
-                var total_hour_session = (await db.LessonSessions.Where(x => x.SaleInvoiceItems_Id == item.sii.Id && x.Deleted == false).ToListAsync()).Sum(x => x.SessionHours);
-                if (total_hour_session != (item.sii.SessionHours - item.sii.SessionHours_Remaining))
+                sc = ctx.Database.SqlQuery<SessionsCheck>(@"
+                    select
+                    si.no,sii.description,sii.sessionhours,sii.sessionhours_remaining,
+                    (sii.sessionhours-sii.sessionhours_remaining) usedhours,
+                    (select isnull(sum(ls.SessionHours),0) from LessonSessions ls where ls.SaleInvoiceItems_Id=sii.id and ls.Deleted=0) totalhours
+                    from saleinvoices si
+                    inner join saleinvoiceitems sii on si.id=sii.saleinvoices_id
+                    where si.cancelled=0 and sii.lessonpackages_id is not null
+                ").ToList();
+            }
+
+            foreach (var item in sc)
+            {
+                if (item.UsedHours != item.TotalHours)
                 {
                     if (string.IsNullOrEmpty(invoices))
                     {
-                        invoices = item.si.No;
+                        invoices = item.No;
                     }
                     else
                     {
-                        invoices += ", " + item.si.No;
+                        invoices += ", " + item.No;
                     }
-                    model.Add(item.si.No);
+                    model.Add(item.No);
                 }
             }
 

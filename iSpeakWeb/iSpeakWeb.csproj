@@ -318,6 +318,7 @@
     <Compile Include="Models\SaleReturnsModels.cs" />
     <Compile Include="Models\SaleReturnViewModels.cs" />
     <Compile Include="Models\ServicesModels.cs" />
+    <Compile Include="Models\SessionsCheck.cs" />
     <Compile Include="Models\SettingsModels.cs" />
     <Compile Include="Models\SettingsViewModels.cs" />
     <Compile Include="Models\StockOnHandViewModels.cs" />

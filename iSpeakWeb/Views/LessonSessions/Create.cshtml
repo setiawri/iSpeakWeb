@@ -312,64 +312,62 @@
         });
         
         $('#target').submit (function (e) {
+            if (!event.detail || event.detail == 1) {
+                var arrItem = [];
+                $('#data-body tr').each(function () {
+                    var student = $(this).find('input.student').val();
+                    var package = $(this).find('input.package').val();
+                    var review = $(this).find('input.review').val();
+                    var internal_notes = $(this).find('input.internal').val();
+                    var sale_invoice_item_id = $(this).find('input.sii_id').val();
 
-            var arrItem = [];
-            $('#data-body tr').each(function () {
-                var student = $(this).find('input.student').val();
-                var package = $(this).find('input.package').val();
-                var review = $(this).find('input.review').val();
-                var internal_notes = $(this).find('input.internal').val();
-                var sale_invoice_item_id = $(this).find('input.sii_id').val();
+                    var obj = { student: student, package: package, review: review, internal_notes: internal_notes, sale_invoice_item_id: sale_invoice_item_id };
+                    arrItem.push(obj);
+                });
+                $('#Items').val(JSON.stringify(arrItem));
+                $('#ChangeSchedule').val($('#chkChangeSchedule').prop('checked'));
+                $('#Waive').val($('#chkWaive').prop('checked'));
 
-                var obj = { student: student, package: package, review: review, internal_notes: internal_notes, sale_invoice_item_id: sale_invoice_item_id };
-                arrItem.push(obj);
-            });
-            $('#Items').val(JSON.stringify(arrItem));
-            $('#ChangeSchedule').val($('#chkChangeSchedule').prop('checked'));
-            $('#Waive').val($('#chkWaive').prop('checked'));
-
-            if ($('#Tutor_UserAccounts_Id').val() == null) {
-                $('.session-validation').html('The Tutor field is required.').show();
-                return false;
-            }
-            else if ($('#ChangeSchedule').val() == 'true' && $('#Waive').val() == 'true') {
-                $('.session-validation').html('Please select one of Change Schedule or Waive Tutor Fee!').show();
-                return false;
-            }
-            else if (arrItem.length == 0) {
-                $('.session-validation').html('List Student-Package is required.').show();
-                return false;
-            }
-            else {
-                
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("CheckRemainingHour", "LessonSessions")',
-                    data: {
-                        items: $('#Items').val(),
-                        hour: $('#SessionHours').val()
-                    },
-                    async: false,
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                        return false;
-                    }, //end error
-                    success: function (data) {
-                        //console.log(data);
-                        if (data.isValid == false) {
-                            e.preventDefault();
-                            $('.session-validation').html(data.message).show();
+                if ($('#Tutor_UserAccounts_Id').val() == null) {
+                    $('.session-validation').html('The Tutor field is required.').show();
+                    return false;
+                }
+                else if ($('#ChangeSchedule').val() == 'true' && $('#Waive').val() == 'true') {
+                    $('.session-validation').html('Please select one of Change Schedule or Waive Tutor Fee!').show();
+                    return false;
+                }
+                else if (arrItem.length == 0) {
+                    $('.session-validation').html('List Student-Package is required.').show();
+                    return false;
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("CheckRemainingHour", "LessonSessions")',
+                        data: {
+                            items: $('#Items').val(),
+                            hour: $('#SessionHours').val()
+                        },
+                        async: false,
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
                             return false;
-                        }
-                        else {
-                            $('.session-validation').html('').hide();
-                            return true;
-                        }
-                    } //end success
-                }); //end ajax
-
-            }
-            
+                        }, //end error
+                        success: function (data) {
+                            //console.log(data);
+                            if (data.isValid == false) {
+                                e.preventDefault();
+                                $('.session-validation').html(data.message).show();
+                                return false;
+                            }
+                            else {
+                                $('.session-validation').html('').hide();
+                                return true;
+                            }
+                        } //end success
+                    }); //end ajax
+                }
+            }            
         });
 
     })

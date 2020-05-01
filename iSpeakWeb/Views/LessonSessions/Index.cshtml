@@ -347,18 +347,16 @@
         SessionsCheck();
 
         $('.mdl-btn-submit').click(function () {
-            if ($('.mdl-notes').val() == '') {
-                $('.modal-validation').html('The field Notes is required.').show();
-            }
-            else {
-                $('.modal-validation').html('').hide();
-                Cancelled($('.mdl-id-inv').val(), $('.mdl-notes').val());
+            if (!event.detail || event.detail == 1) {
+                if ($('.mdl-notes').val() == '') {
+                    $('.modal-validation').html('The field Notes is required.').show();
+                }
+                else {
+                    $('.modal-validation').html('').hide();
+                    Cancelled($('.mdl-id-inv').val(), $('.mdl-notes').val());
+                }
             }
         });
-
-        //$('#btnCheck').click(function () {
-            
-        //});
 
         console.log('DateTimeNow: ' + '@ViewBag.TanggalNow' + ', DateTimeUtcNow: ' + '@ViewBag.TanggalUtc');
     });
