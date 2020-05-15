@@ -10,7 +10,7 @@ namespace iSpeak.Models
     {
         public Guid Id { get; set; }
         [Display(Name = "Date")]
-        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd}")]
+        [DisplayFormat(DataFormatString = "{0:yyyy/MM/dd HH:mm}")]
         public DateTime Timestamp { get; set; }
         public string No { get; set; }
         [DisplayFormat(DataFormatString = "{0:N2}")]

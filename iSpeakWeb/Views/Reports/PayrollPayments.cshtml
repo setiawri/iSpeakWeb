@@ -49,7 +49,7 @@
                                         @if (item.Cancelled == false)
                                         {
                                             @*<a href="#"><span class="badge badge-warning d-block" onclick="Cancelled('@item.Id', '@item.No')">Cancel Payroll</span></a>*@
-                                            <a href="#"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No', '@string.Format("{0:N0}", item.Amount)', '@item.Tutor')">Cancel Payroll</span></a>
+                                            <a href="javascript:void(0)"><span class="badge badge-warning d-block" data-toggle="modal" data-target="#modal_cancel" onclick="Cancel_Modal('@item.Id', '@item.No', '@string.Format("{0:N0}", item.Amount)', '@item.Tutor')">Cancel Payroll</span></a>
                                         }
                                         else
                                         {
@@ -59,18 +59,18 @@
                                     <td>
                                         @if (item.IsChecked)
                                         {
-                                            <a href="#"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id', '@item.No')">Approved</span></a>
+                                            <a href="javascript:void(0)"><span class="badge badge-success d-block" onclick="CancelApprove('@item.Id', '@item.No')">Approved</span></a>
                                         }
                                         else
                                         {
-                                            <a href="#"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
+                                            <a href="javascript:void(0)"><span class="badge badge-dark d-block" onclick="Approve('@item.Id', '@item.No')">None</span></a>
                                         }
                                     </td>
                                     <td>
                                         @if (item.Cancelled == false)
                                         {
                                             <a href="@Url.Action("Print", "Reports", new { id = item.Id, tutor_id = item.Tutor_Id })">Print</a> @:|
-                                            <a href="#" onclick="Details('@item.Id')">Details</a>
+                                            <a href="javascript:void(0)" onclick="Details('@item.Id')">Details</a>
                                         }
                                     </td>
                                 </tr>
@@ -97,7 +97,7 @@
                 <div class="row">
                     <div class="col-lg-9">
                         <div class="form-group">
-                            <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to Payroll Payments List <i class="icon-circle-left2 ml-2"></i></a>
+                            <a href="javascript:void(0)" onclick="Previous()" class="btn btn-sm btn-secondary">Back to Payroll Payments List <i class="icon-circle-left2 ml-2"></i></a>
                         </div>
                     </div>
                     <div class="col-lg-3" style="float: right">
@@ -355,12 +355,14 @@
         $('.check-styled').uniform();
 
         $('.mdl-btn-submit').click(function () {
-            if ($('.mdl-notes').val() == '') {
-                $('.modal-validation').html('The field Notes is required.').show();
-            }
-            else {
-                $('.modal-validation').html('').hide();
-                Cancelled($('.mdl-id').val(), $('.mdl-notes').val());
+            if (!event.detail || event.detail == 1) { //prevent double click on button
+                if ($('.mdl-notes').val() == '') {
+                    $('.modal-validation').html('The field Notes is required.').show();
+                }
+                else {
+                    $('.modal-validation').html('').hide();
+                    Cancelled($('.mdl-id').val(), $('.mdl-notes').val());
+                }
             }
         });
 

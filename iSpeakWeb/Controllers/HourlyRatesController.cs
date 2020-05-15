@@ -36,6 +36,7 @@ namespace iSpeak.Controllers
                         LessonPackages = (item.hr.LessonPackages_Id.HasValue) ? db.LessonPackages.Where(x => x.Id == item.hr.LessonPackages_Id).FirstOrDefault().Name : string.Empty,
                         UserAccounts = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
                         Rate = item.hr.Rate,
+                        FullTimeTutorPayrate = item.hr.FullTimeTutorPayrate,
                         Notes = item.hr.Notes
                     });
                 }
@@ -102,7 +103,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Branches_Id,LessonPackages_Id,UserAccounts_Id,Rate,Notes")] HourlyRatesModels hourlyRatesModels)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Branches_Id,LessonPackages_Id,UserAccounts_Id,Rate,FullTimeTutorPayrate,Notes")] HourlyRatesModels hourlyRatesModels)
         {
             if (ModelState.IsValid)
             {
@@ -229,7 +230,7 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Branches_Id,LessonPackages_Id,UserAccounts_Id,Rate,Notes")] HourlyRatesModels hourlyRatesModels)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Branches_Id,LessonPackages_Id,UserAccounts_Id,Rate,FullTimeTutorPayrate,Notes")] HourlyRatesModels hourlyRatesModels)
         {
             if (ModelState.IsValid)
             {
@@ -238,6 +239,7 @@ namespace iSpeak.Controllers
                 current_data.LessonPackages_Id = hourlyRatesModels.LessonPackages_Id;
                 current_data.UserAccounts_Id = hourlyRatesModels.UserAccounts_Id;
                 current_data.Rate = hourlyRatesModels.Rate;
+                current_data.FullTimeTutorPayrate = hourlyRatesModels.FullTimeTutorPayrate;
                 current_data.Notes = hourlyRatesModels.Notes;
                 db.Entry(current_data).State = EntityState.Modified;
                 await db.SaveChangesAsync();
@@ -324,6 +326,7 @@ namespace iSpeak.Controllers
                     LessonPackages = (item.hr.LessonPackages_Id.HasValue) ? db.LessonPackages.Where(x => x.Id == item.hr.LessonPackages_Id).FirstOrDefault().Name : string.Empty,
                     UserAccounts = item.u.Firstname + " " + item.u.Middlename + " " + item.u.Lastname,
                     Rate = item.hr.Rate,
+                    FullTimeTutorPayrate = item.hr.FullTimeTutorPayrate,
                     Notes = item.hr.Notes
                 };
 

@@ -553,10 +553,12 @@ namespace iSpeak.Controllers
                     {
                         foreach (var subitem in hourly_rate)
                         {
-                            model.HourlyRates_Rate = subitem.Rate / details.Count; //use tutor rate with null package
+                            decimal rate_used = subitem.FullTimeTutorPayrate > 0 ? 0 : subitem.Rate;
+
+                            model.HourlyRates_Rate = rate_used / details.Count; //use tutor rate with null package
                             if (subitem.LessonPackages_Id == sale_invoice_item.LessonPackages_Id.Value) //found tutor with exact package
                             {
-                                model.HourlyRates_Rate = subitem.Rate / details.Count;
+                                model.HourlyRates_Rate = rate_used / details.Count;
                                 break;
                             }
                         }
@@ -594,10 +596,12 @@ namespace iSpeak.Controllers
                     {
                         foreach (var rate in hourly_rate)
                         {
-                            payrollPaymentItemsModels.HourlyRate = rate.Rate; //use tutor rate with null branch
+                            decimal rate_used = rate.FullTimeTutorPayrate > 0 ? 0 : rate.Rate;
+
+                            payrollPaymentItemsModels.HourlyRate = rate_used; //use tutor rate with null branch
                             if (lessonSessionsModels.Branches_Id.HasValue && rate.Branches_Id == lessonSessionsModels.Branches_Id.Value) //found tutor with exact branch
                             {
-                                payrollPaymentItemsModels.HourlyRate = rate.Rate;
+                                payrollPaymentItemsModels.HourlyRate = rate_used;
                                 break;
                             }
                         }

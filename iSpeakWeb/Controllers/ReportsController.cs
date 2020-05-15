@@ -80,8 +80,10 @@ namespace iSpeak.Controllers
         #region GetTutorPayroll
         public async Task<JsonResult> GetTutorPayroll(Guid branch_id, int month, int year)
         {
-            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
-            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
+            DateTime dateFrom = new DateTime(year, month, 1, 0, 0, 0);
+            DateTime dateTo = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            DateTime dateFromUTC = TimeZoneInfo.ConvertTimeToUtc(dateFrom);
+            DateTime dateToUTC = TimeZoneInfo.ConvertTimeToUtc(dateTo);
             List<TutorPayrollViewModels> list = new List<TutorPayrollViewModels>();
 
             //var tutors = await (from u in db.User
@@ -100,7 +102,7 @@ namespace iSpeak.Controllers
                                 join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
                                 join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                                 join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.Id && ls.Deleted == false && ls.Timestamp >= dateFrom && ls.Timestamp <= dateTo
+                                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.Id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
                                 group ppi.Amount by ls.PayrollPaymentItems_Id into x
                                 select new { PayrollPaymentItems_Id = x.Key, TotalAmount = x.ToList() }).ToList();
 
@@ -155,8 +157,10 @@ namespace iSpeak.Controllers
         {
             var tutor = await db.User.FindAsync(tutor_id);
             decimal payroll_total = 0;
-            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
-            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
+            DateTime dateFrom = new DateTime(year, month, 1, 0, 0, 0);
+            DateTime dateTo = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            DateTime dateFromUTC = TimeZoneInfo.ConvertTimeToUtc(dateFrom);
+            DateTime dateToUTC = TimeZoneInfo.ConvertTimeToUtc(dateTo);
             List<TutorPayrollDetailsViewModels> list = new List<TutorPayrollDetailsViewModels>();
 
             var payrolls = (from ppi in db.PayrollPaymentItems
@@ -164,7 +168,7 @@ namespace iSpeak.Controllers
                             join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                             join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
                             join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                            where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFrom && ls.Timestamp <= dateTo
+                            where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
                             group ls by ls.PayrollPaymentItems_Id into x
                             select new { PayrollPaymentItems_Id = x.Key, LessonSession = x.ToList() }).ToList();
             foreach (var payroll in payrolls)
@@ -278,19 +282,21 @@ namespace iSpeak.Controllers
         #region SavePayrollPayments
         public async Task<JsonResult> SavePayrollPayments(Guid branch_id, int month, int year, string tutor_id, DateTime timestamp, decimal total_paid, string notes)
         {
-            DateTime dateFrom = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, 1, 0, 0, 0));
-            DateTime dateTo = TimeZoneInfo.ConvertTimeToUtc(new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59));
+            DateTime dateFrom = new DateTime(year, month, 1, 0, 0, 0);
+            DateTime dateTo = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            DateTime dateFromUTC = TimeZoneInfo.ConvertTimeToUtc(dateFrom);
+            DateTime dateToUTC = TimeZoneInfo.ConvertTimeToUtc(dateTo);
 
             var payrolls = (from ppi in db.PayrollPaymentItems
                             join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
                             join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
                             join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
                             join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                            where ppi.PayrollPayments_Id == null && si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFrom && ls.Timestamp <= dateTo
+                            where ppi.PayrollPayments_Id == null && si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
                             group ls by ls.PayrollPaymentItems_Id into x
                             select new { PayrollPaymentItems_Id = x.Key, LessonSession = x.ToList() }).ToList();
             
-            DateTime dateNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
+            //DateTime dateNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"));
             string lastHex_string = db.PayrollPayments.AsNoTracking().Max(x => x.No);
             int lastHex_int = int.Parse(
                 string.IsNullOrEmpty(lastHex_string) ? 0.ToString("X5") : lastHex_string,
@@ -325,6 +331,57 @@ namespace iSpeak.Controllers
 
             await db.SaveChangesAsync();
             return Json(new { status = "200", payroll_id = payrollPaymentsModels.Id }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region GenerateFullTime
+        public async Task<JsonResult> GenerateFullTime(int month, int year)
+        {
+            var firstDay = new DateTime(year, month, 1, 0, 0, 0);
+            var lastDay = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
+            var tutors = await (from u in db.User
+                                join ur in db.UserRole on u.Id equals ur.UserId
+                                join r in db.Role on ur.RoleId equals r.Id
+                                join hr in db.HourlyRates on u.Id equals hr.UserAccounts_Id
+                                where u.Active == true && r.Name == "Tutor" && hr.FullTimeTutorPayrate > 0
+                                orderby u.Firstname
+                                select new { u, r, hr }).ToListAsync();
+            string status;
+            string description_payroll = string.Format("Payroll {0:MMM yyyy}", lastDay);
+            int row_affected = 0;
+            if (tutors.Count > 0)
+            {
+                status = "200";
+                foreach (var tutor in tutors)
+                {
+                    var check = await db.PayrollPaymentItems
+                        .Where(x => x.UserAccounts_Id == tutor.u.Id && x.Description == description_payroll && x.Timestamp >= firstDay && x.Timestamp <= lastDay)
+                        .FirstOrDefaultAsync();
+
+                    if (check == null)
+                    {
+                        PayrollPaymentItemsModels payrollPaymentItemsModels = new PayrollPaymentItemsModels
+                        {
+                            Id = Guid.NewGuid(),
+                            Timestamp = lastDay,
+                            Description = description_payroll,
+                            Amount = tutor.hr.FullTimeTutorPayrate,
+                            UserAccounts_Id = tutor.u.Id
+                        };
+                        db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
+                        
+                        await db.SaveChangesAsync();
+                        row_affected++;
+                    }
+                }
+            }
+            else
+            {
+                status = "404";
+            }
+
+            if (row_affected == 0) { status = "404"; }
+
+            return Json(new { status, updated = row_affected });
         }
         #endregion
         #region GetDetailsPayments

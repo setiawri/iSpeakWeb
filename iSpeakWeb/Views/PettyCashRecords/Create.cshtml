@@ -9,7 +9,7 @@
 
     <!-- Content area -->
     <div class="content">
-        @using (Html.BeginForm())
+        @using (Html.BeginForm("Create", "PettyCashRecords", FormMethod.Post, new { id = "target" }))
         {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(model => model.No, new { @Value = "123" })
@@ -97,5 +97,9 @@
         if ('@ViewBag.SetExpense' == 'False') {
             $('.allow-set-expense').hide();
         }
+
+        $('#target').submit(function (e) {
+            $(this).find(':submit').attr('disabled', 'disabled'); //prevent double click on submit
+        });
     })
 </script>

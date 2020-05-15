@@ -34,6 +34,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Branch)</th>
                                 <th>@Html.DisplayNameFor(model => model.LessonPackages)</th>
                                 <th>@Html.DisplayNameFor(model => model.Rate)</th>
+                                <th>@Html.DisplayNameFor(model => model.FullTimeTutorPayrate)</th>
                                 <th>@Html.DisplayNameFor(model => model.Notes)</th>
                                 <th>Action</th>
                             </tr>
@@ -46,6 +47,7 @@
                                     <td>@Html.DisplayFor(modelItem => item.Branch)</td>
                                     <td>@Html.DisplayFor(modelItem => item.LessonPackages)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Rate)</td>
+                                    <td>@Html.DisplayFor(modelItem => item.FullTimeTutorPayrate)</td>
                                     <td>@Html.DisplayFor(modelItem => item.Notes)</td>
                                     <td>
                                         @if (ViewBag.HourlyRatesEdit)
@@ -82,7 +84,7 @@
             columnDefs: [{
                 orderable: false,
                 width: 140,
-                targets: [5]
+                targets: [6]
             }],
             dom: '<"datatable-header"fl><"datatable-scroll"t><"datatable-footer"ip>',
             language: {

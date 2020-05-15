@@ -20,6 +20,8 @@ namespace iSpeak.Models
         [Display(Name = "Tutor")]
         public string UserAccounts_Id { get; set; }
         public decimal Rate { get; set; }
+        [Display(Name = "Full Time Tutor Payrate")]
+        public decimal FullTimeTutorPayrate { get; set; }
         public string Notes { get; set; }
     }
 
@@ -33,6 +35,9 @@ namespace iSpeak.Models
         public string UserAccounts { get; set; }
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public decimal Rate { get; set; }
+        [Display(Name = "Full Time Tutor Payrate")]
+        [DisplayFormat(DataFormatString = "{0:N2}")]
+        public decimal FullTimeTutorPayrate { get; set; }
         public string Notes { get; set; }
     }
 }
