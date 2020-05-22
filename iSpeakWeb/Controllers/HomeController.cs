@@ -182,7 +182,7 @@ namespace iSpeak.Controllers
 
             BirthdayHome birthdayAlert = new BirthdayHome
             {
-                Reminders = await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed).ToListAsync(),
+                Reminders = await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed && x.Status_enumid != RemindersStatusEnum.Cancel).ToListAsync(),
                 ThisMonth = this_month,
                 NextMonth = next_month,
                 StudentPackages = student_packages,
@@ -323,9 +323,11 @@ namespace iSpeak.Controllers
         public async Task<JsonResult> ReminderByStatus(string key)
         {
             var user_login = await db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            var reminders = key == "all" 
-                ? await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id).ToListAsync() 
-                : await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id && x.Status_enumid != RemindersStatusEnum.Completed).ToListAsync();
+            var reminders = key == "all"
+                ? await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id).ToListAsync()
+                : await db.Reminders.Where(x => x.Branches_Id == user_login.Branches_Id
+                    && x.Status_enumid != RemindersStatusEnum.Completed 
+                    && x.Status_enumid != RemindersStatusEnum.Cancel).ToListAsync();
 
             List<RemindersViewModels> list = new List<RemindersViewModels>();
             foreach(var reminder in reminders)

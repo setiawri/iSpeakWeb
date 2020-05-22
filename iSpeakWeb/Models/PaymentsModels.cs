@@ -60,4 +60,19 @@ namespace iSpeak.Models
         public string Notes_Cancel { get; set; }
         public bool HasSession { get; set; }
     }
+
+    public class PaymentIndexSQL
+    {
+        public Guid Id { get; set; }
+        public string Branch { get; set; }
+        public DateTime Date { get; set; }
+        public string No { get; set; }
+        public int Cash { get; set; }
+        public int Debit { get; set; }
+        public int Consignment { get; set; }
+        public bool Cancelled { get; set; }
+        public bool Confirmed { get; set; }
+        public string Notes_Cancel { get; set; }
+        public bool Has_Session { get; set; }
+    }
 }

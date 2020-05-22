@@ -731,62 +731,60 @@
         })
 
         $('.btn-reminder-add').click(function () {
-            if ($('.reminder-add-date').val() == '') {
-                $('.reminder-add-validation').html('The Field Date is required.').show();
-            }
-            //else if ($('.reminder-add-desc').val() == '') {
-            //    $('.reminder-add-validation').html('The Field Description is required.').show();
-            //}
-            else {
-                $('.reminder-add-validation').html('').hide();
+            if (!event.detail || event.detail == 1) { //prevent double click on button
+                if ($('.reminder-add-date').val() == '') {
+                    $('.reminder-add-validation').html('The Field Date is required.').show();
+                }
+                else {
+                    $('.reminder-add-validation').html('').hide();
                 
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("ReminderAdd", "Home")',
-                    data: {
-                        timestamp: $('.reminder-add-date').val(),
-                        description: $('.reminder-add-desc').val()
-                    },
-                    success: function (data) {
-                        //Previous();
-                        //ReminderAddClear();
-                        location.reload();
-                    }, //end success
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                    } //end error
-                }); //end ajax
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("ReminderAdd", "Home")',
+                        data: {
+                            timestamp: $('.reminder-add-date').val(),
+                            description: $('.reminder-add-desc').val()
+                        },
+                        success: function (data) {
+                            //Previous();
+                            //ReminderAddClear();
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
             }
         });
 
         $('.btn-reminder-update').click(function () {
-            if ($('.reminder-edit-date').val() == '') {
-                $('.reminder-edit-validation').html('The Field Date is required.').show();
-            }
-            //else if ($('.reminder-edit-desc').val() == '') {
-            //    $('.reminder-edit-validation').html('The Field Description is required.').show();
-            //}
-            else {
-                $('.reminder-edit-validation').html('').hide();
+            if (!event.detail || event.detail == 1) { //prevent double click on button
+                if ($('.reminder-edit-date').val() == '') {
+                    $('.reminder-edit-validation').html('The Field Date is required.').show();
+                }
+                else {
+                    $('.reminder-edit-validation').html('').hide();
                 
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("ReminderUpdate", "Home")',
-                    data: {
-                        id: $('.reminder-edit-id').val(),
-                        timestamp: $('.reminder-edit-date').val(),
-                        description: $('.reminder-edit-desc').val(),
-                        status: $('.reminder-edit-status').val()
-                    },
-                    success: function (data) {
-                        //Previous();
-                        //ReminderAddClear();
-                        location.reload();
-                    }, //end success
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                    } //end error
-                }); //end ajax
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("ReminderUpdate", "Home")',
+                        data: {
+                            id: $('.reminder-edit-id').val(),
+                            timestamp: $('.reminder-edit-date').val(),
+                            description: $('.reminder-edit-desc').val(),
+                            status: $('.reminder-edit-status').val()
+                        },
+                        success: function (data) {
+                            //Previous();
+                            //ReminderAddClear();
+                            location.reload();
+                        }, //end success
+                        error: function (result) {
+                            bootbox.alert("Error " + result);
+                        } //end error
+                    }); //end ajax
+                }
             }
         });
     });
