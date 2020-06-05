@@ -13,8 +13,9 @@ namespace iSpeak.Models
         public string Name { get; set; }
         [Display(Name = "Total Hours")]
         public string TotalHours { get; set; }
-        [Display(Name = "Total Payable")]
+        [Display(Name = "Payable")]
         public string TotalPayable { get; set; }
+        public string Due { get; set; }
         public string Details { get; set; }
     }
 
@@ -27,6 +28,7 @@ namespace iSpeak.Models
         public string HourlyRate { get; set; }
         public string TravelCost { get; set; }
         public string Amount { get; set; }
+        public string Cancel { get; set; }
         public string Paid { get; set; }
     }
 }

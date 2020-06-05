@@ -65,7 +65,7 @@ namespace iSpeak.Controllers
 	                    INNER JOIN PaymentItems pi ON p.Id=pi.Payments_Id
 	                    INNER JOIN SaleInvoices si ON pi.ReferenceId=si.Id
 	                    INNER JOIN Branches b ON si.Branches_Id=b.Id
-	                    WHERE b.Id='c7252dc4-47d0-459b-bffd-619cc914bf85'
+	                    WHERE b.Id='" + user_login.Branches_Id + @"'
 	                    GROUP BY p.Id
                     ) x ON p.Id=x.Id
                     LEFT JOIN (
@@ -80,7 +80,7 @@ namespace iSpeak.Controllers
                 ").ToList();
             }
 
-            foreach(var item in items)
+            foreach (var item in items)
             {
                 list.Add(new PaymentsIndexModels
                 {

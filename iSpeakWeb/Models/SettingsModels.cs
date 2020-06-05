@@ -27,5 +27,6 @@ namespace iSpeak.Models
         public static Guid GUID_ResetPassword = new Guid("01f2d64d-f402-4a96-b854-128f9a9ae42f");
         public static Guid GUID_ShowOnlyOwnUserData = new Guid("70adb944-1917-4cd7-817d-6ca5fa789d5e");
         public static Guid GUID_FixSessionHours = new Guid("f647faa0-bab9-4e3a-9a25-42555a65ded5");
+        public static Guid GUID_PayrollRatesRoles = new Guid("65644f81-e712-4a72-966b-4ae1ee2462c2");
     }
 }

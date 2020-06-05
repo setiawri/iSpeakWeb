@@ -115,13 +115,19 @@ namespace iSpeak.Common
                 filterContext.Controller.ViewBag.PettyCashRecordsCreate = p.IsGranted(userlogin, "pettycashrecords_create");
                 #endregion
                 #region INTERNAL
+                #region Hourly Rates
+                filterContext.Controller.ViewBag.HourlyRatesIndex = p.IsGranted(userlogin, "hourlyrates_index");
+                filterContext.Controller.ViewBag.HourlyRatesCreate = p.IsGranted(userlogin, "hourlyrates_create");
+                filterContext.Controller.ViewBag.HourlyRatesEdit = p.IsGranted(userlogin, "hourlyrates_edit");
+                filterContext.Controller.ViewBag.HourlyRatesDelete = p.IsGranted(userlogin, "hourlyrates_delete");
+                #endregion
                 filterContext.Controller.ViewBag.ReportsNewStudent = p.IsGranted(userlogin, "reports_newstudent");
                 filterContext.Controller.ViewBag.ReportsPayroll = p.IsGranted(userlogin, "reports_payroll");
                 filterContext.Controller.ViewBag.ReportsPayrollPayments = p.IsGranted(userlogin, "reports_payrollpayments");
                 filterContext.Controller.ViewBag.ReportsProfitLoss = p.IsGranted(userlogin, "reports_profitloss");
                 filterContext.Controller.ViewBag.ReportsSendEmails = p.IsGranted(userlogin, "reports_sendemails");
 
-                if (filterContext.Controller.ViewBag.ReportsNewStudent == true || filterContext.Controller.ViewBag.ReportsPayroll == true || filterContext.Controller.ViewBag.ReportsPayrollPayments == true || filterContext.Controller.ViewBag.ReportsProfitLoss == true || filterContext.Controller.ViewBag.ReportsSendEmails == true)
+                if (filterContext.Controller.ViewBag.ReportsNewStudent == true || filterContext.Controller.ViewBag.ReportsPayroll == true || filterContext.Controller.ViewBag.ReportsPayrollPayments == true || filterContext.Controller.ViewBag.ReportsProfitLoss == true || filterContext.Controller.ViewBag.ReportsSendEmails == true || filterContext.Controller.ViewBag.HourlyRatesIndex == true)
                 {
                     filterContext.Controller.ViewBag.InternalMenu = "";
                 }
@@ -173,14 +179,8 @@ namespace iSpeak.Common
                 filterContext.Controller.ViewBag.LessonPackagesCreate = p.IsGranted(userlogin, "lessonpackages_create");
                 filterContext.Controller.ViewBag.LessonPackagesEdit = p.IsGranted(userlogin, "lessonpackages_edit");
                 #endregion
-                #region Hourly Rates
-                filterContext.Controller.ViewBag.HourlyRatesIndex = p.IsGranted(userlogin, "hourlyrates_index");
-                filterContext.Controller.ViewBag.HourlyRatesCreate = p.IsGranted(userlogin, "hourlyrates_create");
-                filterContext.Controller.ViewBag.HourlyRatesEdit = p.IsGranted(userlogin, "hourlyrates_edit");
-                filterContext.Controller.ViewBag.HourlyRatesDelete = p.IsGranted(userlogin, "hourlyrates_delete");
-                #endregion
-
-                if (filterContext.Controller.ViewBag.LanguagesIndex == true || filterContext.Controller.ViewBag.LessonTypesIndex == true || filterContext.Controller.ViewBag.LessonPackagesIndex == true || filterContext.Controller.ViewBag.HourlyRatesIndex == true)
+                
+                if (filterContext.Controller.ViewBag.LanguagesIndex == true || filterContext.Controller.ViewBag.LessonTypesIndex == true || filterContext.Controller.ViewBag.LessonPackagesIndex == true)
                 {
                     filterContext.Controller.ViewBag.MasterData_LessonsMenu = "";
                 }

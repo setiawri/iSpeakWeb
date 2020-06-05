@@ -199,6 +199,7 @@
     <Compile Include="Common\ExportExcel.cs" />
     <Compile Include="Common\IdentityExtension.cs" />
     <Compile Include="Common\Permission.cs" />
+    <Compile Include="Common\PreventDuplicateRequestAttribute.cs" />
     <Compile Include="Common\Select2Pagination.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\API\InvoiceController.cs" />

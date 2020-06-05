@@ -92,12 +92,13 @@ namespace iSpeak.Controllers
             //                    where r.Name.ToLower() == "tutor"
             //                    orderby u.Firstname
             //                    select new { u }).ToListAsync();
-            var tutors = await db.User.ToListAsync();
+            var tutors = await db.User.Where(x => x.Branches_Id == branch_id).ToListAsync();
 
             foreach (var tutor in tutors)
             {
                 decimal tot_hours = 0;
                 decimal tot_payable = 0;
+                decimal tot_due = 0;
                 var payrolls = (from ppi in db.PayrollPaymentItems
                                 join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
                                 join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
@@ -106,9 +107,15 @@ namespace iSpeak.Controllers
                                 group ppi.Amount by ls.PayrollPaymentItems_Id into x
                                 select new { PayrollPaymentItems_Id = x.Key, TotalAmount = x.ToList() }).ToList();
 
-                var payroll_manual = await db.PayrollPaymentItems
-                    .Where(x => x.UserAccounts_Id == tutor.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
-                    .OrderBy(x => x.Timestamp).ToListAsync();
+                //var payroll_manual = await db.PayrollPaymentItems
+                //    .Where(x => x.UserAccounts_Id == tutor.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+                //    .OrderBy(x => x.Timestamp).ToListAsync();
+
+                var payroll_manual = await (from ppi in db.PayrollPaymentItems
+                                            join u in db.User on ppi.UserAccounts_Id equals u.Id
+                                            where u.Branches_Id == branch_id && ppi.UserAccounts_Id == tutor.Id && ppi.Hour == 0 && ppi.Description != "" && ppi.Timestamp >= dateFrom && ppi.Timestamp <= dateTo
+                                            orderby ppi.Timestamp ascending
+                                            select new { ppi }).ToListAsync();
 
                 if (payrolls.Count > 0)
                 {
@@ -117,11 +124,16 @@ namespace iSpeak.Controllers
                         var ppi = await db.PayrollPaymentItems.Where(x => x.Id == payroll.PayrollPaymentItems_Id.Value).FirstOrDefaultAsync();
                         tot_hours += ppi.Hour;
                         tot_payable += ppi.Amount;
+                        if (!ppi.PayrollPayments_Id.HasValue && string.IsNullOrEmpty(ppi.CancelNotes))
+                        {
+                            tot_due += ppi.Amount; //jumlah yg belum dibayar (jika belum ada pembayaran payroll dan CancelNotes kosong)
+                        }
                     }
 
                     if (payroll_manual.Count > 0)
                     {
-                        tot_payable += payroll_manual.Sum(x => x.Amount);
+                        tot_payable += payroll_manual.Where(x => x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount);
+                        tot_due += payroll_manual.Where(x => x.ppi.PayrollPayments_Id == null && x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount);
                     }
 
                     list.Add(new TutorPayrollViewModels
@@ -130,6 +142,7 @@ namespace iSpeak.Controllers
                         Name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname,
                         TotalHours = string.Format("{0:N2}", tot_hours),
                         TotalPayable = string.Format("{0:N2}", tot_payable),
+                        Due = string.Format("{0:N2}", tot_due),
                         Details = "<a href='javascript:void(0)' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
                     });
                 }
@@ -142,8 +155,9 @@ namespace iSpeak.Controllers
                             TutorId = tutor.Id,
                             Name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname,
                             TotalHours = string.Format("{0:N2}", tot_hours),
-                            TotalPayable = string.Format("{0:N2}", payroll_manual.Sum(x => x.Amount)),
-                            Details = "<a href='#' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
+                            TotalPayable = string.Format("{0:N2}", payroll_manual.Where(x => x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount)),
+                            Due = string.Format("{0:N2}", payroll_manual.Where(x => x.ppi.PayrollPayments_Id == null && x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount)),
+                            Details = "<a href='javascript:void(0)' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
                         });
                     }
                 }
@@ -195,6 +209,7 @@ namespace iSpeak.Controllers
                     HourlyRate = ppi.PayrollPayments_Id == null ? "<a href='javascript:void(0)' data-toggle='modal' data-target='#modal_edit' onclick='EditPayrate(\"" + payroll.PayrollPaymentItems_Id.Value + "\",\"" + string.Format("{0:N2}", ppi.Hour) + "\",\"" + string.Format("{0:N2}", ppi.HourlyRate) + "\",\"" + string.Format("{0:N0}", ppi.TutorTravelCost) + "\")'>" + string.Format("{0:N2}", ppi.HourlyRate) + "</a>" : string.Format("{0:N2}", ppi.HourlyRate),
                     TravelCost = string.Format("{0:N0}", ppi.TutorTravelCost),
                     Amount = string.Format("{0:N0}", ppi.Amount),
+                    Cancel = string.Empty,
                     Paid = ppi.PayrollPayments_Id == null ? "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>" : "<span class='text-primary'><i class='icon-checkmark'></i></span>"
                 });
             }
@@ -204,8 +219,19 @@ namespace iSpeak.Controllers
                 .OrderBy(x => x.Timestamp).ToListAsync();
             foreach (var payroll in payroll_manual)
             {
-                if (!payroll.PayrollPayments_Id.HasValue)
+                if (!payroll.PayrollPayments_Id.HasValue && string.IsNullOrEmpty(payroll.CancelNotes))
                     payroll_total += payroll.Amount;
+
+                string cancel_action = "";
+                if (string.IsNullOrEmpty(payroll.CancelNotes))
+                {
+                    if (!payroll.PayrollPayments_Id.HasValue)
+                        cancel_action = "<a href='javascript:void(0)'><span class='badge badge-warning d-block' data-toggle='modal' data-target='#modal_cancel' onclick='Cancel_Modal(\"" + branch_id + "\",\"" + month + "\",\"" + year + "\",\"" + tutor_id + "\",\"" + payroll.Id + "\",\"" + payroll.Description + "\",\"" + string.Format("{0:N2}", payroll.Amount) + "\")'>Cancel</span></a>";
+                }
+                else
+                {
+                    cancel_action = "<span class='badge badge-flat border-danger d-block text-danger-600'>" + payroll.CancelNotes + "</span>";
+                }
 
                 list.Add(new TutorPayrollDetailsViewModels
                 {
@@ -216,6 +242,7 @@ namespace iSpeak.Controllers
                     HourlyRate = string.Empty,
                     TravelCost = string.Empty,
                     Amount = string.Format("{0:N0}", payroll.Amount),
+                    Cancel = cancel_action,
                     Paid = payroll.PayrollPayments_Id == null ? "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>" : "<span class='text-primary'><i class='icon-checkmark'></i></span>"
                 });
             }
@@ -245,6 +272,8 @@ namespace iSpeak.Controllers
             return Json(new
             {
                 status = "200",
+                year = payrollPaymentItemsModels.Timestamp.Value.Year,
+                month = payrollPaymentItemsModels.Timestamp.Value.Month,
                 timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", payrollPaymentItemsModels.Timestamp),
                 description,
                 amount = string.Format("{0:N0}", payrollPaymentItemsModels.Amount),
@@ -277,6 +306,17 @@ namespace iSpeak.Controllers
                 total = string.Format("{0:N0}", payroll_total - amount_before + ppi.Amount),
                 paid = "<span class='text-danger'><i class='icon-cancel-circle2'></i></span>"
             }, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+        #region Cancel Payroll
+        public async Task<JsonResult> CancelPayroll(Guid id, string notes)
+        {
+            var ppi = await db.PayrollPaymentItems.FindAsync(id);
+            ppi.CancelNotes = notes;
+            db.Entry(ppi).State = EntityState.Modified;
+
+            await db.SaveChangesAsync();
+            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region SavePayrollPayments
@@ -321,7 +361,7 @@ namespace iSpeak.Controllers
                 db.Entry(ppi).State = EntityState.Modified;
             }
 
-            var payrolls_manual = await db.PayrollPaymentItems.Where(x => x.PayrollPayments_Id == null && x.Hour == 0 && x.UserAccounts_Id == tutor_id && x.Timestamp >= dateFrom && x.Timestamp <= dateTo).ToListAsync();
+            var payrolls_manual = await db.PayrollPaymentItems.Where(x => x.PayrollPayments_Id == null && x.Hour == 0 && x.UserAccounts_Id == tutor_id && x.CancelNotes == null && x.Timestamp >= dateFrom && x.Timestamp <= dateTo).ToListAsync();
             foreach (var payroll in payrolls_manual)
             {
                 var ppi = await db.PayrollPaymentItems.FindAsync(payroll.Id);
@@ -334,7 +374,7 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region GenerateFullTime
-        public async Task<JsonResult> GenerateFullTime(int month, int year)
+        public async Task<JsonResult> GenerateFullTime(Guid branch_id, int month, int year)
         {
             var firstDay = new DateTime(year, month, 1, 0, 0, 0);
             var lastDay = new DateTime(year, month, DateTime.DaysInMonth(year, month), 23, 59, 59);
@@ -342,7 +382,7 @@ namespace iSpeak.Controllers
                                 join ur in db.UserRole on u.Id equals ur.UserId
                                 join r in db.Role on ur.RoleId equals r.Id
                                 join hr in db.HourlyRates on u.Id equals hr.UserAccounts_Id
-                                where u.Active == true && r.Name == "Tutor" && hr.FullTimeTutorPayrate > 0
+                                where u.Active == true && u.Branches_Id == branch_id && hr.FullTimeTutorPayrate > 0
                                 orderby u.Firstname
                                 select new { u, r, hr }).ToListAsync();
             string status;

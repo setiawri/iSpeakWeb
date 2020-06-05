@@ -219,8 +219,14 @@
         $('.select2').select2();
         $('.check-styled').uniform();
 
+        //$('.mdl-btn-submit').keypress(function (event) { //prevent users hitting enter
+        //    if (event.keyCode === 10 || event.keyCode === 13) {
+        //        event.preventDefault();
+        //    }
+        //});
+
         $('.mdl-btn-submit').click(function () {
-            if (!event.detail || event.detail == 1) { //only execute 1 times (prevent double click from users)
+            //if (!event.detail || event.detail == 1) { //only execute 1 times (prevent double click from users)
                 var bank_amount = 0;
                 if ($('.mdl-card').val() != '') {
                     bank_amount = parseFloat($('.mdl-card').val());
@@ -253,6 +259,8 @@
                 }
                 else {
                     $('.modal-validation').html('').hide();
+
+                    $('.mdl-btn-submit').attr('disabled', true);
 
                     var ids_selected = '';
                     $('.modal-bank-input div div label').find('.check-styled').each(function () {
@@ -290,7 +298,7 @@
                         } //end error
                     }); //end ajax
                 }
-            }
+            //}
         });
     });
 </script>

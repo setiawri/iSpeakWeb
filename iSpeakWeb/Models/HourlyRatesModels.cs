@@ -17,10 +17,10 @@ namespace iSpeak.Models
         [Display(Name = "Lesson Package")]
         public Guid? LessonPackages_Id { get; set; }
         [Required]
-        [Display(Name = "Tutor")]
+        [Display(Name = "Employee")]
         public string UserAccounts_Id { get; set; }
         public decimal Rate { get; set; }
-        [Display(Name = "Full Time Tutor Payrate")]
+        [Display(Name = "Full Time Payrate")]
         public decimal FullTimeTutorPayrate { get; set; }
         public string Notes { get; set; }
     }
@@ -31,11 +31,11 @@ namespace iSpeak.Models
         public string Branch { get; set; }
         [Display(Name = "Lesson Package")]
         public string LessonPackages { get; set; }
-        [Display(Name = "Tutor")]
+        [Display(Name = "Employee")]
         public string UserAccounts { get; set; }
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public decimal Rate { get; set; }
-        [Display(Name = "Full Time Tutor Payrate")]
+        [Display(Name = "Full Time Payrate")]
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public decimal FullTimeTutorPayrate { get; set; }
         public string Notes { get; set; }

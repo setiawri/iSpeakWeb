@@ -73,7 +73,7 @@
                             <div class="btn-toolbar">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-outline-primary form-control" data-toggle="modal" data-target="#modal_new"><i class="icon-plus22 mr-2"></i> Create New Payroll</button>
-                                    <button type="button" class="btn btn-outline-dark form-control" onclick="GenerateFullTime()"><i class="icon-stack-text mr-2"></i> Generate Full Time Tutor Payroll</button>
+                                    <button type="button" class="btn btn-outline-dark form-control" onclick="GenerateFullTime()"><i class="icon-stack-text mr-2"></i> Generate Full Time Payroll</button>
                                 </div>
                             </div>
                         </div>
@@ -86,6 +86,7 @@
                                 <th>@Html.DisplayNameFor(model => model.Name)</th>
                                 <th>@Html.DisplayNameFor(model => model.TotalHours)</th>
                                 <th>@Html.DisplayNameFor(model => model.TotalPayable)</th>
+                                <th>@Html.DisplayNameFor(model => model.Due)</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -98,6 +99,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.Name)</td>
                                         <td>@Html.DisplayFor(modelItem => item.TotalHours)</td>
                                         <td>@Html.DisplayFor(modelItem => item.TotalPayable)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Due)</td>
                                         <td></td>
                                     </tr>
                                 }
@@ -152,8 +154,8 @@
                                 <th>Hourly Rate</th>
                                 <th>Travel Cost</th>
                                 <th>Amount</th>
+                                <th>Action</th>
                                 <th>Paid</th>
-                                @*<th>Action</th>*@
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -298,6 +300,55 @@
             </div>
         </div>
         <!-- /edit payrate form modal -->
+        <!-- Cancel form modal -->
+        <div id="modal_cancel" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning">
+                        <h6 class="modal-title">Cancel Payroll</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-cancel-validation text-danger" style="display: none"></label>
+                            <div style="display: none">
+                                <input class="form-control mdl-cancel-id" />
+
+                                <input class="form-control mdl-cancel-branch_id" />
+                                <input class="form-control mdl-cancel-month" />
+                                <input class="form-control mdl-cancel-year" />
+                                <input class="form-control mdl-cancel-tutor_id" />
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Description</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-cancel-desc" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Amount</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control mdl-cancel-amount" readonly />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control mdl-cancel-reason" rows="2" placeholder="Reason Cancel"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-cancel-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /cancel form modal -->
         <!-- Pay form modal -->
         <div id="modal_pay" class="modal fade" tabindex="-1">
             <div class="modal-dialog">
@@ -393,6 +444,7 @@
                         row.Name,
                         row.TotalHours,
                         row.TotalPayable,
+                        row.Due,
                         row.Details
                     ]).draw();
                 });
@@ -433,6 +485,7 @@
                         row.HourlyRate,
                         row.TravelCost,
                         row.Amount,
+                        row.Cancel,
                         row.Paid
                     ]).draw();
                 });
@@ -457,11 +510,23 @@
         $('.mdl-edit-travel').val(travel);
     }
 
+    function Cancel_Modal(branch_id, month, year, tutor_id, id, desc, amount) {
+        $('.mdl-cancel-branch_id').val(branch_id);
+        $('.mdl-cancel-month').val(month);
+        $('.mdl-cancel-year').val(year);
+        $('.mdl-cancel-tutor_id').val(tutor_id);
+
+        $('.mdl-cancel-id').val(id);
+        $('.mdl-cancel-desc').val(desc);
+        $('.mdl-cancel-amount').val(amount);
+    }
+
     function GenerateFullTime() {
         $.ajax({
             type: "POST",
             url: '@Url.Action("GenerateFullTime", "Reports")',
             data: {
+                branch_id: $('#Branch').val(),
                 month: $('.period-month').val(),
                 year: $('.period-year').val()
             },
@@ -604,20 +669,21 @@
                         payroll_total: parseFloat($('.payroll-total').val().replace(/,/g, ''))
                     },
                     success: function (data) {
-                        var datatable = $('.datatable2').DataTable();
-                        datatable.row.add([
-                            data.timestamp,
-                            data.description,
-                            '',
-                            '',
-                            '',
-                            data.amount,
-                            data.paid
-                        ]).draw();
+                        //var datatable = $('.datatable2').DataTable();
+                        //datatable.row.add([
+                        //    data.timestamp,
+                        //    data.description,
+                        //    '',
+                        //    '',
+                        //    '',
+                        //    data.amount,
+                        //    data.paid
+                        //]).draw();
 
-                        $('.payroll-total').val(data.total);
-                        $('.mdl-paid').val(data.total);
+                        //$('.payroll-total').val(data.total);
+                        //$('.mdl-paid').val(data.total);
                         $('#modal_manual').modal('toggle');
+                        Details($('#Branch').val(), data.month, data.year, $('.mdl-tutor-id').val());
                     }, //end success
                     error: function (result) {
                         bootbox.alert("Error " + result);
@@ -661,12 +727,39 @@
             }); //end ajax
         });
 
+        $('.mdl-cancel-btn-submit').click(function () {
+            if ($('.mdl-cancel-reason').val() == '') {
+                $('.modal-cancel-validation').html('The field Reason Cancel is required.').show();
+            }
+            else {
+                $('.modal-cancel-validation').html('').hide();
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CancelPayroll", "Reports")',
+                    data: {
+                        id: $('.mdl-cancel-id').val(),
+                        notes: $('.mdl-cancel-reason').val()
+                    },
+                    success: function (data) {
+                        $('#modal_cancel').modal('toggle');
+                        Details($('.mdl-cancel-branch_id').val(), $('.mdl-cancel-month').val(), $('.mdl-cancel-year').val(), $('.mdl-cancel-tutor_id').val());
+                    }, //end success
+                    error: function (result) {
+                        bootbox.alert("Error " + result);
+                    } //end error
+                }); //end ajax
+            }
+        });
+
         $('.mdl-btn-submit').click(function () {
             if ($('.mdl-paid').val() == '0.00') {
                 $('.modal-validation').html('The field Total Payment is required.').show();
             }
             else {
                 $('.modal-validation').html('').hide();
+
+                $('.mdl-btn-submit').attr('disabled', true);
 
                 $.ajax({
                     type: "POST",
@@ -681,8 +774,11 @@
                         notes: $('.mdl-notes').val()
                     },
                     success: function (data) {
+                        $('#modal_pay').modal('toggle');
+                        Previous();
                         var url = '@Url.Action("Print", "Reports", new { id = "_id" })';
-                        window.location.href = url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val();
+                        window.open(url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val(), '_blank');
+                        //window.location.href = url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val();
                         @*window.location.href = '@Url.Action("PayrollPayments", "Reports")';*@
                     }, //end success
                     error: function (result) {

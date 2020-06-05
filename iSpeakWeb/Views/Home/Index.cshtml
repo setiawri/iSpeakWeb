@@ -80,7 +80,7 @@
                                 <div class="col-lg-12 reminder-list animated bounceInLeft">
                                     <div class="card">
                                         <div class="card-body">
-                                            <a href="#" onclick="Next()" class="btn btn-sm btn-success mb-1">Create Reminder<i class="icon-plus22 ml-2"></i></a>
+                                            <a href="javascript:void(0)" onclick="Next()" class="btn btn-sm btn-success mb-1">Create Reminder<i class="icon-plus22 ml-2"></i></a>
                                             <div style="float: right">
                                                 <select class="form-control select2 reminder-by-status">
                                                     <option value="not_completed">Not Completed</option>
@@ -168,7 +168,7 @@
                                                 </div>
                                             </fieldset>
                                             <div>
-                                                <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
+                                                <a href="javascript:void(0)" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
                                                 <button type="button" class="btn btn-sm btn-primary btn-reminder-add">Submit <i class="icon-paperplane ml-2"></i></button>
                                             </div>
                                         </div>
@@ -215,7 +215,7 @@
                                                 </div>
                                             </fieldset>
                                             <div>
-                                                <a href="#" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
+                                                <a href="javascript:void(0)" onclick="Previous()" class="btn btn-sm btn-secondary">Back to List <i class="icon-circle-left2 ml-2"></i></a>
                                                 <button type="button" class="btn btn-sm btn-primary btn-reminder-update">Save <i class="icon-checkmark4 ml-2"></i></button>
                                             </div>
                                         </div>
@@ -708,35 +708,46 @@
 
         $('.reminder-by-status').change(function () {
             $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("ReminderByStatus", "Home")',
-                    data: {
-                        key: $('.reminder-by-status').val()
-                    },
+                type: "POST",
+                url: '@Url.Action("ReminderByStatus", "Home")',
+                data: {
+                    key: $('.reminder-by-status').val()
+                },
                 success: function (data) {
-                        dt_reminders.clear().draw();
-                        $.each(data.obj, function (index, row) {
-                            dt_reminders.row.add([
-                                row.Timestamp,
-                                row.Description,
-                                row.Status,
-                                row.Action_Render
-                            ]).draw();
-                        });
-                    }, //end success
-                    error: function (result) {
-                        bootbox.alert("Error " + result);
-                    } //end error
-                }); //end ajax
-        })
+                    dt_reminders.clear().draw();
+                    $.each(data.obj, function (index, row) {
+                        dt_reminders.row.add([
+                            row.Timestamp,
+                            row.Description,
+                            row.Status,
+                            row.Action_Render
+                        ]).draw();
+                    });
+                }, //end success
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                } //end error
+            }); //end ajax
+        });
+
+        $('.btn-reminder-add, .btn-reminder-update').keypress(function (event) { //prevent users hitting enter
+            if (event.keyCode === 10 || event.keyCode === 13) {
+                event.preventDefault();
+            }
+        });
 
         $('.btn-reminder-add').click(function () {
-            if (!event.detail || event.detail == 1) { //prevent double click on button
+            //if (!event.detail || event.detail == 1) { //prevent double click on button
                 if ($('.reminder-add-date').val() == '') {
                     $('.reminder-add-validation').html('The Field Date is required.').show();
                 }
+                else if ($('.reminder-add-desc').val() == '') {
+                    $('.reminder-add-validation').html('The Field Description is required.').show();
+                }
                 else {
                     $('.reminder-add-validation').html('').hide();
+
+                    $('.btn-reminder-add').attr('disabled', true);
                 
                     $.ajax({
                         type: "POST",
@@ -755,7 +766,7 @@
                         } //end error
                     }); //end ajax
                 }
-            }
+            //}
         });
 
         $('.btn-reminder-update').click(function () {

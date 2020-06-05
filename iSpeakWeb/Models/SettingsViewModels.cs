@@ -35,5 +35,9 @@ namespace iSpeak.Models
         [Display(Name = "Fix Session Hours")]
         public string FixSessionHours { get; set; }
         public string FixSessionHours_Notes { get; set; }
+
+        [Display(Name = "Payroll Rates Roles")]
+        public List<string> PayrollRatesRoles { get; set; }
+        public string PayrollRatesRoles_Notes { get; set; }
     }
 }

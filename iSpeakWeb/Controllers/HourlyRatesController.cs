@@ -1,5 +1,6 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -52,14 +53,15 @@ namespace iSpeak.Controllers
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }
             else
             {
+                string[] payroll_rates_roles = db.Settings.Find(SettingsValue.GUID_PayrollRatesRoles).Value_String.Split(',');
                 var users = (from u in db.User
                              join ur in db.UserRole on u.Id equals ur.UserId
                              join r in db.Role on ur.RoleId equals r.Id
-                             where r.Name == "Tutor"
+                             where u.Active == true && payroll_rates_roles.Contains(r.Id)
                              orderby u.Firstname
                              select new { u }).ToList();
                 List<object> user_list = new List<object>();
-                foreach (var item in users)
+                foreach (var item in users.DistinctBy(x => x.u.Id))
                 {
                     user_list.Add(new
                     {
@@ -114,10 +116,11 @@ namespace iSpeak.Controllers
                 return RedirectToAction("Index");
             }
 
+            string[] payroll_rates_roles = db.Settings.Find(SettingsValue.GUID_PayrollRatesRoles).Value_String.Split(',');
             var users = (from u in db.User
                          join ur in db.UserRole on u.Id equals ur.UserId
                          join r in db.Role on ur.RoleId equals r.Id
-                         where r.Name == "Tutor"
+                         where u.Active == true && payroll_rates_roles.Contains(r.Id)
                          orderby u.Firstname
                          select new { u }).ToList();
             List<object> user_list = new List<object>();
@@ -179,10 +182,11 @@ namespace iSpeak.Controllers
                     return HttpNotFound();
                 }
 
+                string[] payroll_rates_roles = db.Settings.Find(SettingsValue.GUID_PayrollRatesRoles).Value_String.Split(',');
                 var users = (from u in db.User
                              join ur in db.UserRole on u.Id equals ur.UserId
                              join r in db.Role on ur.RoleId equals r.Id
-                             where r.Name == "Tutor"
+                             where u.Active == true && payroll_rates_roles.Contains(r.Id)
                              orderby u.Firstname
                              select new { u }).ToList();
                 List<object> user_list = new List<object>();
@@ -246,10 +250,11 @@ namespace iSpeak.Controllers
                 return RedirectToAction("Index");
             }
 
+            string[] payroll_rates_roles = db.Settings.Find(SettingsValue.GUID_PayrollRatesRoles).Value_String.Split(',');
             var users = (from u in db.User
                          join ur in db.UserRole on u.Id equals ur.UserId
                          join r in db.Role on ur.RoleId equals r.Id
-                         where r.Name == "Tutor"
+                         where u.Active == true && payroll_rates_roles.Contains(r.Id)
                          orderby u.Firstname
                          select new { u }).ToList();
             List<object> user_list = new List<object>();

@@ -151,6 +151,7 @@
                     </a>
                     <div class="dropdown-menu">
                         @if (ViewBag.ReportsNewStudent) { <a href="@Url.Action("NewStudent", "Reports")" class="dropdown-item">New Student</a> }
+                        @if (ViewBag.HourlyRatesIndex) { <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Payroll Rates</a> }
                         @if (ViewBag.ReportsPayroll) { <a href="@Url.Action("Payroll", "Reports")" class="dropdown-item">Payroll</a> }
                         @if (ViewBag.ReportsPayrollPayments) { <a href="@Url.Action("PayrollPayments", "Reports")" class="dropdown-item">Payroll Payments</a> }
                         @if (ViewBag.ReportsProfitLoss) { <a href="@Url.Action("ProfitLoss", "Reports")" class="dropdown-item">Profit &amp; Loss</a> }
@@ -177,7 +178,6 @@
                                 @if (ViewBag.LanguagesIndex) { <a href="@Url.Action("Index", "Languages")" class="dropdown-item">Languages</a> }
                                 @if (ViewBag.LessonTypesIndex) { <a href="@Url.Action("Index", "LessonTypes")" class="dropdown-item">Lesson Types</a> }
                                 @if (ViewBag.LessonPackagesIndex) { <a href="@Url.Action("Index", "LessonPackages")" class="dropdown-item">Lesson Packages</a> }
-                                @if (ViewBag.HourlyRatesIndex) { <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Hourly Rates</a> }
                             </div>
                         </div>
                         <div class="dropdown-submenu" @(ViewBag.MasterData_ExpensesMenu == "" ? "" : Html.Raw(ViewBag.MasterData_ExpensesMenu))>
@@ -240,7 +240,7 @@
             </span>
         </div>
         <div class="mt-2">
-            <span class="badge badge-success">v.200522</span>
+            <span class="badge badge-success">v.200605</span>
         </div>
     </div>
     <!-- /footer -->

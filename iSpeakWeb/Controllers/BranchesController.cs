@@ -1,5 +1,6 @@
 ﻿using iSpeak.Common;
 using iSpeak.Models;
+using iSpeakWeb.Common;
 using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
@@ -103,8 +104,14 @@ namespace iSpeak.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [PreventDuplicateRequest]
         public async Task<ActionResult> Create([Bind(Include = "Id,Name,Address,PhoneNumber,Notes,InvoiceHeaderText,Active")] BranchesModels branchesModels)
         {
+            if (ModelState.ContainsKey("Duplicate"))
+            {
+                return RedirectToAction("Index");
+            }
+
             if (ModelState.IsValid)
             {
                 branchesModels.Id = Guid.NewGuid();

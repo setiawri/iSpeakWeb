@@ -30,6 +30,7 @@ namespace iSpeak.Controllers
                 var settings_sooud = await db.Settings.FindAsync(SettingsValue.GUID_ShowOnlyOwnUserData);
                 var settings_resetpass = await db.Settings.FindAsync(SettingsValue.GUID_ResetPassword);
                 var settings_fsh = await db.Settings.FindAsync(SettingsValue.GUID_FixSessionHours);
+                var settings_prr = await db.Settings.FindAsync(SettingsValue.GUID_PayrollRatesRoles);
 
                 List<string> role_for_reminder = new List<string>();
                 if (!string.IsNullOrEmpty(settings_rafr.Value_String))
@@ -61,6 +62,16 @@ namespace iSpeak.Controllers
                     }
                 }
 
+                List<string> role_for_payroll_rates = new List<string>();
+                if (!string.IsNullOrEmpty(settings_prr.Value_String))
+                {
+                    string[] ids = settings_prr.Value_String.Split(',');
+                    foreach (var id in ids)
+                    {
+                        role_for_payroll_rates.Add(id);
+                    }
+                }
+
                 SettingsViewModels settingsViewModels = new SettingsViewModels()
                 {
                     AutoEntryForCashPayments = settings_aefcp.Value_Guid ?? Guid.Empty,
@@ -76,7 +87,9 @@ namespace iSpeak.Controllers
                     ResetPassword = settings_resetpass.Value_String,
                     ResetPassword_Notes = settings_resetpass.Notes,
                     FixSessionHours = settings_fsh.Value_String,
-                    FixSessionHours_Notes = settings_fsh.Notes
+                    FixSessionHours_Notes = settings_fsh.Notes,
+                    PayrollRatesRoles = role_for_payroll_rates,
+                    PayrollRatesRoles_Notes = settings_prr.Notes
                 };
 
                 ViewBag.listCategory = new SelectList(db.PettyCashRecordsCategories.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
@@ -87,7 +100,7 @@ namespace iSpeak.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Index([Bind(Include = "AutoEntryForCashPayments,AutoEntryForCashPayments_Notes,UserSetRoleAllowed,UserSetRoleAllowed_Notes,RoleAccessForReminders,RoleAccessForReminders_Notes,FullAccessForTutorSchedules,FullAccessForTutorSchedules_Notes,ShowOnlyOwnUserData,ShowOnlyOwnUserData_Notes,ResetPassword,ResetPassword_Notes")] SettingsViewModels settingsViewModels)
+        public async Task<ActionResult> Index([Bind(Include = "AutoEntryForCashPayments,AutoEntryForCashPayments_Notes,UserSetRoleAllowed,UserSetRoleAllowed_Notes,RoleAccessForReminders,RoleAccessForReminders_Notes,FullAccessForTutorSchedules,FullAccessForTutorSchedules_Notes,ShowOnlyOwnUserData,ShowOnlyOwnUserData_Notes,ResetPassword,ResetPassword_Notes,PayrollRatesRoles,PayrollRatesRoles_Notes")] SettingsViewModels settingsViewModels)
         {
             if (settingsViewModels.AutoEntryForCashPayments == Guid.Empty || settingsViewModels.AutoEntryForCashPayments == null)
             {
@@ -130,6 +143,11 @@ namespace iSpeak.Controllers
                 }
             }
 
+            if (settingsViewModels.PayrollRatesRoles == null)
+            {
+                ModelState.AddModelError("ValidationMessage", "The field Payroll Rates Roles is required.");
+            }
+
             if (ModelState.IsValid)
             {
                 SettingsModels settingsModels_aefcp = await db.Settings.FindAsync(SettingsValue.GUID_AutoEntryForCashPayments);
@@ -161,6 +179,11 @@ namespace iSpeak.Controllers
                 settingsModels_resetpass.Value_String = settingsViewModels.ResetPassword;
                 settingsModels_resetpass.Notes = settingsViewModels.ResetPassword_Notes;
                 db.Entry(settingsModels_resetpass).State = EntityState.Modified;
+
+                SettingsModels settingsModels_prr = await db.Settings.FindAsync(SettingsValue.GUID_PayrollRatesRoles);
+                settingsModels_prr.Value_String = string.Join(",", settingsViewModels.PayrollRatesRoles);
+                settingsModels_prr.Notes = settingsViewModels.PayrollRatesRoles_Notes;
+                db.Entry(settingsModels_prr).State = EntityState.Modified;
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");

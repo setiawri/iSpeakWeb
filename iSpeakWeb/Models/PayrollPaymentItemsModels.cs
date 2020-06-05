@@ -20,5 +20,6 @@ namespace iSpeak.Models
         public int TutorTravelCost { get; set; }
         public decimal Amount { get; set; }
         public string UserAccounts_Id { get; set; }
+        public string CancelNotes { get; set; }
     }
 }
