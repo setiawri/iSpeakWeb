@@ -943,13 +943,16 @@ namespace iSpeak.Controllers
                     mail.AlternateViews.Add(view);
 
                     client.UseDefaultCredentials = false;
-                    //client.Host = "relay-hosting.secureserver.net"; //godaddy
-                    client.Host = "smtp.gmail.com"; //local
-                    //client.Port = 25; //godaddy
-                    client.Port = 587; //local
-                    client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
-                    //client.EnableSsl = false; //godaddy
-                    client.EnableSsl = true; //local
+
+                    client.Host = "relay-hosting.secureserver.net"; //godaddy
+                    client.Port = 25; //godaddy
+                    client.EnableSsl = false; //godaddy
+
+                    //client.Host = "smtp.gmail.com"; //local
+                    //client.Port = 587; //local
+                    //client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
+                    //client.EnableSsl = true; //local
+                    
                     client.Send(mail);
                 }
 
@@ -958,18 +961,6 @@ namespace iSpeak.Controllers
 
             ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(emailSenderViewModels);
-        }
-
-        private AlternateView GetEmbeddedImage(string path)
-        {
-            LinkedResource res = new LinkedResource(path)
-            {
-                ContentId = Guid.NewGuid().ToString()
-            };
-            string htmlBody = @"<img src='cid:" + res.ContentId + @"'/>";
-            AlternateView alternateView = AlternateView.CreateAlternateViewFromString(htmlBody, null, System.Net.Mime.MediaTypeNames.Text.Html);
-            alternateView.LinkedResources.Add(res);
-            return alternateView;
         }
     }
 }
