@@ -206,7 +206,9 @@ namespace iSpeak.Controllers
                     Timestamp = string.Format("{0:yyyy/MM/dd HH:mm}", payroll.LessonSession.Select(x => x.Timestamp).FirstOrDefault()), //string.Format("{0:yyyy/MM/dd HH:mm}", TimeZoneInfo.ConvertTimeFromUtc(payroll.LessonSession.Select(x => x.Timestamp).FirstOrDefault(), TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time"))),
                     Description = students,
                     SessionHours = string.Format("{0:N2}", ppi.Hour),
-                    HourlyRate = ppi.PayrollPayments_Id == null ? "<a href='javascript:void(0)' data-toggle='modal' data-target='#modal_edit' onclick='EditPayrate(\"" + payroll.PayrollPaymentItems_Id.Value + "\",\"" + string.Format("{0:N2}", ppi.Hour) + "\",\"" + string.Format("{0:N2}", ppi.HourlyRate) + "\",\"" + string.Format("{0:N0}", ppi.TutorTravelCost) + "\")'>" + string.Format("{0:N2}", ppi.HourlyRate) + "</a>" : string.Format("{0:N2}", ppi.HourlyRate),
+                    HourlyRate = ppi.PayrollPayments_Id == null 
+                        ? "<a href='javascript:void(0)' data-toggle='modal' data-target='#modal_edit' onclick='EditPayrate(\"" + branch_id + "\",\"" + month + "\",\"" + year + "\",\"" + tutor_id + "\",\"" + payroll.PayrollPaymentItems_Id.Value + "\",\"" + string.Format("{0:N2}", ppi.Hour) + "\",\"" + string.Format("{0:N2}", ppi.HourlyRate) + "\",\"" + string.Format("{0:N0}", ppi.TutorTravelCost) + "\")'>" + string.Format("{0:N2}", ppi.HourlyRate) + "</a>" 
+                        : string.Format("{0:N2}", ppi.HourlyRate),
                     TravelCost = string.Format("{0:N0}", ppi.TutorTravelCost),
                     Amount = string.Format("{0:N0}", ppi.Amount),
                     Cancel = string.Empty,
@@ -857,7 +859,7 @@ namespace iSpeak.Controllers
             var customers = await (from u in db.User
                                    join ur in db.UserRole on u.Id equals ur.UserId
                                    join r in db.Role on ur.RoleId equals r.Id
-                                   where r.Name.ToLower() == "student"
+                                   where u.Active ==true && r.Name.ToLower() == "student"
                                    select new { u }).ToListAsync();
             foreach (var customer in customers)
             {
@@ -900,7 +902,8 @@ namespace iSpeak.Controllers
                 {
                     DirectoryInfo di = Directory.CreateDirectory(Dir);
                 }
-                string namaFile = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                string extension = Path.GetExtension(file.FileName);
+                string namaFile = Guid.NewGuid().ToString() + extension;
                 string fullPath = Path.Combine(Dir, namaFile);
                 file.SaveAs(fullPath);
 
@@ -910,36 +913,43 @@ namespace iSpeak.Controllers
                     mail.From = new MailAddress(emailSenderViewModels.From);
                     mail.To.Add(string.Join(",", list_mailTo));
                     mail.Subject = emailSenderViewModels.Subject;
+
+                    Attachment att = new Attachment(fullPath);
+                    mail.Attachments.Add(att);
+
                     mail.IsBodyHtml = true;
 
-                    //mail.Body = string.Format("<h2>{0}</h2><img src='{1}' alt='iSpeak' title='iSpeak' style='display:block' />"
-                    //    , emailSenderViewModels.Body
-                    //    , HttpContext.Request.Url.Scheme + "://" + HttpContext.Request.Url.Host + ":" + HttpContext.Request.Url.Port + "/assets/email/" + namaFile);
-
-                    var inlineImage = new LinkedResource(fullPath)
-                    {
-                        ContentId = Guid.NewGuid().ToString()
-                    };
-
+                    string content_id = Guid.NewGuid().ToString();
                     string htmlBody = string.Format(@"
                         <img src=""cid:{0}"" /><br />
                         <b>{1}</b>
-                    ", inlineImage.ContentId, emailSenderViewModels.Footer.Replace("\n", "<br />"));
+                    ", content_id, emailSenderViewModels.Footer.Replace("\n", "<br />"));
 
-                    var view = AlternateView.CreateAlternateViewFromString(htmlBody, null, System.Net.Mime.MediaTypeNames.Text.Html);
-                    view.LinkedResources.Add(inlineImage);
+                    var view = AlternateView.CreateAlternateViewFromString(htmlBody, System.Text.Encoding.UTF8, System.Net.Mime.MediaTypeNames.Text.Html);
+                    string mediaType;
+                    if (extension == "gif") { mediaType = System.Net.Mime.MediaTypeNames.Image.Gif; }
+                    else
+                    {
+                        mediaType = System.Net.Mime.MediaTypeNames.Image.Jpeg;
+                    }
+                    LinkedResource img = new LinkedResource(fullPath, mediaType);
+                    img.ContentId = content_id;
+                    img.ContentType.MediaType = mediaType;
+                    img.TransferEncoding = System.Net.Mime.TransferEncoding.Base64;
+                    img.ContentType.Name = img.ContentId;
+                    img.ContentLink = new Uri("cid:" + img.ContentId);
+                    view.LinkedResources.Add(img);
+                    
                     mail.AlternateViews.Add(view);
 
-                    Attachment att = new Attachment(fullPath);
-                    att.ContentDisposition.Inline = true;
-                    att.ContentDisposition.FileName = namaFile;
-                    mail.Attachments.Add(att);
-
                     client.UseDefaultCredentials = false;
-                    client.Host = "relay-hosting.secureserver.net"; //"smtp.gmail.com";
-                    client.Port = 25; //587;
-                    //client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
-                    client.EnableSsl = false;
+                    //client.Host = "relay-hosting.secureserver.net"; //godaddy
+                    client.Host = "smtp.gmail.com"; //local
+                    //client.Port = 25; //godaddy
+                    client.Port = 587; //local
+                    client.Credentials = new System.Net.NetworkCredential(emailSenderViewModels.From, emailSenderViewModels.Password);
+                    //client.EnableSsl = false; //godaddy
+                    client.EnableSsl = true; //local
                     client.Send(mail);
                 }
 
@@ -948,6 +958,18 @@ namespace iSpeak.Controllers
 
             ViewBag.listLanguages = new SelectList(db.Languages.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
             return View(emailSenderViewModels);
+        }
+
+        private AlternateView GetEmbeddedImage(string path)
+        {
+            LinkedResource res = new LinkedResource(path)
+            {
+                ContentId = Guid.NewGuid().ToString()
+            };
+            string htmlBody = @"<img src='cid:" + res.ContentId + @"'/>";
+            AlternateView alternateView = AlternateView.CreateAlternateViewFromString(htmlBody, null, System.Net.Mime.MediaTypeNames.Text.Html);
+            alternateView.LinkedResources.Add(res);
+            return alternateView;
         }
     }
 }

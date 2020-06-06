@@ -270,6 +270,11 @@
                             <label class="modal-edit-validation text-danger" style="display: none"></label>
                             <div style="display: none">
                                 <input type="text" class="form-control mdl-edit-id">
+
+                                <input class="form-control mdl-edit-branch_id" />
+                                <input class="form-control mdl-edit-month" />
+                                <input class="form-control mdl-edit-year" />
+                                <input class="form-control mdl-edit-tutor_id" />
                             </div>
                             <div class="form-group row">
                                 <label class="col-form-label col-sm-4">Session Hour</label>
@@ -503,7 +508,12 @@
         $('.payroll-details').show();
     }
 
-    function EditPayrate(id, hour, rate, travel) {
+    function EditPayrate(branch_id, month, year, tutor_id, id, hour, rate, travel) {
+        $('.mdl-edit-branch_id').val(branch_id);
+        $('.mdl-edit-month').val(month);
+        $('.mdl-edit-year').val(year);
+        $('.mdl-edit-tutor_id').val(tutor_id);
+
         $('.mdl-edit-id').val(id);
         $('.mdl-edit-hour').val(hour);
         $('.mdl-edit-rate').val(rate);
@@ -718,8 +728,7 @@
                     $('.payroll-total').val(data.total);
                     $('.mdl-paid').val(data.total);
                     $('#modal_edit').modal('toggle');
-
-                    Previous();
+                    Details($('.mdl-edit-branch_id').val(), $('.mdl-edit-month').val(), $('.mdl-edit-year').val(), $('.mdl-edit-tutor_id').val());
                 }, //end success
                 error: function (result) {
                     bootbox.alert("Error " + result);
