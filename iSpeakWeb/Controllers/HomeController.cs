@@ -218,21 +218,36 @@ namespace iSpeak.Controllers
                 Description = description,
                 Status_enumid = RemindersStatusEnum.New
             };
-            db.Reminders.Add(remindersModels);
 
-            ActivityLogsModels activityLogsModels = new ActivityLogsModels
+            string status;
+            DateTime dateEnd = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second);
+            DateTime dateStart = dateEnd.AddSeconds(-10); //range time = 10 seconds
+            var reminderCheck = await db.Reminders.Where(x => x.Branches_Id == remindersModels.Branches_Id
+                                                            && x.Timestamp >= dateStart && x.Timestamp <= dateEnd
+                                                            && x.Description == remindersModels.Description
+                                                            && x.Status_enumid == remindersModels.Status_enumid
+                                                        ).FirstOrDefaultAsync();
+            if (reminderCheck != null) { status = "300"; }
+            else
             {
-                Id = Guid.NewGuid(),
-                Timestamp = DateTime.UtcNow,
-                TableName = "Reminders",
-                RefId = remindersModels.Id,
-                Description = "[New] " + description,
-                UserAccounts_Id = user_login.Id
-            };
-            db.ActivityLogs.Add(activityLogsModels);
+                status = "200";
+                db.Reminders.Add(remindersModels);
 
-            await db.SaveChangesAsync();
-            return Json(new { status = "200" }, JsonRequestBehavior.AllowGet);
+                ActivityLogsModels activityLogsModels = new ActivityLogsModels
+                {
+                    Id = Guid.NewGuid(),
+                    Timestamp = DateTime.UtcNow,
+                    TableName = "Reminders",
+                    RefId = remindersModels.Id,
+                    Description = "[New] " + description,
+                    UserAccounts_Id = user_login.Id
+                };
+                db.ActivityLogs.Add(activityLogsModels);
+
+                await db.SaveChangesAsync();
+            }
+
+            return Json(new { status }, JsonRequestBehavior.AllowGet);
         }
         #endregion
         #region Reminder Update

@@ -337,68 +337,92 @@ namespace iSpeak.Controllers
                 Confirmed = false,
                 IsTransfer = (bank_type == "Transfer") ? true : false
             };
-            db.Payments.Add(paymentsModels);
 
-            int total_paid = cash_amount + bank_amount + consignment_amount;
-            string[] ids = invoices_id.Split(',');
-            for (int i = ids.Length - 1; i >= 0; i--)  //foreach (string id in ids)
+            string status; Guid payment_id;
+            DateTime dateStart = DateTime.UtcNow.AddSeconds(-10); //range time = 10 seconds
+            DateTime dateEnd = DateTime.UtcNow;
+            var paymentCheck = db.Payments.Where(x =>
+                                            x.Timestamp >= dateStart && x.Timestamp <= dateEnd
+                                            && x.CashAmount == paymentsModels.CashAmount
+                                            && x.DebitAmount == paymentsModels.DebitAmount
+                                            && x.DebitBank == paymentsModels.DebitBank
+                                            && x.DebitOwnerName == paymentsModels.DebitOwnerName
+                                            && x.DebitNumber == paymentsModels.DebitNumber
+                                            && x.DebitRefNo == paymentsModels.DebitRefNo
+                                            && x.Consignments_Id == paymentsModels.Consignments_Id
+                                            && x.ConsignmentAmount == paymentsModels.ConsignmentAmount
+                                            && x.Notes == paymentsModels.Notes
+                                            && x.Cancelled == paymentsModels.Cancelled
+                                            && x.Confirmed == paymentsModels.Confirmed
+                                            && x.IsTransfer == paymentsModels.IsTransfer
+                                        ).FirstOrDefault();
+            if (paymentCheck != null) { status = "300"; payment_id = paymentCheck.Id; } //duplicate
+            else
             {
-                if (total_paid > 0)
-                {
-                    string id_saleinvoice = ids[i];
-                    SaleInvoicesModels saleInvoicesModels = db.SaleInvoices.Where(x => x.Id.ToString() == id_saleinvoice).FirstOrDefault();
-                    int due_inv = saleInvoicesModels.Due;
-                    if (total_paid >= due_inv)
-                    {
-                        saleInvoicesModels.Due = 0;
-                        total_paid -= due_inv;
-                    }
-                    else
-                    {
-                        saleInvoicesModels.Due -= total_paid;
-                        total_paid = 0;
-                    }
-                    db.Entry(saleInvoicesModels).State = EntityState.Modified;
+                status = "200"; payment_id = paymentsModels.Id;
+                db.Payments.Add(paymentsModels);
 
-                    PaymentItemsModels paymentItemsModels = new PaymentItemsModels
+                int total_paid = cash_amount + bank_amount + consignment_amount;
+                string[] ids = invoices_id.Split(',');
+                for (int i = ids.Length - 1; i >= 0; i--)  //foreach (string id in ids)
+                {
+                    if (total_paid > 0)
+                    {
+                        string id_saleinvoice = ids[i];
+                        SaleInvoicesModels saleInvoicesModels = db.SaleInvoices.Where(x => x.Id.ToString() == id_saleinvoice).FirstOrDefault();
+                        int due_inv = saleInvoicesModels.Due;
+                        if (total_paid >= due_inv)
+                        {
+                            saleInvoicesModels.Due = 0;
+                            total_paid -= due_inv;
+                        }
+                        else
+                        {
+                            saleInvoicesModels.Due -= total_paid;
+                            total_paid = 0;
+                        }
+                        db.Entry(saleInvoicesModels).State = EntityState.Modified;
+
+                        PaymentItemsModels paymentItemsModels = new PaymentItemsModels
+                        {
+                            Id = Guid.NewGuid(),
+                            Payments_Id = paymentsModels.Id,
+                            ReferenceId = saleInvoicesModels.Id,
+                            Amount = (due_inv > saleInvoicesModels.Due) ? due_inv - saleInvoicesModels.Due : saleInvoicesModels.Due - due_inv,
+                            DueBefore = due_inv,
+                            DueAfter = saleInvoicesModels.Due
+                        };
+                        db.PaymentItems.Add(paymentItemsModels);
+                    }
+                }
+
+                if (cash_amount > 0)
+                {
+                    string lastHex_string_pcr = db.PettyCashRecords.AsNoTracking().Max(x => x.No);
+                    int lastHex_int_pcr = int.Parse(
+                        string.IsNullOrEmpty(lastHex_string_pcr) ? 0.ToString("X5") : lastHex_string_pcr,
+                        System.Globalization.NumberStyles.HexNumber);
+
+                    PettyCashRecordsModels pettyCashRecordsModels = new PettyCashRecordsModels
                     {
                         Id = Guid.NewGuid(),
-                        Payments_Id = paymentsModels.Id,
-                        ReferenceId = saleInvoicesModels.Id,
-                        Amount = (due_inv > saleInvoicesModels.Due) ? due_inv - saleInvoicesModels.Due : saleInvoicesModels.Due - due_inv,
-                        DueBefore = due_inv,
-                        DueAfter = saleInvoicesModels.Due
+                        Branches_Id = branch_id,
+                        RefId = paymentsModels.Id,
+                        No = (lastHex_int_pcr + 1).ToString("X5"),
+                        Timestamp = DateTime.UtcNow,
+                        PettyCashRecordsCategories_Id = db.Settings.Where(x => x.Id == SettingsValue.GUID_AutoEntryForCashPayments).FirstOrDefault().Value_Guid.Value, //db.PettyCashRecordsCategories.Where(x => x.Name == "Penjualan Tunai").FirstOrDefault().Id,
+                        Notes = "Cash Payment [" + paymentsModels.No + "]",
+                        Amount = cash_amount,
+                        IsChecked = false,
+                        UserAccounts_Id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id
                     };
-                    db.PaymentItems.Add(paymentItemsModels);
+                    db.PettyCashRecords.Add(pettyCashRecordsModels);
                 }
+
+                db.SaveChanges();
             }
 
-            if (cash_amount > 0)
-            {
-                string lastHex_string_pcr = db.PettyCashRecords.AsNoTracking().Max(x => x.No);
-                int lastHex_int_pcr = int.Parse(
-                    string.IsNullOrEmpty(lastHex_string_pcr) ? 0.ToString("X5") : lastHex_string_pcr,
-                    System.Globalization.NumberStyles.HexNumber);
-
-                PettyCashRecordsModels pettyCashRecordsModels = new PettyCashRecordsModels
-                {
-                    Id = Guid.NewGuid(),
-                    Branches_Id = branch_id,
-                    RefId = paymentsModels.Id,
-                    No = (lastHex_int_pcr + 1).ToString("X5"),
-                    Timestamp = DateTime.UtcNow,
-                    PettyCashRecordsCategories_Id = db.Settings.Where(x => x.Id == SettingsValue.GUID_AutoEntryForCashPayments).FirstOrDefault().Value_Guid.Value, //db.PettyCashRecordsCategories.Where(x => x.Name == "Penjualan Tunai").FirstOrDefault().Id,
-                    Notes = "Cash Payment [" + paymentsModels.No + "]",
-                    Amount = cash_amount,
-                    IsChecked = false,
-                    UserAccounts_Id = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault().Id
-                };
-                db.PettyCashRecords.Add(pettyCashRecordsModels);
-            }
-
-            db.SaveChanges();
-
-            return Json(new { status = "200", payment_id = paymentsModels.Id }, JsonRequestBehavior.AllowGet);
+            return Json(new { status, payment_id }, JsonRequestBehavior.AllowGet);
         }
 
         public async Task<ActionResult> Print(Guid? id)
