@@ -92,18 +92,24 @@ namespace iSpeak.Controllers
             //                    where r.Name.ToLower() == "tutor"
             //                    orderby u.Firstname
             //                    select new { u }).ToListAsync();
-            var tutors = await db.User.Where(x => x.Branches_Id == branch_id).ToListAsync();
+            //var tutors = await db.User.Where(x => x.Branches_Id == branch_id).ToListAsync();
 
-            foreach (var tutor in tutors)
+            foreach (var tutor in await db.User.ToListAsync()) //foreach (var tutor in tutors)
             {
                 decimal tot_hours = 0;
                 decimal tot_payable = 0;
                 decimal tot_due = 0;
+                //var payrolls = (from ppi in db.PayrollPaymentItems
+                //                join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
+                //                join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+                //                join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+                //                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.Id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
+                //                group ppi.Amount by ls.PayrollPaymentItems_Id into x
+                //                select new { PayrollPaymentItems_Id = x.Key, TotalAmount = x.ToList() }).ToList();
+
                 var payrolls = (from ppi in db.PayrollPaymentItems
                                 join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
-                                join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                                join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.Id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
+                                where ppi.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor.Id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
                                 group ppi.Amount by ls.PayrollPaymentItems_Id into x
                                 select new { PayrollPaymentItems_Id = x.Key, TotalAmount = x.ToList() }).ToList();
 
@@ -111,11 +117,15 @@ namespace iSpeak.Controllers
                 //    .Where(x => x.UserAccounts_Id == tutor.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
                 //    .OrderBy(x => x.Timestamp).ToListAsync();
 
-                var payroll_manual = await (from ppi in db.PayrollPaymentItems
-                                            join u in db.User on ppi.UserAccounts_Id equals u.Id
-                                            where u.Branches_Id == branch_id && ppi.UserAccounts_Id == tutor.Id && ppi.Hour == 0 && ppi.Description != "" && ppi.Timestamp >= dateFrom && ppi.Timestamp <= dateTo
-                                            orderby ppi.Timestamp ascending
-                                            select new { ppi }).ToListAsync();
+                //var payroll_manual = await (from ppi in db.PayrollPaymentItems
+                //                            join u in db.User on ppi.UserAccounts_Id equals u.Id
+                //                            where u.Branches_Id == branch_id && ppi.UserAccounts_Id == tutor.Id && ppi.Hour == 0 && ppi.Description != "" && ppi.Timestamp >= dateFrom && ppi.Timestamp <= dateTo
+                //                            orderby ppi.Timestamp ascending
+                //                            select new { ppi }).ToListAsync();
+
+                var payroll_manual = await db.PayrollPaymentItems
+                    .Where(x => x.Branches_Id == branch_id && x.UserAccounts_Id == tutor.Id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+                    .OrderBy(x => x.Timestamp).ToListAsync();
 
                 if (payrolls.Count > 0)
                 {
@@ -132,8 +142,8 @@ namespace iSpeak.Controllers
 
                     if (payroll_manual.Count > 0)
                     {
-                        tot_payable += payroll_manual.Where(x => x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount);
-                        tot_due += payroll_manual.Where(x => x.ppi.PayrollPayments_Id == null && x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount);
+                        tot_payable += payroll_manual.Where(x => x.CancelNotes == null).Sum(x => x.Amount);
+                        tot_due += payroll_manual.Where(x => x.PayrollPayments_Id == null && x.CancelNotes == null).Sum(x => x.Amount);
                     }
 
                     list.Add(new TutorPayrollViewModels
@@ -155,8 +165,8 @@ namespace iSpeak.Controllers
                             TutorId = tutor.Id,
                             Name = tutor.Firstname + " " + tutor.Middlename + " " + tutor.Lastname,
                             TotalHours = string.Format("{0:N2}", tot_hours),
-                            TotalPayable = string.Format("{0:N2}", payroll_manual.Where(x => x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount)),
-                            Due = string.Format("{0:N2}", payroll_manual.Where(x => x.ppi.PayrollPayments_Id == null && x.ppi.CancelNotes == null).Sum(x => x.ppi.Amount)),
+                            TotalPayable = string.Format("{0:N2}", payroll_manual.Where(x => x.CancelNotes == null).Sum(x => x.Amount)),
+                            Due = string.Format("{0:N2}", payroll_manual.Where(x => x.PayrollPayments_Id == null && x.CancelNotes == null).Sum(x => x.Amount)),
                             Details = "<a href='javascript:void(0)' onclick='Details(\"" + branch_id.ToString() + "\",\"" + month + "\",\"" + year + "\",\"" + tutor.Id + "\")'>Details</a>"
                         });
                     }
@@ -177,14 +187,21 @@ namespace iSpeak.Controllers
             DateTime dateToUTC = TimeZoneInfo.ConvertTimeToUtc(dateTo);
             List<TutorPayrollDetailsViewModels> list = new List<TutorPayrollDetailsViewModels>();
 
+            //var payrolls = (from ppi in db.PayrollPaymentItems
+            //                join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
+            //                join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
+            //                join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
+            //                join u in db.User on si.Customer_UserAccounts_Id equals u.Id
+            //                where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
+            //                group ls by ls.PayrollPaymentItems_Id into x
+            //                select new { PayrollPaymentItems_Id = x.Key, LessonSession = x.ToList() }).ToList();
+
             var payrolls = (from ppi in db.PayrollPaymentItems
                             join ls in db.LessonSessions on ppi.Id equals ls.PayrollPaymentItems_Id
-                            join sii in db.SaleInvoiceItems on ls.SaleInvoiceItems_Id equals sii.Id
-                            join si in db.SaleInvoices on sii.SaleInvoices_Id equals si.Id
-                            join u in db.User on si.Customer_UserAccounts_Id equals u.Id
-                            where si.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
+                            where ppi.Branches_Id == branch_id && ls.Tutor_UserAccounts_Id == tutor_id && ls.Deleted == false && ls.Timestamp >= dateFromUTC && ls.Timestamp <= dateToUTC
                             group ls by ls.PayrollPaymentItems_Id into x
                             select new { PayrollPaymentItems_Id = x.Key, LessonSession = x.ToList() }).ToList();
+
             foreach (var payroll in payrolls)
             {
                 var ppi = await db.PayrollPaymentItems.Where(x => x.Id == payroll.PayrollPaymentItems_Id.Value).FirstOrDefaultAsync();
@@ -216,9 +233,14 @@ namespace iSpeak.Controllers
                 });
             }
 
+            //var payroll_manual = await db.PayrollPaymentItems
+            //    .Where(x => x.UserAccounts_Id == tutor_id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+            //    .OrderBy(x => x.Timestamp).ToListAsync();
+
             var payroll_manual = await db.PayrollPaymentItems
-                .Where(x => x.UserAccounts_Id == tutor_id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
+                .Where(x => x.Branches_Id == branch_id && x.UserAccounts_Id == tutor_id && x.Hour == 0 && x.Description != "" && x.Timestamp >= dateFrom && x.Timestamp <= dateTo)
                 .OrderBy(x => x.Timestamp).ToListAsync();
+
             foreach (var payroll in payroll_manual)
             {
                 if (!payroll.PayrollPayments_Id.HasValue && string.IsNullOrEmpty(payroll.CancelNotes))
@@ -258,7 +280,7 @@ namespace iSpeak.Controllers
         }
         #endregion
         #region SaveManualPayroll
-        public async Task<JsonResult> SaveManualPayroll(string tutor_id, DateTime timestamp, decimal amount, string description, decimal payroll_total)
+        public async Task<JsonResult> SaveManualPayroll(Guid branch_id, string tutor_id, DateTime timestamp, decimal amount, string description, decimal payroll_total)
         {
             PayrollPaymentItemsModels payrollPaymentItemsModels = new PayrollPaymentItemsModels
             {
@@ -266,7 +288,8 @@ namespace iSpeak.Controllers
                 Timestamp = new DateTime(timestamp.Year, timestamp.Month, timestamp.Day, DateTime.UtcNow.Hour, DateTime.UtcNow.Minute, DateTime.UtcNow.Second),
                 Description = description,
                 Amount = amount,
-                UserAccounts_Id = tutor_id
+                UserAccounts_Id = tutor_id,
+                Branches_Id = branch_id
             };
             db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
 

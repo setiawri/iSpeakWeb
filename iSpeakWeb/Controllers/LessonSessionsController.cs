@@ -585,7 +585,8 @@ namespace iSpeak.Controllers
                         Timestamp = lessonSessionsModels.Timestamp,
                         Description = Description,
                         Hour = lessonSessionsModels.SessionHours,
-                        UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id
+                        UserAccounts_Id = lessonSessionsModels.Tutor_UserAccounts_Id,
+                        Branches_Id = lessonSessionsModels.Branches_Id
                     };
 
                     if (hourly_rate.Count == 0)

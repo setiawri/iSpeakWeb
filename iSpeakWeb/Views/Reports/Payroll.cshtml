@@ -432,6 +432,7 @@
     }
 
     function ShowData() {
+        $('#btnGo').attr('disabled', true);
         $.ajax({
             type: "POST",
             url: '@Url.Action("GetTutorPayroll", "Reports")',
@@ -453,6 +454,7 @@
                         row.Details
                     ]).draw();
                 });
+                $('#btnGo').attr('disabled', false);
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -641,6 +643,7 @@
                     type: "POST",
                     url: '@Url.Action("SaveManualPayroll", "Reports")',
                     data: {
+                        branch_id: $('#Branch').val(),
                         tutor_id: $('#Payroll_Id').val(),
                         timestamp: $('.mdl-new-timestamp').val(),
                         amount: parseFloat($('.mdl-new-amount').val().replace(/,/g, '')),
@@ -672,6 +675,7 @@
                     type: "POST",
                     url: '@Url.Action("SaveManualPayroll", "Reports")',
                     data: {
+                        branch_id: $('#Branch').val(),
                         tutor_id: $('.mdl-tutor-id').val(),
                         timestamp: $('.mdl-manual-timestamp').val(),
                         amount: parseFloat($('.mdl-manual-amount').val().replace(/,/g, '')),
@@ -785,6 +789,8 @@
                     success: function (data) {
                         $('#modal_pay').modal('toggle');
                         Previous();
+                        $('.mdl-btn-submit').attr('disabled', false);
+                        $('.mdl-notes').val('');
                         var url = '@Url.Action("Print", "Reports", new { id = "_id" })';
                         window.open(url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val(), '_blank');
                         //window.location.href = url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val();

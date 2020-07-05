@@ -21,5 +21,6 @@ namespace iSpeak.Models
         public decimal Amount { get; set; }
         public string UserAccounts_Id { get; set; }
         public string CancelNotes { get; set; }
+        public Guid? Branches_Id { get; set; }
     }
 }
