@@ -11,6 +11,37 @@
         -moz-animation-duration: 1s;
         animation-duration: 1s;
     }
+
+    /* Start by setting display:none to make this hidden.
+    Then we position it in relation to the viewport window
+    with position:fixed. Width, height, top and left speak
+    for themselves. Background we set to 80% white with
+    our animation centered, and no-repeating */
+    .modal {
+        display:    none;
+        position:   fixed;
+        z-index:    1000;
+        top:        0;
+        left:       0;
+        height:     100%;
+        width:      100%;
+        background: rgba( 255, 255, 255, .8 ) 
+                    url('http://i.stack.imgur.com/FhHRx.gif') 
+                    50% 50% 
+                    no-repeat;
+    }
+
+    /* When the body has the loading class, we turn
+       the scrollbar off with overflow:hidden */
+    body.loading .modal {
+        overflow: hidden;   
+    }
+
+    /* Anytime the body has the loading class, our
+       modal element will be visible */
+    body.loading .modal {
+        display: block;
+    }
 </style>
 
 <div class="content-wrapper">
@@ -432,6 +463,7 @@
     }
 
     function ShowData() {
+        $.blockUI({ message: '<strong class="text-center"><img src="https://icon-library.net//images/spinner-icon-gif/spinner-icon-gif-16.jpg" height="35" /> Still processing your request. Please wait...</strong>' });
         $('#btnGo').attr('disabled', true);
         $.ajax({
             type: "POST",
@@ -455,6 +487,8 @@
                     ]).draw();
                 });
                 $('#btnGo').attr('disabled', false);
+                
+                $.unblockUI();
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
@@ -559,6 +593,11 @@
     }
 
     $(document).ready(function () {
+        $body = $('body');
+        $(document).on({
+            ajaxStart: function () { $body.addClass('loading'); },
+            ajaxStop: function () { $body.removeClass('loading'); }
+        });
         
         $('.select2').select2({
             minimumResultsForSearch: -1
