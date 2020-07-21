@@ -432,6 +432,7 @@
     }
 
     function ShowData() {
+        $.blockUI({ message: '<strong class="text-center"><img src="https://icon-library.net//images/spinner-icon-gif/spinner-icon-gif-16.jpg" height="35" /> Still processing your request. Please wait...</strong>' });
         $('#btnGo').attr('disabled', true);
         $.ajax({
             type: "POST",
@@ -455,6 +456,8 @@
                     ]).draw();
                 });
                 $('#btnGo').attr('disabled', false);
+                
+                $.unblockUI();
             }, //end success
             error: function (result) {
                 bootbox.alert("Error " + result);
