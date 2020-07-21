@@ -432,7 +432,7 @@
     }
 
     function ShowData() {
-        $.blockUI({ message: '<strong class="text-center"><img src="https://icon-library.net//images/spinner-icon-gif/spinner-icon-gif-16.jpg" height="35" /> Still processing your request. Please wait...</strong>' });
+        $.blockUI({ message: '<img src="@Url.Content("~/assets/images/spinner-icon-gif-16.gif")" height="200" />' });
         $('#btnGo').attr('disabled', true);
         $.ajax({
             type: "POST",
@@ -456,7 +456,7 @@
                     ]).draw();
                 });
                 $('#btnGo').attr('disabled', false);
-                
+
                 $.unblockUI();
             }, //end success
             error: function (result) {
@@ -499,7 +499,7 @@
                         row.Paid
                     ]).draw();
                 });
-                
+
                 $('.title-details').html(data.tutor_name);
                 $('.payroll-total').val(data.amount);
                 $('.mdl-paid').val(data.amount);
@@ -562,7 +562,7 @@
     }
 
     $(document).ready(function () {
-        
+
         $('.select2').select2({
             minimumResultsForSearch: -1
         });
@@ -674,7 +674,7 @@
             }
             else {
                 $('.modal-manual-validation').html('').hide();
-                
+
                 $.ajax({
                     type: "POST",
                     url: '@Url.Action("SaveManualPayroll", "Reports")',
