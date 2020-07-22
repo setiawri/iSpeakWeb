@@ -96,6 +96,11 @@ namespace iSpeak.Controllers
 
             foreach (var tutor in await db.User.ToListAsync()) //foreach (var tutor in tutors)
             {
+                if (tutor.Id == "605aefc8-d80c-4984-baf8-016ab867bb04")
+                {
+
+                }
+
                 decimal tot_hours = 0;
                 decimal tot_payable = 0;
                 decimal tot_due = 0;
@@ -430,7 +435,8 @@ namespace iSpeak.Controllers
                             Timestamp = lastDay,
                             Description = description_payroll,
                             Amount = tutor.hr.FullTimeTutorPayrate,
-                            UserAccounts_Id = tutor.u.Id
+                            UserAccounts_Id = tutor.u.Id,
+                            Branches_Id = branch_id
                         };
                         db.PayrollPaymentItems.Add(payrollPaymentItemsModels);
                         
