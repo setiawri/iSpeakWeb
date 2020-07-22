@@ -96,11 +96,6 @@ namespace iSpeak.Controllers
 
             foreach (var tutor in await db.User.ToListAsync()) //foreach (var tutor in tutors)
             {
-                if (tutor.Id == "605aefc8-d80c-4984-baf8-016ab867bb04")
-                {
-
-                }
-
                 decimal tot_hours = 0;
                 decimal tot_payable = 0;
                 decimal tot_due = 0;
