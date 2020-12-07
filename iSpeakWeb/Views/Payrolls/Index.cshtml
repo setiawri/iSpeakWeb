@@ -1,0 +1,296 @@
+﻿@model IEnumerable<iSpeak.Models.PayrollsModel>
+
+@{
+    ViewBag.Root = "Reports";
+    ViewBag.Title = "Payroll";
+}
+
+<style>
+    .animated {
+        -webkit-animation-duration: 1s;
+        -moz-animation-duration: 1s;
+        animation-duration: 1s;
+    }
+</style>
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card payroll-index animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Title</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mt-2">
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <label class="control-label">Date Period</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button type="button" class="btn btn-light" onclick="ReloadTable('@EnumActions.Previous.ToString()')">&lt;</button>
+                                    <select id="PayPeriodMonth" name="PayPeriodMonth" class="form-control select2" onchange="ReloadTable(null)">
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+                                <input id="PayPeriodYear" name="PayPeriodYear" type="number" class="form-control text-center positiveintegeronly period-year" value="@DateTime.UtcNow.Year">
+                                <button type="button" class="btn btn-light" onclick="ReloadTable('@EnumActions.Next.ToString()')">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="btn-toolbar">
+                                <div class="btn-group">
+                                    <button type="submit" id="ReloadButton" class="btn btn-outline-primary form-control"><i class="icon-reload-alt mr-2"></i>LOAD DATA</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="btn-toolbar">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-primary form-control"><i class="icon-plus22 mr-2"></i> Add Payroll Item</button>
+                                    <button type="button" class="btn btn-outline-dark form-control" onclick="GenerateFullTime()"><i class="icon-stack-text mr-2"></i> Generate Full Time Payroll</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Tutor_UserAccounts_FullName)</th>
+                                <th class="text-right">@Html.DisplayNameFor(model => model.TotalHours)</th>
+                                <th class="text-right">@Html.DisplayNameFor(model => model.PayableAmount)</th>
+                                <th class="text-right">@Html.DisplayNameFor(model => model.DueAmount)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Tutor_UserAccounts_FullName)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.TotalHours)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.PayableAmount)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.DueAmount)</td>
+                                        <td><a href="javascript:void(0)" onclick="Details('@item.Tutor_UserAccounts_Id')">Details</a></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        applyEventsToInputs();
+
+        $('#PayPeriodMonth').val('@ViewBag.PayPeriodMonth');
+        $('#PayPeriodYear').val('@ViewBag.PayPeriodYear');
+
+        if('@ViewBag.Search' != null && '@ViewBag.Search' != '')
+            setSearch('@ViewBag.Search');
+
+    });
+
+    var datatable = $('.datatable').DataTable({
+        autoWidth: false,
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']],
+        bStateSave: true,
+        stateSaveCallback: function (settings, data) {
+            localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+        },
+        stateLoadCallback: function (settings) {
+            return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+        },
+        stateLoadParams: function (settings, data) {
+            if ($(".removeDatatablesStateSave").text() == "1") {
+                data.search.search = "";
+                data.start = 0;
+            }
+        },
+        columnDefs: [
+            { searchable: false, targets: "non-searchable" },
+            { orderable: false, targets: "non-sortable" }
+        ],
+        dom: '<"datatable-header"flp>' +
+            '<"datatable-scroll"t>' +
+            '<"datatable-footer"ilp>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'enter keyword',
+            lengthMenu: '<span>Rows:</span> _MENU_',
+            paginate: {
+                'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;'
+            }
+        }
+    });
+
+    function applyEventsToInputs() {
+        //45 = minus sign
+        //46 = dot sign
+        //48-57 = 0-9
+
+        $('.numericonly').bind('keypress', function (e) {
+            return event.charCode == 45 || event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57);
+        });
+
+        $('.positivenumericonly').bind('keypress', function (e) {
+            return event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57);
+        });
+
+        $('.integeronly').bind('keypress', function (e) {
+            return event.charCode == 45 || (event.charCode >= 48 && event.charCode <= 57);
+        });
+
+        $('.positiveintegeronly').bind('keypress', function (e) {
+            return (event.charCode >= 48 && event.charCode <= 57);
+        });
+
+        //allow editing text after initial select all on focus
+        $('input').on('focus', function (e) {
+            $(this)
+                .one('mouseup', function () {
+                    $(this).select();
+                    return false;
+                })
+                .select();
+        });
+    }
+
+    function ReloadTable(periodChange) {
+        console.log(periodChange);
+        var url = '@Url.Action("Index","Payrolls",new { year = "__data" })';
+        window.location.href = url.replace("__data", getAllFilterString() + (periodChange != null ? "&periodChange=" + periodChange : ''));
+    }
+
+    function Details(TutorId) {
+        var url = '@Url.Action("Index", "PayrollPaymentItems", new { year = "__data" })';
+        window.location.href = url.replace("__data", getAllFilterString() + "&TutorId=" + TutorId);
+    }
+
+    function GenerateFullTime() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GenerateFullTime", "Reports")',
+            data: {
+                branch_id: $('#Branch').val(),
+                month: parseInt('@ViewBag.PayPeriodMonth'),
+                year: parseInt('@ViewBag.PayPeriodYear')
+            },
+            success: function (data) {
+                //console.log(data.obj);
+                if (data.status == '404') {
+                    bootbox.alert('No data available to generate');
+                }
+                else {
+                    bootbox.confirm(data.updated + ' records Full Time Tutor Payroll has been added', function (result) {
+                        if (data.updated > 0) {
+                            ReloadTable();
+                        }
+                    });
+                }
+            }, //end success
+            error: function (result) {
+                bootbox.alert("Error " + result);
+            } //end error
+        }); //end ajax
+    }
+
+    function getAllFilterString() { return getFilterString(null, null, null); }
+    function getFilterString(year, month, search) {
+        var filter = "";
+
+        filter += getFilter_YearAndMonth(year, month);
+
+        filter += getFilter_Search(search);
+
+        return filter;
+    }
+    function getFilter_YearAndMonth(year, month) {
+        var filter = "";
+
+        if (year == null && $('#PayPeriodYear') != null)
+            year = $('#PayPeriodYear').val();
+        filter += validateFilter(year, "");
+
+        if (month == null && $('#PayPeriodMonth') != null)
+            month = $('#PayPeriodMonth').val();
+        filter += validateFilter(month, "month");
+
+        return filter;
+    }
+    function getFilter_Search(search) {
+        var filter = "";
+
+        if ((search == null || search == "") && $('input[aria-controls=DataTables_Table_0]').val() != undefined)
+            search = $('input[aria-controls=DataTables_Table_0]').val();
+
+        filter += validateFilterNaN(search, "search");
+
+        return filter;
+    }
+    function validateFilter(value, filterName) {
+        if (value != null && value.toString() != "" && isNaN(value) != true) {
+            if (filterName == "")
+                return value;
+            else
+                return "&" + filterName + "=" + value;
+        }
+        return "";
+    }
+    function validateFilterNaN(value, filterName) {
+        if (value != null && value != "") {
+            if (filterName == "")
+                return value;
+            else
+                return "&" + filterName + "=" + value;
+        }
+        return "";
+    }
+
+    function getSearch() {
+        if ((search == null || search == "") && $('input[aria-controls=DataTables_Table_0]').val() != undefined)
+            return $('input[aria-controls=DataTables_Table_0]').val();
+        else
+            return "";
+    }
+
+    function setSearch(search) {
+        if ($('input[aria-controls=DataTables_Table_0]').val() != undefined)
+            $('input[aria-controls=DataTables_Table_0]').val(search).keyup();
+    }
+
+</script>

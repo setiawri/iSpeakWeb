@@ -196,7 +196,9 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Common\BranchesActionFilter.cs" />
+    <Compile Include="Common\Enums.cs" />
     <Compile Include="Common\ExportExcel.cs" />
+    <Compile Include="Common\Helper.cs" />
     <Compile Include="Common\IdentityExtension.cs" />
     <Compile Include="Common\Permission.cs" />
     <Compile Include="Common\PreventDuplicateRequestAttribute.cs" />
@@ -222,6 +224,8 @@
     <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\PaymentsController.cs" />
+    <Compile Include="Controllers\PayrollPaymentItemsController.cs" />
+    <Compile Include="Controllers\PayrollsController.cs" />
     <Compile Include="Controllers\PettyCashRecordsCategoriesController.cs" />
     <Compile Include="Controllers\PettyCashRecordsController.cs" />
     <Compile Include="Controllers\ProductsController.cs" />
@@ -297,6 +301,8 @@
     <Compile Include="Models\PayrollPaymentItemsModels.cs" />
     <Compile Include="Models\PayrollPaymentsModels.cs" />
     <Compile Include="Models\PayrollPaymentsViewModels.cs" />
+    <Compile Include="Models\PayrollPaymentItemsModel.cs" />
+    <Compile Include="Models\PayrollsModel.cs" />
     <Compile Include="Models\PettyCashRecordsCategoriesModels.cs" />
     <Compile Include="Models\PettyCashRecordsModels.cs" />
     <Compile Include="Models\PettyCashViewModels.cs" />
@@ -596,6 +602,8 @@
     <Content Include="Views\Schedules\StudentCreate.cshtml" />
     <Content Include="Views\Schedules\StudentEdit.cshtml" />
     <Content Include="Views\Schedules\Search.cshtml" />
+    <Content Include="Views\Payrolls\Index.cshtml" />
+    <Content Include="Views\PayrollPaymentItems\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -624,6 +632,12 @@
     <EmbeddedResource Include="Migrations\201911280725472_addPromoInterest.resx">
       <DependentUpon>201911280725472_addPromoInterest.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\LIBUtil\LIBUtil\LIBUtil\LIBUtil.csproj">
+      <Project>{23013bfc-021e-426a-8a92-8c1c34836974}</Project>
+      <Name>LIBUtil</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

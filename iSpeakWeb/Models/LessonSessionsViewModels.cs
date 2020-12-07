@@ -29,7 +29,7 @@ namespace iSpeak.Models
         public int TutorTravelCost { get; set; }
         public bool Deleted { get; set; }
         public string Notes_Cancel { get; set; }
-        [Display(Name = "No. Invoice")]
+        [Display(Name = "Invoice")]
         public string NoInvoice { get; set; }
     }
 }

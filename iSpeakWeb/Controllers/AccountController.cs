@@ -96,9 +96,15 @@ namespace iSpeak.Controllers
         {
             ViewBag.listBranch = new SelectList(db.Branches.Where(x => x.Active == true).OrderBy(x => x.Name).ToList(), "Id", "Name");
 
-            if (!ModelState.IsValid)
+            if (true && Server.MachineName == "RQ-ASUS")
             {
-                return View(model);
+                model.UserName = "ricky";
+                model.Password = "A2cdefGH";
+            }
+            else
+            {
+                if (!ModelState.IsValid)
+                    return View(model);
             }
 
             var cekUser = db.User.Where(x => x.UserName == model.UserName).FirstOrDefault();
@@ -123,7 +129,6 @@ namespace iSpeak.Controllers
                     switch (result)
                     {
                         case SignInStatus.Success:
-                            //Session["Login"] = model;
                             return RedirectToLocal(returnUrl);
                         case SignInStatus.LockedOut:
                             return View("Lockout");

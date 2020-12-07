@@ -152,6 +152,7 @@
                     <div class="dropdown-menu">
                         @if (ViewBag.ReportsNewStudent) { <a href="@Url.Action("NewStudent", "Reports")" class="dropdown-item">New Student</a> }
                         @if (ViewBag.HourlyRatesIndex) { <a href="@Url.Action("Index", "HourlyRates")" class="dropdown-item">Payroll Rates</a> }
+                        @if (ViewBag.ReportsPayroll) { <a href="@Url.Action("Index", "Payrolls")" class="dropdown-item">New Payroll</a> }
                         @if (ViewBag.ReportsPayroll) { <a href="@Url.Action("Payroll", "Reports")" class="dropdown-item">Payroll</a> }
                         @if (ViewBag.ReportsPayrollPayments) { <a href="@Url.Action("PayrollPayments", "Reports")" class="dropdown-item">Payroll Payments</a> }
                         @if (ViewBag.ReportsProfitLoss) { <a href="@Url.Action("ProfitLoss", "Reports")" class="dropdown-item">Profit &amp; Loss</a> }

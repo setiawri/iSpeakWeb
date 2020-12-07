@@ -1,0 +1,230 @@
+﻿@model IEnumerable<iSpeak.Models.PayrollPaymentItemsModel>
+
+@{
+    ViewBag.Root = "Reports";
+}
+
+<style>
+    .animated {
+        -webkit-animation-duration: 1s;
+        -moz-animation-duration: 1s;
+        animation-duration: 1s;
+    }
+</style>
+
+<div class="content-wrapper">
+
+    <!-- Content area -->
+    <div class="content">
+        <!-- Form inputs -->
+        <div class="card payroll-details animated bounceInLeft">
+            <div class="card-header header-elements-inline">
+                <h5 class="card-title">@ViewBag.Title</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <div class="form-group">
+
+                            @Html.ActionLink("Back", "Index", "Payrolls", new { year = ViewBag.PayPeriodYear, month = ViewBag.PayPeriodMonth, search = ViewBag.Search }, new { @Class = "btn btn-sm btn-secondary", @id="BackToPayrolls"})
+
+                            @*<a href="javascript:void(0)" onclick="Previous()" class="btn btn-sm btn-secondary">Back to Payroll List <i class="icon-circle-left2 ml-2"></i></a>*@
+                            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modal_manual">Manual Payroll<i class="icon-plus22 ml-2"></i></button>
+                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#modal_pay">Pay<i class="icon-checkmark3 ml-2"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-lg-3" style="float: right">
+                        <div class="form-group">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text bg-slate-700 border-slate-700 text-white">
+                                        Due
+                                    </span>
+                                </span>
+                                <input type="text" class="form-control bg-slate text-white border-transparent payroll-total" value="@ViewBag.DueAmount">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th class="text-right">Hour</th>
+                                <th class="text-right">Hourly Rate</th>
+                                <th class="text-right">Travel Cost</th>
+                                <th class="text-right">Amount</th>
+                                <th>Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@Html.DisplayFor(modelItem => item.Timestamp)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.Hour)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.HourlyRate)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.TutorTravelCost)</td>
+                                        <td class="text-right">@Html.DisplayFor(modelItem => item.Amount)</td>
+                                        <td>
+                                            @if (item.PayrollPayments_Id == null)
+                                            {
+                                                <span class='text-danger'><i class='icon-cancel-circle2'></i></span>
+                                            }
+                                            else
+                                            {
+                                                <span class='text-primary'><i class='icon-checkmark'></i></span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /form inputs -->
+        <!-- Pay form modal -->
+        <div id="modal_pay" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success">
+                        <h6 class="modal-title">Payments</h6>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <form action="#" class="form-horizontal">
+                        <div class="modal-body">
+                            <label class="modal-validation text-danger" style="display: none"></label>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Date</label>
+                                <div class="col-sm-4">
+                                    <div class="input-group">
+                                        <input type="datetime" class="form-control tanggal mdl-timestamp" />
+                                        <span class="input-group-append">
+                                            <span class="input-group-text"><i class="icon-calendar"></i></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Total Payment</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control text-right mdl-paid" value="@ViewBag.DueAmount" readonly>
+                                </div>
+                                <div class="col-sm-4" style="display: none">
+                                    <input type="text" class="form-control mdl-tutor-id" readonly>
+                                </div>
+                            </div>
+                            <hr />
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Notes</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control mdl-notes" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn bg-success mdl-btn-submit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /pay form modal -->
+    </div>
+    <!-- /content area -->
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+    });
+
+    $('.tanggal').daterangepicker({
+        singleDatePicker: true,
+        locale: {
+            format: 'YYYY/MM/DD'
+        }
+    });
+
+    $('.mdl-btn-submit').click(function () {
+        if ($('.mdl-paid').val() == '0.00') {
+            $('.modal-validation').html('No due amount for payment.').show();
+        }
+        else {
+            $('.modal-validation').html('').hide();
+
+            $('.mdl-btn-submit').attr('disabled', true);
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("SavePayrollPayments", "Reports")',
+                data: {
+                    branch_id: $('#Branch').val(),
+                    month: parseInt('@ViewBag.PayPeriodMonth'),
+                    year: parseInt('@ViewBag.PayPeriodYear'),
+                    tutor_id: '@ViewBag.Tutor_UserAccounts_Id',
+                    timestamp: $('.mdl-timestamp').val(),
+                    total_paid: parseFloat($('.mdl-paid').val().replace(/,/g, '')),
+                    notes: $('.mdl-notes').val()
+                },
+                success: function (data) {
+                    var url = '@Url.Action("Print", "Reports", new { id = "_id" })';
+                    //window.open(url.replace('_id', data.payroll_id) + '?tutor_id=' + $('.mdl-tutor-id').val(), '_blank');
+
+                    url = '@Url.Action("Index", "Payrolls", new { year = "__data" })';
+                    window.location.href = url.replace('__data', '@ViewBag.PayPeriodYear' + '&month=' + '@ViewBag.PayPeriodMonth' + '&search=' + '@ViewBag.Search');
+                }, //end success
+                error: function (result) {
+                    bootbox.alert("Error " + result);
+                } //end error
+            }); //end ajax
+        }
+    });
+
+    var datatable = $('.datatable').DataTable({
+        autoWidth: false,
+        pagingType: 'full_numbers',
+        order: [[0, 'asc']],
+        bStateSave: true,
+        stateSaveCallback: function (settings, data) {
+            localStorage.setItem('DataTables_' + settings.sInstance, JSON.stringify(data))
+        },
+        stateLoadCallback: function (settings) {
+            return JSON.parse(localStorage.getItem('DataTables_' + settings.sInstance))
+        },
+        stateLoadParams: function (settings, data) {
+            if ($(".removeDatatablesStateSave").text() == "1") {
+                data.search.search = "";
+                data.start = 0;
+            }
+        },
+        columnDefs: [
+            { searchable: false, targets: "non-searchable" },
+            { orderable: false, targets: "non-sortable" }
+        ],
+        dom: '<"datatable-header"flp>' +
+            '<"datatable-scroll"t>' +
+            '<"datatable-footer"ilp>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'enter keyword',
+            lengthMenu: '<span>Rows:</span> _MENU_',
+            paginate: {
+                'first': 'First', 'last': 'Last', 'next': $('html').attr('dir') == 'rtl' ? '&larr;' : '&rarr;', 'previous': $('html').attr('dir') == 'rtl' ? '&rarr;' : '&larr;'
+            }
+        }
+    });
+
+</script>
