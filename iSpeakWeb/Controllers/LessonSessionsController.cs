@@ -10,6 +10,7 @@ using System.Linq.Dynamic;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using LIBUtil;
 
 namespace iSpeak.Controllers
 {
@@ -20,8 +21,11 @@ namespace iSpeak.Controllers
 
         #region JSON
         #region GetData
-        public async Task<JsonResult> GetData()
+        public async Task<JsonResult> GetData(int? year, int? month)
         {
+            DateTime StartDate = Helper.setFilterViewBag(this, year, month, null, null);
+            DateTime EndDate = (DateTime)Util.getAsEndDate(StartDate.AddMonths(1).AddDays(-1));
+
             var user_data = db.User.Where(x => x.UserName == User.Identity.Name).FirstOrDefault();
 
             var user_role = await (from u in db.User
@@ -92,6 +96,7 @@ namespace iSpeak.Controllers
                          join s in db.User on si.Customer_UserAccounts_Id equals s.Id
                          join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
                          where ls.Branches_Id == user_data.Branches_Id && ls.Tutor_UserAccounts_Id == user_data.Id
+                            && ls.Timestamp >= StartDate && ls.Timestamp <= EndDate
                          select new { ls, u, sii, si, s, lp }).ToListAsync()
                 : (isStudentOnly)
                     //Student
@@ -102,6 +107,7 @@ namespace iSpeak.Controllers
                              join s in db.User on si.Customer_UserAccounts_Id equals s.Id
                              join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
                              where ls.Branches_Id == user_data.Branches_Id && s.UserName == User.Identity.Name
+                                && ls.Timestamp >= StartDate && ls.Timestamp <= EndDate
                              select new { ls, u, sii, si, s, lp }).ToListAsync()
                     //All
                     : await (from ls in db.LessonSessions
@@ -111,6 +117,7 @@ namespace iSpeak.Controllers
                              join s in db.User on si.Customer_UserAccounts_Id equals s.Id
                              join lp in db.LessonPackages on sii.LessonPackages_Id equals lp.Id
                              where ls.Branches_Id == user_data.Branches_Id
+                                && ls.Timestamp >= StartDate && ls.Timestamp <= EndDate
                              select new { ls, u, sii, si, s, lp }).ToListAsync();
 
             foreach (var session in sessions)
@@ -450,8 +457,10 @@ namespace iSpeak.Controllers
         #endregion
         #endregion
 
-        public ActionResult Index()
+        public ActionResult Index(int? year, int? month, string search, string periodChange)
         {
+            DateTime StartDate = Helper.setFilterViewBag(this, year, month, search, periodChange);
+
             Permission p = new Permission();
             bool auth = p.IsGranted(User.Identity.Name, this.ControllerContext.RouteData.Values["controller"].ToString() + "_" + this.ControllerContext.RouteData.Values["action"].ToString());
             if (!auth) { return new ViewResult() { ViewName = "Unauthorized" }; }

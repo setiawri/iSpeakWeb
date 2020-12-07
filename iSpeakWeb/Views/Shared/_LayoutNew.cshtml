@@ -301,6 +301,103 @@
             });
 
         });
+
+        function applyEventsToInputs() {
+            //45 = minus sign
+            //46 = dot sign
+            //48-57 = 0-9
+
+            $('.numericonly').bind('keypress', function (e) {
+                return event.charCode == 45 || event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57);
+            });
+
+            $('.positivenumericonly').bind('keypress', function (e) {
+                return event.charCode == 46 || (event.charCode >= 48 && event.charCode <= 57);
+            });
+
+            $('.integeronly').bind('keypress', function (e) {
+                return event.charCode == 45 || (event.charCode >= 48 && event.charCode <= 57);
+            });
+
+            $('.positiveintegeronly').bind('keypress', function (e) {
+                return (event.charCode >= 48 && event.charCode <= 57);
+            });
+
+            //allow editing text after initial select all on focus
+            $('input').on('focus', function (e) {
+                $(this)
+                    .one('mouseup', function () {
+                        $(this).select();
+                        return false;
+                    })
+                    .select();
+            });
+        }
+
+        function getAllFilterString() { return getFilterString(null, null, null); }
+        function getFilterString(year, month, search) {
+            var filter = "";
+
+            filter += getFilter_YearAndMonth(year, month);
+
+            filter += getFilter_Search(search);
+
+            return filter;
+        }
+        function getFilter_YearAndMonth(year, month) {
+            var filter = "";
+
+            if (year == null && $('#PayPeriodYear') != null)
+                year = $('#PayPeriodYear').val();
+            filter += validateFilter(year, "");
+
+            if (month == null && $('#PayPeriodMonth') != null)
+                month = $('#PayPeriodMonth').val();
+            filter += validateFilter(month, "month");
+
+            return filter;
+        }
+        function getFilter_Search(search) {
+            var filter = "";
+
+            if ((search == null || search == "") && $('input[aria-controls=DataTables_Table_0]').val() != undefined)
+                search = $('input[aria-controls=DataTables_Table_0]').val();
+
+            filter += validateFilterNaN(search, "search");
+
+            return filter;
+        }
+        function validateFilter(value, filterName) {
+            if (value != null && value.toString() != "" && isNaN(value) != true) {
+                if (filterName == "")
+                    return value;
+                else
+                    return "&" + filterName + "=" + value;
+            }
+            return "";
+        }
+        function validateFilterNaN(value, filterName) {
+            if (value != null && value != "") {
+                if (filterName == "")
+                    return value;
+                else
+                    return "&" + filterName + "=" + value;
+            }
+            return "";
+        }
+
+        function getSearch() {
+            if ((search == null || search == "") && $('input[aria-controls=DataTables_Table_0]').val() != undefined)
+                return $('input[aria-controls=DataTables_Table_0]').val();
+            else
+                return "";
+        }
+
+        function setSearch(search) {
+            if ($('input[aria-controls=DataTables_Table_0]').val() != undefined)
+                $('input[aria-controls=DataTables_Table_0]').val(search).keyup();
+        }
+
     </script>
     <!-- /script -->
 

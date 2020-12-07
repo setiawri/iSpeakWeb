@@ -28,21 +28,55 @@
         <div class="card animated bounceInLeft">
             <div class="card-header header-elements-inline">
                 <h5 class="card-title">@ViewBag.Root</h5>
-                <div class="header-elements">
-                    <div class="list-icons">
-                        <a class="list-icons-item" data-action="collapse"></a>
-                        <a class="list-icons-item" data-action="reload"></a>
-                        <a class="list-icons-item" data-action="remove"></a>
-                    </div>
-                </div>
             </div>
             <div class="card-body">
+                <div class="row mt-0">
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <label class="control-label">Month</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button type="button" class="btn btn-light" onclick="ReloadTable('@EnumActions.Previous.ToString()')">&lt;</button>
+                                    <select id="PayPeriodMonth" name="PayPeriodMonth" class="form-control select2" onchange="ReloadTable(null)">
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+                                <input id="PayPeriodYear" name="PayPeriodYear" type="number" class="form-control text-center positiveintegeronly period-year" value="@DateTime.UtcNow.Year">
+                                <button type="button" class="btn btn-light" onclick="ReloadTable('@EnumActions.Next.ToString()')">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label class="control-label">&nbsp;</label>
+                            <div class="btn-toolbar">
+                                <div class="btn-group">
+                                    <button type="submit" id="ReloadButton" class="btn btn-outline-primary form-control"><i class="icon-reload-alt mr-2"></i>LOAD DATA</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 @if (ViewBag.LessonSessionsCreate)
                 {
                     <div class="div-new" style="display:none;">
                         <a href="@Url.Action("Create", "LessonSessions")" class="btn btn-sm btn-success" id="btnSessionNew">Create New <i class="icon-plus22 ml-2"></i></a>
                     </div>
                 }
+
                 <div class="table-responsive">
                     <table class="table table-hover datatable">
                         <thead>
@@ -249,6 +283,10 @@
         ],
         ajax: {
             url: '@Url.Action("GetData", "LessonSessions")',
+            data: {
+                month: parseInt('@ViewBag.PayPeriodMonth'),
+                year: parseInt('@ViewBag.PayPeriodYear')
+            },
             type: 'POST',
             dataType: 'json',
         },
@@ -331,6 +369,14 @@
 
     $(document).ready(function () {
 
+        applyEventsToInputs();
+
+        $('#PayPeriodMonth').val('@ViewBag.PayPeriodMonth');
+        $('#PayPeriodYear').val('@ViewBag.PayPeriodYear');
+
+        if('@ViewBag.Search' != null && '@ViewBag.Search' != '')
+            setSearch('@ViewBag.Search');
+
         if ('@ViewBag.IsShowTravelCost' == 'False' && '@ViewBag.Cancel' == 'False') {
             table.column(6).visible(false);
             table.column(7).visible(false);
@@ -360,4 +406,11 @@
 
         console.log('DateTimeNow: ' + '@ViewBag.TanggalNow' + ', DateTimeUtcNow: ' + '@ViewBag.TanggalUtc');
     });
+
+    function ReloadTable(periodChange) {
+        console.log(periodChange);
+        var url = '@Url.Action("Index","LessonSessions",new { year = "__data" })';
+        window.location.href = url.replace("__data", getAllFilterString() + (periodChange != null ? "&periodChange=" + periodChange : ''));
+    }
+
 </script>
