@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iSpeakMobile", "iSpeakMobil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LIBUtil", "..\..\LIBUtil\LIBUtil\LIBUtil\LIBUtil.csproj", "{23013BFC-021E-426A-8A92-8C1C34836974}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iSpeakWebApp", "iSpeakWebApp\iSpeakWebApp.csproj", "{8CE4437A-D757-4984-A09B-932AAE389724}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +120,22 @@ Global
 		{23013BFC-021E-426A-8A92-8C1C34836974}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{23013BFC-021E-426A-8A92-8C1C34836974}.Release|x86.ActiveCfg = Release|Any CPU
 		{23013BFC-021E-426A-8A92-8C1C34836974}.Release|x86.Build.0 = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Debug|x86.Build.0 = Debug|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|iPhone.Build.0 = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|x86.ActiveCfg = Release|Any CPU
+		{8CE4437A-D757-4984-A09B-932AAE389724}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
